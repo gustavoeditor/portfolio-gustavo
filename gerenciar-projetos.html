@@ -195,9 +195,13 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;fle
   loadPublished().then(() => {
     try {
       const saved = localStorage.getItem(draftKey);
-      if (saved && confirm('Existe um rascunho salvo neste navegador. Deseja carregá-lo no lugar da lista publicada?')) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) { projects = parsed.map(normalize); render(); }
+      if (saved) {
+        if (confirm('Existe um rascunho salvo neste navegador. Deseja carregá-lo no lugar da lista publicada?')) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) { projects = parsed.map(normalize); render(); }
+        } else {
+          localStorage.removeItem(draftKey);
+        }
       }
     } catch (_) {}
   });
