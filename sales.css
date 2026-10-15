@@ -16,3 +16,13 @@
 .site-footer .social{flex-wrap:wrap}
 @media(max-width:600px){.contact-socials a{padding:11px 12px}.contact-actions{width:100%}.contact-actions>.btn{width:100%;justify-content:center}}
 @media(prefers-reduced-motion:reduce){.contact-socials a{transition:none!important;transform:none!important}}
+
+
+/* Ícones vetoriais dos destinos do rodapé */
+.site-footer .social{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:9px 16px}
+.site-footer .social a{display:inline-flex;align-items:center;gap:8px;padding:8px 3px;min-height:36px;white-space:nowrap;transition:color .2s}
+.site-footer .social .footer-icon{display:block;width:17px;height:17px;flex:0 0 17px;color:#c5acfa;transition:transform .22s,color .22s}
+.site-footer .social a:hover .footer-icon{color:#fff;transform:translateY(-2px)}
+.site-footer .social a:focus-visible{outline:2px solid #cdb3ff;outline-offset:4px;border-radius:4px}
+@media(max-width:700px){.site-footer .social{justify-content:flex-start;gap:4px 17px}.site-footer .social a{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.site-footer .social .footer-icon{transition:none!important;transform:none!important}}
