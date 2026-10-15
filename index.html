@@ -98,15 +98,18 @@ nav a{transition:color .25s ease}
 }
 .contact-nudge[hidden], .contact-nudge .nudge-bubble[hidden] { display: none; }
 .nudge-bubble {
-  position: relative; padding: 15px 16px; border: 1px solid rgba(255,255,255,.12);
-  border-radius: 16px; background: rgba(20, 16, 28, .96); color: #fff;
-  box-shadow: 0 14px 42px rgba(0,0,0,.28); backdrop-filter: blur(16px);
-  animation: nudge-in .35s ease both;
+  position: relative; width: 286px; padding: 17px 17px 15px;
+  border: 1px solid rgba(167,139,250,.34); border-radius: 12px;
+  background: linear-gradient(145deg,rgba(25,22,33,.98),rgba(15,15,19,.98));
+  color: #f4f3f0; box-shadow: 0 18px 55px rgba(0,0,0,.48), 0 0 32px rgba(167,139,250,.09);
+  backdrop-filter: blur(18px); animation: nudge-in .32s cubic-bezier(.2,.75,.25,1) both;
 }
-.nudge-copy { margin: 0 22px 12px 0; font-size: 13px; line-height: 1.5; letter-spacing: -.01em; }
-.nudge-actions { display: flex; align-items: center; gap: 12px; }
-.nudge-cta { color: #c9a8ff; font-size: 12px; font-weight: 650; text-decoration: none; }
-.nudge-cta:hover { color: #fff; }
+.nudge-bubble:before { content:""; position:absolute; left:17px; top:-1px; width:42px; height:2px; background:var(--accent); border-radius:2px; }
+.nudge-kicker { margin:0 28px 9px 0; color:var(--accent); font-size:9px; font-weight:750; letter-spacing:.16em; text-transform:uppercase; }
+.nudge-copy { margin: 0 8px 14px 0; font-size: 13px; line-height: 1.55; letter-spacing: -.015em; }
+.nudge-actions { display: flex; align-items: center; }
+.nudge-cta { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:9px 12px; border:1px solid rgba(167,139,250,.35); border-radius:5px; color:#e5d9ff; background:rgba(167,139,250,.11); font-size:11px; font-weight:700; text-decoration:none; transition:background .2s,border-color .2s; }
+.nudge-cta:hover { color: #fff; background:rgba(167,139,250,.22); border-color:var(--accent); }
 .nudge-close {
   position: absolute; top: 8px; right: 9px; width: 25px; height: 25px;
   border: 0; border-radius: 50%; background: transparent; color: #bdb3c9;
@@ -283,9 +286,10 @@ document.querySelectorAll(".media-shell").forEach((shell) => {
 <div class="contact-nudge" id="contact-nudge" aria-label="Contato rápido">
   <div class="nudge-bubble" id="nudge-bubble" role="status" hidden>
     <button class="nudge-close" id="nudge-close" type="button" aria-label="Fechar mensagem">×</button>
+    <p class="nudge-kicker">GUSTAVO · EDITOR DE VÍDEO</p>
     <p class="nudge-copy" id="nudge-copy">Tem um projeto em mente? Vamos dar vida a ele.</p>
     <div class="nudge-actions">
-      <a class="nudge-cta" href="https://wa.me/5537988445372?text=Ol%C3%A1%2C%20Gustavo!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto." target="_blank" rel="noopener noreferrer">Vamos conversar ↗</a>
+      <a class="nudge-cta" href="https://wa.me/5537988445372?text=Ol%C3%A1%2C%20Gustavo!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto." target="_blank" rel="noopener noreferrer">Vamos conversar <span aria-hidden="true">↗</span></a>
     </div>
   </div>
   <button class="nudge-launch" id="nudge-launch" type="button" aria-label="Abrir mensagem de contato" aria-expanded="false">
@@ -323,21 +327,26 @@ document.querySelectorAll(".media-shell").forEach((shell) => {
   try { sessionStorage.setItem('portfolio-nudge-message-index', String(index)); } catch (_) {}
 
   let dismissed = false;
+  let manuallyControlled = false;
+  nudgeBubble.hidden = false;
+  nudgeLaunch.setAttribute('aria-expanded', 'true');
   nudgeClose.addEventListener('click', () => {
     dismissed = true;
+    manuallyControlled = true;
     nudgeBubble.hidden = true;
     nudgeLaunch.setAttribute('aria-expanded', 'false');
   });
   nudgeLaunch.addEventListener('click', () => {
+    manuallyControlled = true;
     nudgeBubble.hidden = !nudgeBubble.hidden;
     nudgeLaunch.setAttribute('aria-expanded', String(!nudgeBubble.hidden));
   });
   window.setTimeout(() => {
-    if (!dismissed) {
-      nudgeBubble.hidden = false;
-      nudgeLaunch.setAttribute('aria-expanded', 'true');
+    if (!dismissed && !manuallyControlled) {
+      nudgeBubble.hidden = true;
+      nudgeLaunch.setAttribute('aria-expanded', 'false');
     }
-  }, 3200);
+  }, 5000);
 })();
 </script>
 
