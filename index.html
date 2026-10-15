@@ -576,7 +576,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
         player.removeAttribute('src');
       }
       player = null;
-      media.replaceChildren(preview);
+      media.replaceChildren(preview, media.querySelector('.project-index') || make('span','project-index',String(position+1).padStart(2,'0')));
       if (stopActivePlayer === stop) stopActivePlayer = null;
     };
 
@@ -659,7 +659,22 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
     const response = await fetch('/projetos.json', { cache: 'no-cache' });
     if (!response.ok) throw new Error('Não foi possível ler projetos.json');
     const data = await response.json();
-    projects = Array.isArray(data) ? data.filter((p) => p && typeof p === 'object') : [];
+    const originals = Array.isArray(data) ? data.filter((p) => p && typeof p === 'object') : [];
+    // Trabalhos adicionados pelo painel seguro do site, sem alterar os 17 originais.
+    let automatic = [];
+    try {
+      const extraResponse = await fetch('/api/managed-projects', {cache:'no-store'});
+      if (extraResponse.ok) {
+        const managed = await extraResponse.json();
+        if (Array.isArray(managed.projects)) automatic = managed.projects;
+      }
+    } catch (_) { /* Sem Vercel Blob, os projetos do GitHub continuam visíveis. */ }
+    projects = [...originals];
+    automatic.forEach((project) => {
+      if (!project || typeof project !== 'object' || !safeUrl(project.src)) return;
+      const place = Number.isInteger(project.position) ? Math.max(0,Math.min(projects.length,project.position)) : projects.length;
+      if (!projects.some(p => p.src === project.src)) projects.splice(place,0,project);
+    });
     const fragment = document.createDocumentFragment();
     cardEntries = projects.map((project, index) => {
       const entry = createProjectCard(project, index);
