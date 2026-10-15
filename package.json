@@ -9,5 +9,8 @@
   "dependencies": {
     "@vercel/blob": "^2.5.0",
     "sharp": "^0.34.4"
+  },
+  "scripts": {
+    "test": "node scripts/verify-portfolio.cjs"
   }
 }
