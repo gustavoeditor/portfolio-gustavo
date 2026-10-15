@@ -791,7 +791,8 @@ document.getElementById('year').textContent = new Date().getFullYear();
                 : '',
               fullSource: /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(source)
                 ? '/videos-1080/' + source.replace(/^\/?videos\//,'')
-                : ''
+                : '',
+              verifiedLocalVariants: /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(source)
             });
             mounted = playerUI.element;
           } catch (error) {
