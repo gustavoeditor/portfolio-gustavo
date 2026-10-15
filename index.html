@@ -28,6 +28,7 @@
 <meta name="twitter:description" content="Portfólio de edição de vídeo, cinematics e motion design.">
 <title>GUSTAVO | EDITOR DE VÍDEO</title>
 <link rel="stylesheet" href="/sales.css?v=1">
+<link rel="stylesheet" href="/quote-modal.css?v=1">
 <style>
 :root{--bg:#0b0b0d;--panel:#131316;--text:#f4f3f0;--muted:#96969e;--line:#28282e;--accent:#a78bfa;--max:1120px}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible,video:focus-visible{outline:2px solid var(--accent);outline-offset:4px}.skip-link{position:absolute;left:12px;top:-60px;z-index:2000;background:var(--accent);color:#101108;padding:10px 14px;border-radius:4px}.skip-link:focus{top:12px}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}.wrap{width:min(var(--max),calc(100% - 48px));margin:auto}
@@ -867,14 +868,29 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
 
 </script>
 
-<a class="contact-float" href="https://wa.me/5537988445372?text=Ol%C3%A1%2C%20Gustavo!%20Vi%20seus%20trabalhos%20no%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20a%20edi%C3%A7%C3%A3o%20de%20um%20projeto." target="_blank" rel="noopener noreferrer" aria-label="Falar com Gustavo pelo WhatsApp"><span class="float-live" aria-hidden="true"></span><span>Vamos conversar</span><span aria-hidden="true">↗</span></a>
+<button class="contact-float quote-float" type="button" data-open-quote aria-haspopup="dialog" aria-controls="quick-quote-dialog" aria-label="Abrir formulário rápido de orçamento"><span class="float-live" aria-hidden="true"></span><span>Solicitar orçamento</span><span aria-hidden="true">↗</span></button>
 
 
+<dialog class="quick-quote-dialog" id="quick-quote-dialog" aria-labelledby="quick-quote-title" aria-describedby="quick-quote-description">
+  <div class="quick-quote-shell">
+    <header class="quick-quote-heading">
+      <div>
+        <span class="quick-quote-kicker"><span class="float-live" aria-hidden="true"></span> SEU PRÓXIMO PROJETO</span>
+        <h2 id="quick-quote-title">Vamos criar algo <em>incrível.</em></h2>
+        <p id="quick-quote-description">Envie um briefing rápido. Conversamos diretamente pelo WhatsApp.</p>
+      </div>
+      <button class="quick-quote-close" id="quick-quote-close" type="button" aria-label="Fechar orçamento">✕</button>
+    </header>
+    <div class="quick-quote-form-slot" id="quick-quote-form-slot"></div>
+    <p class="quick-quote-footer"><span class="float-live" aria-hidden="true"></span> Atendimento remoto · Projeto sob medida</p>
+  </div>
+</dialog>
 <script>
 window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script defer src="/sales.js?v=1"></script>
+<script defer src="/quote-modal.js?v=1"></script>
 <script defer src="/proof.js?v=1"></script>
 </body>
 </html>
