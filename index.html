@@ -88,6 +88,48 @@ nav a{transition:color .25s ease}
 .why-item p{font-size:13px;line-height:1.75;color:var(--muted);margin:0}
 @media(max-width:760px){.why{padding:10px 0 62px}.why-grid{grid-template-columns:1fr;gap:12px}.why-item{padding:20px}}
 
+
+/* Assistente discreto de contato */
+.contact-nudge {
+  position: fixed; right: 24px; bottom: 24px; z-index: 1000;
+  display: flex; align-items: flex-end; gap: 10px;
+  max-width: min(360px, calc(100vw - 32px));
+  font-family: inherit;
+}
+.contact-nudge[hidden], .contact-nudge .nudge-bubble[hidden] { display: none; }
+.nudge-bubble {
+  position: relative; padding: 15px 16px; border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px; background: rgba(20, 16, 28, .96); color: #fff;
+  box-shadow: 0 14px 42px rgba(0,0,0,.28); backdrop-filter: blur(16px);
+  animation: nudge-in .35s ease both;
+}
+.nudge-copy { margin: 0 22px 12px 0; font-size: 13px; line-height: 1.5; letter-spacing: -.01em; }
+.nudge-actions { display: flex; align-items: center; gap: 12px; }
+.nudge-cta { color: #c9a8ff; font-size: 12px; font-weight: 650; text-decoration: none; }
+.nudge-cta:hover { color: #fff; }
+.nudge-close {
+  position: absolute; top: 8px; right: 9px; width: 25px; height: 25px;
+  border: 0; border-radius: 50%; background: transparent; color: #bdb3c9;
+  cursor: pointer; font-size: 18px; line-height: 1;
+}
+.nudge-close:hover { background: rgba(255,255,255,.1); color: #fff; }
+.nudge-launch {
+  flex: 0 0 48px; width: 48px; height: 48px; border: 1px solid rgba(255,255,255,.15);
+  border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  color: #fff; background: #4d2673; box-shadow: 0 8px 26px rgba(0,0,0,.3);
+  transition: transform .2s ease, background .2s ease;
+}
+.nudge-launch:hover { transform: translateY(-2px); background: #60338b; }
+.nudge-launch svg { width: 21px; height: 21px; }
+@keyframes nudge-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 600px) {
+  .contact-nudge { right: 14px; bottom: 14px; gap: 8px; }
+  .nudge-bubble { padding: 13px 14px; }
+  .nudge-copy { font-size: 12px; }
+  .nudge-launch { flex-basis: 44px; width: 44px; height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) { .nudge-bubble { animation: none; } .nudge-launch { transition: none; } }
+
 </style>
   <script type="application/ld+json">
   {
@@ -232,5 +274,19 @@ document.querySelectorAll(".media-shell").forEach((shell) => {
     .catch(showFallback);
 });
 </script>
+
+<div class="contact-nudge" id="contact-nudge" aria-label="Contato rápido">
+  <div class="nudge-bubble" id="nudge-bubble" role="status">
+    <button class="nudge-close" id="nudge-close" type="button" aria-label="Fechar mensagem">×</button>
+    <p class="nudge-copy">Tem um projeto em mente? Vamos dar vida a ele.</p>
+    <div class="nudge-actions">
+      <a class="nudge-cta" href="https://wa.me/5537988445372?text=Ol%C3%A1%2C%20Gustavo!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto." target="_blank" rel="noopener noreferrer">Vamos conversar ↗</a>
+    </div>
+  </div>
+  <button class="nudge-launch" id="nudge-launch" type="button" aria-label="Abrir mensagem de contato" aria-expanded="true">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l1.7-3.1A7.5 7.5 0 1 1 20 11.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 11.5h7M8.5 14.5h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
 </body>
 </html>
