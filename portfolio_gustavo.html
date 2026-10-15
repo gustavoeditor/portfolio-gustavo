@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Portfólio de edição de vídeo, motion design e cinematics.">
+<title>Gustavo — Video Editor</title>
+<style>
+:root{--bg:#0b0b0d;--panel:#131316;--text:#f4f3f0;--muted:#96969e;--line:#28282e;--accent:#a78bfa;--max:1120px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}a{color:inherit;text-decoration:none}.wrap{width:min(var(--max),calc(100% - 48px));margin:auto}
+header{height:78px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{font-weight:750;letter-spacing:-.04em;font-size:18px}.brand span{color:var(--accent)}nav{display:flex;gap:30px;color:#c1c1c7;font-size:13px}nav a:hover,.text-link:hover{color:var(--accent)}
+.hero{padding:112px 0 86px;display:grid;grid-template-columns:1.25fr .75fr;gap:56px;align-items:end}.eyebrow{color:var(--accent);font-size:11px;letter-spacing:.19em;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:10px}.dot{height:7px;width:7px;background:var(--accent);border-radius:50%;display:inline-block}.hero h1{font-size:clamp(48px,7vw,86px);line-height:.98;letter-spacing:-.075em;margin:24px 0 26px;font-weight:700}.hero h1 em{font-style:normal;color:#777780}.intro{max-width:510px;color:#a7a7af;font-size:16px}.hero-side{border-left:1px solid var(--line);padding:8px 0 8px 28px;color:var(--muted);font-size:13px}.hero-side strong{display:block;color:var(--text);font-size:15px;margin-bottom:7px}.hero-side p{margin:0 0 26px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 17px;border-radius:5px;font-size:13px;font-weight:650;border:1px solid var(--line);transition:.2s}.btn.primary{background:var(--accent);color:#101108;border-color:var(--accent)}.btn:hover{transform:translateY(-2px)}.btn.secondary:hover{border-color:#666}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:26px}.section-head h2{font-size:28px;letter-spacing:-.05em;margin:0}.section-head p{font-size:12px;color:var(--muted);margin:0}.portfolio{padding:28px 0 100px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}.filter{background:transparent;border:1px solid var(--line);color:#a5a5ad;padding:8px 13px;border-radius:4px;font:inherit;font-size:12px;cursor:pointer}.filter.active,.filter:hover{background:var(--accent);border-color:var(--accent);color:#101108}.projects{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px 20px}.project{min-width:0}.thumb{position:relative;aspect-ratio:16/9;width:100%;padding:0;background:linear-gradient(135deg,#25252d,#111114);border:1px solid #27272d;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);text-align:center}.thumb:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 70% 35%,rgba(167,139,250,.18),transparent 42%),linear-gradient(135deg,transparent 40%,rgba(255,255,255,.035));pointer-events:none}.thumb .frame{position:absolute;inset:12% 9%;border:1px solid rgba(255,255,255,.13);transform:skewY(-5deg);pointer-events:none}.thumb .label{position:relative;font-size:clamp(22px,4vw,42px);font-weight:800;letter-spacing:-.07em;text-align:center;text-shadow:0 4px 25px #000;pointer-events:none}.thumb .label span{color:var(--accent)}.play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:var(--accent);color:#101108;display:grid;place-items:center;font-size:18px;z-index:1;box-shadow:0 8px 28px #0008;pointer-events:none}.thumb .preview-hint{position:absolute;left:12px;bottom:12px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#0009;border:1px solid #ffffff24;border-radius:3px;padding:5px 7px;z-index:1}.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}.thumb.has-poster:before{background:linear-gradient(0deg,#0008,transparent 65%);z-index:1}.video-modal{position:fixed;inset:0;z-index:1000;background:#000e;display:none;align-items:center;justify-content:center;padding:24px}.video-modal.open{display:flex}.video-modal-inner{width:min(100%,1100px);position:relative}.video-modal-close{position:absolute;right:0;top:-44px;border:1px solid #ffffff44;background:#17171b;color:#fff;border-radius:5px;padding:9px 13px;cursor:pointer}.video-frame{width:100%;aspect-ratio:16/9;background:#050505;border:1px solid #333;border-radius:6px;overflow:hidden}.video-frame iframe,.video-frame video{width:100%;height:100%;border:0;display:block}.video-modal-title{color:#fff;font-size:14px;margin:12px 0 0}.video-slot{width:100%;aspect-ratio:16/9;display:block;background:#08080a;border:1px solid #27272d;border-radius:6px;object-fit:cover;color:#c9c9d1}.video-placeholder{aspect-ratio:16/9;width:100%;border:1px dashed #494453;border-radius:6px;background:linear-gradient(135deg,#17151e,#0d0d10);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#b9b1cc;text-align:center;padding:18px}.video-placeholder .plus{font-size:30px;color:var(--accent);line-height:1}.video-placeholder strong{font-size:13px}.video-placeholder small{font-size:11px;color:#85818e}.project-info{display:flex;align-items:start;justify-content:space-between;gap:16px;padding-top:14px}.project h3{margin:0 0 4px;font-size:16px;letter-spacing:-.025em}.project p{margin:0;color:var(--muted);font-size:12px}.tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#b7b7be;border:1px solid var(--line);padding:5px 7px;border-radius:3px;white-space:nowrap}.project[hidden]{display:none}.note{margin-top:22px;color:#777780;font-size:12px}
+.services{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:76px 0}.service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:32px}.service{padding-top:18px;border-top:1px solid #3a3a41}.service .num{font-size:11px;color:var(--accent)}.service h3{font-size:18px;margin:15px 0 8px;letter-spacing:-.03em}.service p{font-size:13px;color:var(--muted);margin:0;max-width:290px}
+.about{padding:82px 0;display:grid;grid-template-columns:.7fr 1.3fr;gap:70px}.about h2{font-size:32px;letter-spacing:-.06em;margin:0}.about-copy{font-size:16px;color:#a9a9b0;max-width:650px}.about-copy p{margin:0 0 15px}.contact{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:clamp(28px,6vw,60px);display:flex;justify-content:space-between;align-items:center;gap:30px;margin-bottom:80px}.contact h2{font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-.065em;margin:12px 0}.contact p{color:var(--muted);font-size:13px;margin:0}.contact .btn{flex-shrink:0}
+footer{border-top:1px solid var(--line);padding:22px 0 28px;display:flex;justify-content:space-between;color:#777780;font-size:11px}.social{display:flex;gap:18px}
+@media(max-width:980px){.projects{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.wrap{width:min(var(--max),calc(100% - 32px))}header{height:68px}nav{gap:14px;font-size:12px}nav a:nth-child(2){display:none}.hero{padding:76px 0 60px;grid-template-columns:1fr;gap:32px}.hero-side{border-left:0;border-top:1px solid var(--line);padding:22px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:8px 22px}.hero-side p{margin-bottom:12px}.projects{grid-template-columns:1fr;gap:26px}.section-head{align-items:start;flex-direction:column}.service-grid{grid-template-columns:1fr;gap:24px}.about{grid-template-columns:1fr;gap:24px;padding:62px 0}.contact{align-items:flex-start;flex-direction:column;margin-bottom:54px}.contact .btn{width:100%}footer{gap:15px;flex-direction:column}.tag{font-size:9px}}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <a class="brand" href="#inicio">GUSTAVO<span>.</span></a>
+  <nav aria-label="Navegação principal"><a href="#trabalhos">Melhores resultados</a><a href="#contato">Contato ↗</a></nav>
+</header>
+<main>
+  <section class="hero wrap" id="inicio">
+    <div>
+      <div class="eyebrow"><span class="dot"></span> Video editor · Motion design</div>
+      <h1>Vídeos que<br>fazem <em>sentir.</em></h1>
+      <p class="intro">Edição, ritmo e visual trabalhando juntos para transformar boas ideias em vídeos que prendem a atenção.</p>
+      <div class="actions"><a class="btn primary" href="#trabalhos">Ver meu trabalho <span>↘</span></a><a class="btn secondary" href="https://wa.me/55379884545372?text=Ol%C3%A1%2C%20Gustavo!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto." target="_blank" rel="noopener noreferrer">Vamos conversar ↗</a></div>
+    </div>
+    <aside class="hero-side">
+      <div><strong>O que eu faço</strong><p>Edição · Motion graphics · Cinematics</p></div>
+      <div><strong>Projetos</strong><p>Games · YouTube · Conteúdo digital</p></div>
+      <div><strong>Disponibilidade</strong><p>Aberto a novos projetos</p></div>
+      <div><strong>Base</strong><p>Brasil · Trabalho remoto</p></div>
+    </aside>
+  </section>
+
+  <section class="portfolio wrap" id="trabalhos">
+    <div class="section-head"><div><div class="eyebrow">Seleção principal</div><h2>Melhores resultados</h2></div><p>Os projetos que melhor representam meu trabalho.</p></div>
+    <div class="projects">
+      <article class="project" data-category="cs2">
+        <video class="video-slot" controls preload="metadata" playsinline aria-label="Vídeo do portfólio"><source src="videos/projeto-01.mp4" type="video/mp4">Seu navegador não suporta a reprodução deste vídeo.</video>
+        <div class="project-info"><div><h3>CS2 — Cinematic Edit</h3><p>Montagem · Sound design · Color grading</p></div><span class="tag">Gaming</span></div>
+      </article>
+      <article class="project" data-category="motion">
+        <video class="video-slot" controls preload="metadata" playsinline aria-label="Vídeo do portfólio"><source src="videos/projeto-02.mp4" type="video/mp4">Seu navegador não suporta a reprodução deste vídeo.</video>
+        <div class="project-info"><div><h3>Motion & Visual Effects</h3><p>Composição · Animação · VFX</p></div><span class="tag">Motion</span></div>
+      </article>
+      <article class="project" data-category="youtube">
+        <video class="video-slot" controls preload="metadata" playsinline aria-label="Vídeo do portfólio"><source src="videos/projeto-03.mp4" type="video/mp4">Seu navegador não suporta a reprodução deste vídeo.</video>
+        <div class="project-info"><div><h3>Vídeo para YouTube</h3><p>Ritmo · Narrativa · Retenção</p></div><span class="tag">Long-form</span></div>
+      </article>
+      <article class="project" data-category="cs2">
+        <video class="video-slot" controls preload="metadata" playsinline aria-label="Vídeo do portfólio"><source src="videos/projeto-04.mp4" type="video/mp4">Seu navegador não suporta a reprodução deste vídeo.</video>
+        <div class="project-info"><div><h3>Map Transition</h3><p>Cinematic · Transição · Sound design</p></div><span class="tag">CS2</span></div>
+      </article>
+    </div>
+    <p class="note">Adicione seus arquivos MP4 à pasta <code>videos</code> usando os nomes indicados no guia de personalização.</p>
+  </section>
+
+  <section class="services">
+    <div class="wrap">
+      <div class="eyebrow">Como posso ajudar</div><div class="section-head"><h2>Do bruto ao memorável.</h2><p>Serviços sob medida para cada projeto.</p></div>
+      <div class="service-grid">
+        <article class="service"><span class="num">01 /</span><h3>Edição de vídeo</h3><p>Montagem com ritmo, narrativa e sound design para manter o público envolvido.</p></article>
+        <article class="service"><span class="num">02 /</span><h3>Motion graphics</h3><p>Elementos gráficos, animações e efeitos que dão personalidade ao conteúdo.</p></article>
+        <article class="service"><span class="num">03 /</span><h3>Cinematics & gaming</h3><p>Cenas de jogo com atmosfera, movimentos de câmera e acabamento cinematográfico.</p></article>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="contact wrap" id="contato">
+    <div><div class="eyebrow"><span class="dot"></span> Tem um projeto em mente?</div><h2>Vamos fazer<br>acontecer.</h2><p>Me conte sua ideia e o que você precisa editar.</p></div>
+    <a class="btn primary" id="contactButton" href="https://wa.me/55379884545372?text=Ol%C3%A1%2C%20Gustavo!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto." target="_blank" rel="noopener noreferrer">Entrar em contato ↗</a>
+  </section>
+</main>
+<footer class="wrap"><span>© <span id="year"></span> Gustavo — Video Editor</span><div class="social"><a href="#contato">Instagram ↗</a><a href="#contato">YouTube ↗</a><a href="#inicio">Voltar ao topo ↑</a></div></footer>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+// Coloque uma pasta chamada "videos" ao lado deste HTML e adicione os arquivos com os nomes indicados abaixo.
+// projeto-01.mp4 = CS2 Cinematic; projeto-02.mp4 = Motion/VFX; projeto-03.mp4 = YouTube; projeto-04.mp4 = Vertigo → Inferno.
+</script>
+</body>
+</html>
