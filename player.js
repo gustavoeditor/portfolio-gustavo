@@ -21,6 +21,9 @@ function mount(video,options={}){
  const primarySource=String(options.source||video.currentSrc||video.src||'');
  const lowSource=typeof options.lowSource==='string'&&options.lowSource.startsWith('/videos-480/')?options.lowSource:'';
  const fullSource=typeof options.fullSource==='string'&&options.fullSource.startsWith('/videos-1080/')?options.fullSource:'';
+ // All original locally hosted projects have both encodes, verified in CI.
+ // Avoid two HEAD requests and a second video download on each new player.
+ const verifiedVariants=options.verifiedLocalVariants===true && /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(primarySource);
  const qualityPreferenceKey='gustavo-video-quality-v1';
  const validQualities=['auto','low','high','full'];
  let qualityChoice='auto';
@@ -28,8 +31,8 @@ function mount(video,options={}){
    const saved=localStorage.getItem(qualityPreferenceKey);
    if(validQualities.includes(saved))qualityChoice=saved;
  }catch(_){}
- let lowReady=false;
- let fullReady=false;
+ let lowReady=verifiedVariants&&Boolean(lowSource);
+ let fullReady=verifiedVariants&&Boolean(fullSource);
  let currentQuality='high';
  let switching=false;
  const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
@@ -98,7 +101,14 @@ function mount(video,options={}){
  function selectedSource(key){
    return key==='low'&&lowReady?lowSource:key==='full'&&fullReady?fullSource:primarySource;
  }
- function changeSource(key){
+ // Apply an already-saved 1080p/480p preference before playback starts.
+ // The source switch doesn't need an asynchronous metadata probe for bundled files.
+ if(verifiedVariants) {
+   currentQuality=effectiveQuality();
+   const initial=selectedSource(currentQuality);
+   if(initial && video.src!==new URL(initial,document.baseURI).href) video.src=initial;
+ }
+  function changeSource(key){
    const selected=key==='low'&&lowReady?'low':key==='full'&&fullReady?'full':'high';
    if(selected===currentQuality||!primarySource||switching||disposed)return;
    const previousTime=Number.isFinite(video.currentTime)?video.currentTime:0;
@@ -174,8 +184,10 @@ function mount(video,options={}){
    qualityChoice=event.newValue;renderQualityOptions();applyQuality();
  });
  if(connection&&typeof connection.addEventListener==='function')on(connection,'change',()=>{if(qualityChoice==='auto')applyQuality();});
- probeVariant(lowSource,'low');
- probeVariant(fullSource,'full');
+ if(!verifiedVariants) {
+   probeVariant(lowSource,'low');
+   probeVariant(fullSource,'full');
+ }
  const raf=()=>{
    if(frame||disposed)return;
    frame=requestAnimationFrame(()=>{frame=0;draw();});

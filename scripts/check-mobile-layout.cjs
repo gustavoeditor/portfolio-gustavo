@@ -33,7 +33,7 @@ async function run(){
   const base='http://127.0.0.1:'+server.address().port;
   const browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox']});
   try{
-    for(const width of [320,360,390,430,600,768]){
+    for(const width of [320,360,390,430,600,768,821,900,1024]){
       const context=await browser.newContext({
         viewport:{width,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true
       });
@@ -243,6 +243,167 @@ async function run(){
       assert.ok(result.scrollWidth<=width+2,'Channel cards caused horizontal overflow: '+JSON.stringify(result));
       assert.ok(Math.abs(result.left-(width-result.right))<=3,'Channel section off-center');
       console.log('Channels layout '+width+'px OK');
+      await context.close();
+    }
+    // Works without JavaScript, with honest static links to all video files.
+    {
+      const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,javaScriptEnabled:false});
+      const page=await context.newPage();
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      const noJs=await page.evaluate(()=>{
+        const links=[...document.querySelectorAll('.projects-nojs li a')];
+        return {count:links.length,allLocal:links.every(a=>a.pathname.startsWith('/videos/')&&a.pathname.endsWith('.mp4')),
+          horizontal:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth};
+      });
+      assert.equal(noJs.count,17,'Video catalog should still work with JS disabled');
+      assert.ok(noJs.allLocal && noJs.horizontal<=noJs.viewport+2,'Non-script portfolio must remain usable and centered');
+      await context.close();
+      console.log('No-JavaScript gallery: 17 direct video links OK');
+    }
+
+    // The 17 originals must show before a slow optional admin API resolves;
+    // adding admin projects may NOT tear down an already-open player.
+    {
+      const context=await browser.newContext({viewport:{width:1280,height:850}});
+      const page=await context.newPage();
+      let resumeManaged;
+      const pending=new Promise(resolve=>{resumeManaged=resolve;});
+      await page.route('**/api/managed-projects',async route=>{
+        await pending;
+        await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+          projects:[{title:'Projeto gerenciado de teste',category:'outros',position:0,
+            src:'https://example.com/video-test.mp4',poster:'/capas/awp-the-prince.webp',
+            description:'Projeto adicional carregado depois da biblioteca.'}]
+        })});
+      });
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length===17);
+      assert.equal(await page.locator('#project-grid .project-card').count(),17);
+      await page.locator('#project-grid .project-play').first().click();
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid video').length===1);
+      await page.evaluate(()=>{document.querySelector('#project-grid video').dataset.testKeep='yes';});
+      resumeManaged();
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length===18);
+      const managedResult=await page.evaluate(()=>({
+        first:document.querySelector('#project-grid .project-card h3')?.textContent,
+        featured:document.querySelectorAll('#project-grid .project-card.featured').length,
+        playerKept:document.querySelectorAll('#project-grid video[data-test-keep="yes"]').length,
+        extraFilter:!!document.querySelector('#project-filters [data-filter="outros"]')
+      }));
+      assert.equal(managedResult.first,'Projeto gerenciado de teste');
+      assert.equal(managedResult.featured,1);
+      assert.equal(managedResult.playerKept,1,'Admin additions must not interrupt a playing video');
+      assert.ok(managedResult.extraFilter,'New managed categories should be filterable');
+      await context.close();
+      console.log('Static gallery loads immediately; late admin project preserves active player');
+    }
+
+    // Quality and volume persist across two different video cards without
+    // temporary 720p loading or unnecessary availability requests.
+    {
+      const context=await browser.newContext({viewport:{width:1280,height:850}});
+      await context.addInitScript(()=>{
+        localStorage.setItem('gustavo-video-quality-v1','full');
+        localStorage.setItem('gustavo-video-audio-v1',JSON.stringify({volume:.42,muted:false}));
+      });
+      const page=await context.newPage();
+      const altRequests=[];
+      page.on('request',request=>{
+        if(request.method()==='HEAD'&&/\/videos-(480|1080)\//.test(request.url()))altRequests.push(request.url());
+      });
+      await page.route('**/*.mp4',route=>route.fulfill({status:200,contentType:'video/mp4',body:''}));
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length>=17);
+      for(const index of [0,1]){
+        await page.locator('#project-grid .project-card').nth(index).locator('.project-play').click();
+        const state=await page.locator('#project-grid .project-card').nth(index).evaluate(card=>{
+          const v=card.querySelector('video');
+          return {src:v?.getAttribute('src'),volume:v?.volume,quality:card.querySelector('.vip-quality')?.textContent};
+        });
+        assert.ok(state.src?.includes('/videos-1080/'),index+' should start at Full HD: '+JSON.stringify(state));
+        assert.ok(Math.abs(state.volume-.42)<.011,'Remembered volume should not reset');
+        assert.ok(state.quality?.includes('1080p'),'Quality picker must show selected Full HD immediately');
+      }
+      assert.equal(altRequests.length,0,'Local variants should not trigger HEAD checks');
+      await context.close();
+      console.log('Persistent Full HD + volume, zero variant probes across two videos OK');
+    }
+
+        // A project can be shared individually without losing the branded page.
+    {
+      const context=await browser.newContext({viewport:{width:1280,height:850}});
+      await context.addInitScript(()=>{
+        Object.defineProperty(navigator,'clipboard',{configurable:true,
+          value:{writeText:async url=>{window.__copiedProjectUrl=url;}}});
+      });
+      const page=await context.newPage();
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length>=17);
+      const first=page.locator('#project-grid .project-card').first();
+      assert.equal(await first.getAttribute('id'),'projeto-awp-the-prince');
+      await first.locator('.project-share').click();
+      await page.waitForFunction(()=>Boolean(window.__copiedProjectUrl));
+      const shared=await page.evaluate(()=>({
+        copied:window.__copiedProjectUrl,
+        label:document.querySelector('#project-grid .project-card .project-share')?.textContent
+      }));
+      assert.ok(shared.copied.endsWith('/#projeto-awp-the-prince'),'Copied link should target specific video');
+      assert.ok(shared.label.includes('Link copiado'),'Share action should have success feedback');
+      await page.goto(base+'/#projeto-awp-the-prince',{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>{
+        const card=document.getElementById('projeto-awp-the-prince');
+        return Boolean(card && card.getBoundingClientRect().top<window.innerHeight);
+      });
+      await context.close();
+      console.log('Deep-linked, shareable videos and accessible copy feedback OK');
+    }
+
+        // Contact flow: required inputs, service selection and final WhatsApp URL.
+    {
+      const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+      const page=await context.newPage();
+      await page.addInitScript(()=>{
+        window.open=(url)=>{window.__testOutboundUrl=url;return {opener:null};};
+      });
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.locator('.quote-float').click();
+      await page.locator('#quote-name').fill('Cliente Teste');
+      await page.locator('#quote-service').selectOption('cinematics');
+      await page.locator('#quote-details').fill('Quero um cinematic de Counter-Strike com iluminação cinematográfica.');
+      await page.locator('#quote-form button[type="submit"]').click();
+      await page.waitForFunction(()=>Boolean(window.__testOutboundUrl));
+      const lead=await page.evaluate(()=>window.__testOutboundUrl);
+      const text=new URL(lead).searchParams.get('text');
+      assert.ok(lead.startsWith('https://wa.me/5537988445372?text='),'WhatsApp lead URL missing');
+      assert.ok(text.includes('Cliente Teste')&&text.includes('Cinematics / Gaming')&&text.includes('iluminação cinematográfica'),
+        'User briefing lost fields: '+text);
+      await context.close();
+      console.log('Real quote-to-WhatsApp funnel OK on mobile');
+    }
+
+        // Accessibility smoke audit using axe-core on mobile and desktop, including modal.
+    const axePath=require.resolve('axe-core/axe.min.js');
+    for(const width of [390,1280]){
+      const context=await browser.newContext({viewport:{width,height:850},deviceScaleFactor:2,isMobile:width<700,hasTouch:width<700});
+      const page=await context.newPage();
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length>=17);
+      await page.addScriptTag({path:axePath});
+      // Audit steady-state colors after entrance fades, not a 760ms transition frame.
+      await page.waitForTimeout(1050);
+      async function audit(which){
+        const findings=await page.evaluate(async()=>{
+          const response=await window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});
+          return response.violations.map(v=>({id:v.id,impact:v.impact,description:v.help,nodes:v.nodes.slice(0,5).map(n=>n.target.join(' '))}));
+        });
+        console.log('Accessibility '+width+'px '+which+': '+JSON.stringify(findings));
+        const severe=findings.filter(v=>['critical','serious'].includes(v.impact));
+        assert.equal(severe.length,0,width+'px '+which+' has serious accessibility issues: '+JSON.stringify(severe));
+      }
+      await audit('site');
+      await page.locator('.quote-float').click();
+      await page.waitForTimeout(480);
+      await audit('quote-modal');
       await context.close();
     }
   }finally{await browser.close();await close();}
