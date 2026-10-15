@@ -27,7 +27,7 @@ Hero headline:
 Intro: "Edição, motion design e cinematics para transformar ideias em vídeos com identidade visual, ritmo e intenção."
 Buttons: "Ver meu trabalho" and "Vamos conversar".
 Differentiators section: "Por que trabalhar comigo?" with "Visual com propósito", "Edição que conduz", and "Atenção aos detalhes".
-Projects heading: "Projetos em destaque".
+Projects heading: "Trabalhos em destaque". The projects area is a self-managed video library, not a Behance portfolio/embed section.
 
 Hero side information must remain present:
 - O que eu faço / Edição · Motion graphics · Cinematics
@@ -40,7 +40,11 @@ Hero side information must remain present:
 - A WhatsApp contact popup was added in the lower-right with rotating messages, a launcher to reopen it, a 5-second auto-hide, and sessionStorage logic to avoid repeating the previous message when possible. It has a minimal robot/avatar, violet border glow, dark glass look, label "GUSTAVO · EDITOR DE VÍDEO" and "Disponível para projetos". It cannot read visitor interests; do not claim personalized AI targeting.
 - Ambient violet glow and subtle technical grid were added to the hero. The grid opacity was recently reduced to about 20% desktop / 15% mobile and line opacity softened.
 - A subtle divider was moved directly below the two hero buttons, inside the hero text column. Keep the hero-side information in its existing right column.
-- The video references videos/projeto-01.mp4 through videos/projeto-04.mp4 may be placeholders; historically the repository did not contain these MP4 files. Verify current repo state before assuming project videos exist or claiming they work.
+- The Behance embeds were removed by request. The projects gallery reads from root-level projetos.json and renders a responsive grid: three columns on desktop, two on medium screens, one on mobile. Categories are filterable; video entries can use local videos/ paths, public direct MP4/WebM links, YouTube URLs, or Vimeo URLs.
+- A user-friendly manager lives at gerenciar-projetos.html. It supports adding projects, category selection, ordering, removal, importing/exporting projetos.json, and browser-local drafts. It cannot publish files on its own: video files and the exported JSON still need to be uploaded/committed to GitHub. Large videos should use a public video host rather than bloating the repository.
+- The videos/ and capas/ folders contain README instructions. COMO-ADICIONAR-VIDEOS.md documents the full workflow.
+- The favicon is a sharp-cornered white geometric G on a dark square, based on the user's description of their logo. The exact original standalone logo asset was not confidently identified in the available library, so do not claim this SVG is the original source file.
+- After changes, validate the JSON schema, filter behavior, mobile grid, local and external video paths, empty state, and manager import/export flow. Do not claim the site is live until Vercel deployment is verified.
 - Recent commit for softer grid and corrected hero divider: 0deb3b20c054fd077d5bcc6c3a2ccb1990a57ad3.
 - Previous visual commit: c2ea4670719a1c27cc9eb6047bd3bfa936628e83.
 - Previous popup polish commit: 5c53de665f183785fae8ce9bcbe717f81953fddf.
