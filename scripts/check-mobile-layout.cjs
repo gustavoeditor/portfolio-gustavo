@@ -66,6 +66,26 @@ async function run(){
       }
       assert.ok(layout.floating.right<=width+2 && layout.floating.left>=-2,
         width+'px: floating quote button outside viewport');
+      const heroCopy=await page.evaluate(()=>{
+        const title=document.getElementById('hero-title');
+        const subtitle=document.querySelector('.hero .intro');
+        const signature=document.querySelector('.hero-copy .eyebrow');
+        const a=title.getBoundingClientRect(), b=subtitle.getBoundingClientRect(), c=signature.getBoundingClientRect();
+        return {
+          title: title.textContent.trim(),
+          signature: signature.textContent.trim(),
+          headline:{left:a.left,right:a.right,bottom:a.bottom,top:a.top},
+          description:{left:b.left,right:b.right,top:b.top,bottom:b.bottom},
+          eyebrow:{left:c.left,right:c.right,top:c.top,bottom:c.bottom}
+        };
+      });
+      assert.ok(heroCopy.signature.includes('GUSTAVO')&&heroCopy.signature.includes('EDITOR DE VÍDEO'),
+        width+'px: Gustavo brand identification must be visible');
+      assert.ok(heroCopy.headline.top>=heroCopy.eyebrow.bottom-2 &&
+        heroCopy.description.top>=heroCopy.headline.bottom-2,
+        width+'px: hero headline or description overlap: '+JSON.stringify(heroCopy));
+      assert.ok(heroCopy.headline.left>=-2 && heroCopy.headline.right<=width+2,
+        width+'px: hero headline outside screen');
       const ambient=await page.evaluate(()=>{
         const layer=document.querySelector('.ambient-atmosphere');
         const orb=layer?.querySelector('.ambient-orb-one');
