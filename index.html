@@ -333,6 +333,18 @@ body{background:radial-gradient(ellipse at 50% -10%,rgba(91,55,147,.19),transpar
 @media(prefers-reduced-motion:reduce){
  .project-card,.project-card .project-media,.project-card .project-poster{transition:none!important;transform:none!important;filter:none!important}
 }
+
+/* Profundidade editorial: apenas ornamentos acompanham a rolagem. Textos e players permanecem fixos no fluxo. */
+@media (min-width:821px) and (prefers-reduced-motion:no-preference) {
+  .hero-stage .stage-inner {
+    transform:translate3d(0,var(--vip-depth-y,0px),0);
+  }
+  .hero::before,.hero::after,
+  .portfolio::before,.why::before,.services::before,
+  .contact::after,footer::before {
+    transform:translate3d(0,var(--vip-depth-y,0px),0);
+  }
+}
 </style>
   <script type="application/ld+json">
   {
@@ -425,6 +437,53 @@ body{background:radial-gradient(ellipse at 50% -10%,rgba(91,55,147,.19),transpar
 <footer class="wrap site-footer"><span>© <span id="year"></span> GUSTAVO | EDITOR DE VÍDEO</span><div class="social"><a href="https://www.instagram.com/gustaeditor0812/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="#trabalhos">Trabalhos</a><a href="#inicio">Voltar ao topo ↑</a></div></footer>
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
+
+
+/* Parallax discreto de rolagem: uma leitura por frame, somente na área visível e no desktop. */
+(() => {
+  const motion = window.matchMedia('(min-width: 821px) and (prefers-reduced-motion: no-preference)');
+  const targets = Array.from(document.querySelectorAll('.hero, .portfolio, .why, .services, .contact, footer'));
+  if (!targets.length || !('requestAnimationFrame' in window)) return;
+  let frame = 0;
+  let listening = false;
+
+  function renderDepth() {
+    frame = 0;
+    if (!motion.matches || document.hidden) return;
+    const viewportHeight = window.innerHeight;
+    const midpoint = viewportHeight / 2;
+    for (const element of targets) {
+      const rect = element.getBoundingClientRect();
+      if (rect.bottom < -60 || rect.top > viewportHeight + 60) continue;
+      const distance = midpoint - (rect.top + rect.height / 2);
+      const offset = Math.max(-26, Math.min(26, distance * 0.075));
+      element.style.setProperty('--vip-depth-y', offset.toFixed(1) + 'px');
+    }
+  }
+  function requestDepth() {
+    if (frame === 0 && motion.matches && !document.hidden) {
+      frame = window.requestAnimationFrame(renderDepth);
+    }
+  }
+  function syncMotion() {
+    if (motion.matches && !listening) {
+      window.addEventListener('scroll', requestDepth, { passive: true });
+      window.addEventListener('resize', requestDepth, { passive: true });
+      listening = true;
+      requestDepth();
+    } else if (!motion.matches && listening) {
+      window.removeEventListener('scroll', requestDepth);
+      window.removeEventListener('resize', requestDepth);
+      listening = false;
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+      targets.forEach(element => element.style.removeProperty('--vip-depth-y'));
+    }
+  }
+  if (typeof motion.addEventListener === 'function') motion.addEventListener('change', syncMotion);
+  document.addEventListener('visibilitychange', requestDepth);
+  syncMotion();
+})();
 
 /* Scroll reveal: entrada gradual de baixo para cima, respeitando acessibilidade. */
 const revealTargets = document.querySelectorAll('.why-item, .service, .contact > div, .contact > a');
