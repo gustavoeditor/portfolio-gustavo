@@ -301,6 +301,38 @@ body{background:radial-gradient(ellipse at 50% -10%,rgba(91,55,147,.19),transpar
 .site-header .brand .brand-identity{color:#f7f5ff;text-shadow:none}
 .site-header .brand .brand-divider{color:var(--accent);text-shadow:none}
 @media(max-width:600px){.hero-stage{display:none}}
+
+/* Galeria VIP: destaque cinematográfico, sem penalizar toque ou movimento reduzido. */
+.project-grid{gap:clamp(24px,3vw,45px) clamp(20px,2.6vw,32px)}
+.project-card{position:relative;z-index:1;isolation:isolate;transform-origin:center}
+.project-card .project-media{overflow:hidden;border-radius:15px;box-shadow:0 24px 60px #0004;backface-visibility:hidden}
+.project-card .project-poster{transform:scale(1.005);transition:transform .55s cubic-bezier(.2,.7,.2,1)}
+.project-card.featured .project-media{aspect-ratio:16/7.6}
+.project-card .project-play-icon{width:64px;height:64px;box-shadow:0 12px 35px #0009}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ .project-card{transition:opacity .35s ease,transform .5s cubic-bezier(.15,.85,.16,1),filter .35s ease}
+ .project-grid:has(.project-card:hover) .project-card:not(:hover){opacity:.46;filter:brightness(.73)}
+ .project-grid .project-card:hover{opacity:1;z-index:12;transform:translateY(-10px) scale(1.047)}
+ .project-card:hover .project-media{border-color:#c5b2ff;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 38px rgba(163,111,255,.24);
+ transform:perspective(1200px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)) translateZ(0);transition:transform .2s ease-out,border-color .3s,box-shadow .3s}
+ .project-card:hover .project-poster{transform:scale(1.10) translate(var(--shift-x,0px),var(--shift-y,0px))}
+ body:has(.project-card:hover) .hero,
+ body:has(.project-card:hover) .capability-strip,
+ body:has(.project-card:hover) .why,
+ body:has(.project-card:hover) .services,
+ body:has(.project-card:hover) .contact,
+ body:has(.project-card:hover) .site-footer,
+ body:has(.project-card:hover) .portfolio .section-head,
+ body:has(.project-card:hover) .project-toolbar{opacity:.65;transition:opacity .35s ease}
+}
+@media(max-width:600px){
+ .project-grid{gap:34px}
+ .project-card .project-media,.project-card.featured .project-media{aspect-ratio:16/9}
+ .project-card .project-play-icon{width:58px;height:58px}
+}
+@media(prefers-reduced-motion:reduce){
+ .project-card,.project-card .project-media,.project-card .project-poster{transition:none!important;transform:none!important;filter:none!important}
+}
 </style>
   <script type="application/ld+json">
   {
@@ -457,6 +489,35 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
   let projects = [];
   let cardEntries = [];
   let stopActivePlayer = null;
+  // Compartilha as escolhas de volume e mute entre todos os MP4, inclusive após recarregar.
+  const volumeKey = 'gustavo-video-audio-v1';
+  const audioState = { volume: 1, muted: false };
+  try {
+    const stored = JSON.parse(localStorage.getItem(volumeKey) || 'null');
+    if (stored && Number.isFinite(stored.volume) && stored.volume >= 0 && stored.volume <= 1) {
+      audioState.volume = stored.volume;
+      audioState.muted = Boolean(stored.muted);
+    }
+  } catch (_) {}
+  const rememberAudio = (video) => {
+    audioState.volume = video.volume;
+    audioState.muted = video.muted;
+    try { localStorage.setItem(volumeKey, JSON.stringify(audioState)); } catch (_) {}
+  };
+  window.addEventListener('storage', (event) => {
+    if (event.key !== volumeKey || !event.newValue) return;
+    try {
+      const next = JSON.parse(event.newValue);
+      if (Number.isFinite(next.volume) && next.volume >= 0 && next.volume <= 1) {
+        audioState.volume = next.volume;
+        audioState.muted = Boolean(next.muted);
+        document.querySelectorAll('#project-grid video').forEach((video) => {
+          video.volume = audioState.volume;
+          video.muted = audioState.muted;
+        });
+      }
+    } catch (_) {}
+  });
 
   function updateVisibleCards() {
     let visibleCount = 0;
@@ -515,7 +576,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
         player.removeAttribute('src');
       }
       player = null;
-      media.replaceChildren(preview);
+      media.replaceChildren(preview, media.querySelector('.project-index') || make('span','project-index',String(position+1).padStart(2,'0')));
       if (stopActivePlayer === stop) stopActivePlayer = null;
     };
 
@@ -535,6 +596,9 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
           video.controls = true;
           video.playsInline = true;
           video.preload = 'metadata';
+          video.volume = audioState.volume;
+          video.muted = audioState.muted;
+          video.addEventListener('volumechange', () => rememberAudio(video));
           if (poster) video.poster = poster;
           video.src = source;
           video.addEventListener('error', () => {
@@ -563,6 +627,31 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
     info.append(make('h3', '', title));
     if (project.description) info.append(make('p', 'project-description', project.description));
     card.append(media, info);
+    // A posição do cursor move levemente a perspectiva e a capa, sem carregar scripts externos.
+    if (window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
+      let frameId = 0;
+      let pointer = null;
+      card.addEventListener('pointermove', (event) => {
+        pointer = event;
+        if (frameId) return;
+        frameId = requestAnimationFrame(() => {
+          frameId = 0;
+          if (!pointer) return;
+          const r = media.getBoundingClientRect();
+          const x = Math.max(-1, Math.min(1, ((pointer.clientX-r.left)/r.width-.5)*2));
+          const y = Math.max(-1, Math.min(1, ((pointer.clientY-r.top)/r.height-.5)*2));
+          media.style.setProperty('--tilt-x', (-y*2.4).toFixed(2)+'deg');
+          media.style.setProperty('--tilt-y', (x*2.4).toFixed(2)+'deg');
+          media.style.setProperty('--shift-x', (-x*6).toFixed(2)+'px');
+          media.style.setProperty('--shift-y', (-y*6).toFixed(2)+'px');
+        });
+      });
+      card.addEventListener('pointerleave', () => {
+        pointer = null;
+        if (frameId) { cancelAnimationFrame(frameId); frameId = 0; }
+        ['--tilt-x','--tilt-y','--shift-x','--shift-y'].forEach((p) => media.style.removeProperty(p));
+      });
+    }
     return { card, category, stop };
   }
 
@@ -570,7 +659,22 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
     const response = await fetch('/projetos.json', { cache: 'no-cache' });
     if (!response.ok) throw new Error('Não foi possível ler projetos.json');
     const data = await response.json();
-    projects = Array.isArray(data) ? data.filter((p) => p && typeof p === 'object') : [];
+    const originals = Array.isArray(data) ? data.filter((p) => p && typeof p === 'object') : [];
+    // Trabalhos adicionados pelo painel seguro do site, sem alterar os 17 originais.
+    let automatic = [];
+    try {
+      const extraResponse = await fetch('/api/managed-projects', {cache:'no-store'});
+      if (extraResponse.ok) {
+        const managed = await extraResponse.json();
+        if (Array.isArray(managed.projects)) automatic = managed.projects;
+      }
+    } catch (_) { /* Sem Vercel Blob, os projetos do GitHub continuam visíveis. */ }
+    projects = [...originals];
+    automatic.forEach((project) => {
+      if (!project || typeof project !== 'object' || !safeUrl(project.src)) return;
+      const place = Number.isInteger(project.position) ? Math.max(0,Math.min(projects.length,project.position)) : projects.length;
+      if (!projects.some(p => p.src === project.src)) projects.splice(place,0,project);
+    });
     const fragment = document.createDocumentFragment();
     cardEntries = projects.map((project, index) => {
       const entry = createProjectCard(project, index);
