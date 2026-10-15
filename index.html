@@ -368,6 +368,7 @@ body{background:radial-gradient(ellipse at 50% -10%,rgba(91,55,147,.19),transpar
     "knowsAbout": ["Edição de vídeo", "Counter-Strike 2", "Cinematics", "Motion design", "Sound design", "Color grading", "YouTube"]
   }
   </script>
+<link rel="stylesheet" href="/player.css?v=1">
 </head>
 <body>
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -543,6 +544,7 @@ body{background:radial-gradient(ellipse at 50% -10%,rgba(91,55,147,.19),transpar
 <a href="#orcamento"><svg class="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3.5h11l5 5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"/><path d="M14.5 3.5v5.5H20M8 13h8M8 17h5"/></svg><span>Orçamento</span></a>
 <a href="#inicio"><svg class="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 10 6-6 6 6M12 4v15M5 20h14"/></svg><span>Voltar ao topo</span></a>
 </nav></footer>
+<script src="/player.js?v=1"></script>
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -719,6 +721,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
     const poster = safeUrl(project.poster);
     const title = String(project.title || 'Projeto sem título');
     let player = null;
+    let playerUI = null;
 
     const preview = make('button', 'project-play');
     preview.type = 'button';
@@ -736,6 +739,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
 
     const stop = () => {
       if (!player) return;
+      if (playerUI) { playerUI.destroy(); playerUI = null; }
       if (player.tagName === 'VIDEO') {
         player.pause();
         player.removeAttribute('src');
@@ -761,7 +765,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
           player = frame;
         } else {
           const video = make('video', 'project-video');
-          video.controls = true;
+          video.controls = !window.GustavoPlayer;
           video.playsInline = true;
           video.preload = 'metadata';
           video.volume = audioState.volume;
@@ -775,7 +779,18 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
           }, { once: true });
           player = video;
         }
-        media.replaceChildren(player);
+        let mounted = player;
+        if (player.tagName === 'VIDEO' && window.GustavoPlayer) {
+          try {
+            playerUI = window.GustavoPlayer.mount(player, {title});
+            mounted = playerUI.element;
+          } catch (error) {
+            player.controls = true;
+            mounted = player;
+            playerUI = null;
+          }
+        }
+        media.replaceChildren(mounted);
         stopActivePlayer = stop;
         try { window.va?.('event', {name:'video_play',data:{source:category}}); } catch (_) {}
         if (player.tagName === 'VIDEO') {
