@@ -1,0 +1,89 @@
+'use strict';
+// Responsive smoke test against the site's actual HTML/CSS in headless Chrome.
+// A narrow viewport is the browser-equivalent of zooming in, without disabling pinch zoom.
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const http = require('node:http');
+const path = require('node:path');
+const { chromium } = require('playwright-core');
+
+const root = path.resolve(__dirname, '..');
+const mime = {
+  '.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8',
+  '.js':'application/javascript; charset=utf-8','.json':'application/json',
+  '.svg':'image/svg+xml','.webp':'image/webp','.jpg':'image/jpeg',
+  '.png':'image/png','.mp4':'video/mp4'
+};
+const server = http.createServer((req,res)=>{
+  let pathname;
+  try { pathname = decodeURIComponent(new URL(req.url,'http://local').pathname); }
+  catch (_) {res.writeHead(400).end(); return;}
+  const file = path.resolve(root, '.'+ (pathname==='/'?'/index.html':pathname));
+  if (!file.startsWith(root+path.sep)) {res.writeHead(403).end();return;}
+  fs.stat(file,(err,stat)=>{
+    if(err || !stat.isFile()) {res.writeHead(404).end();return;}
+    res.writeHead(200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream'});
+    fs.createReadStream(file).pipe(res);
+  });
+});
+const listen = ()=>new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+const close = ()=>new Promise(resolve=>server.close(resolve));
+async function run(){
+  await listen();
+  const base='http://127.0.0.1:'+server.address().port;
+  const browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox']});
+  try{
+    for(const width of [320,360,390,430,600,768]){
+      const context=await browser.newContext({
+        viewport:{width,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true
+      });
+      const page=await context.newPage();
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForTimeout(180);
+      const layout=await page.evaluate(()=>{
+        const vw=document.documentElement.clientWidth;
+        const box=(sel)=>{
+          const el=document.querySelector(sel);if(!el)return null;
+          const r=el.getBoundingClientRect();
+          return {left:r.left,right:r.right,width:r.width};
+        };
+        return {
+          viewport:vw,scrollWidth:document.documentElement.scrollWidth,
+          body:box('body'),header:box('.site-header'),hero:box('.hero'),
+          portfolio:box('#trabalhos'),card:box('.project-card'),
+          main:box('main'),floating:box('.quote-float')
+        };
+      });
+      assert.ok(layout.scrollWidth<=width+2,
+        width+'px: horizontal page overflow '+JSON.stringify(layout));
+      for(const section of ['header','hero','portfolio']){
+        const b=layout[section];
+        if(!b)continue;
+        assert.ok(b.left>=-2 && b.right<=width+2,
+          width+'px: '+section+' outside screen: '+JSON.stringify(b));
+        assert.ok(Math.abs(b.left-(width-b.right))<=3,
+          width+'px: '+section+' not centered: '+JSON.stringify(b));
+      }
+      assert.ok(layout.floating.right<=width+2 && layout.floating.left>=-2,
+        width+'px: floating quote button outside viewport');
+      if(width<=600){
+        await page.locator('.quote-float').click();
+        await page.waitForTimeout(80);
+        const form=await page.evaluate(()=>{
+          const dialog=document.getElementById('quick-quote-dialog');
+          const heading=dialog.querySelector('.quick-quote-heading').getBoundingClientRect();
+          const copy=dialog.querySelector('.quick-quote-heading p').getBoundingClientRect();
+          const slot=dialog.querySelector('.quick-quote-form-slot').getBoundingClientRect();
+          return {open:dialog.open,headingEnd:heading.bottom,copyEnd:copy.bottom,
+            slotTop:slot.top,formWidth:slot.width};
+        });
+        assert.ok(form.open,width+'px: quote modal did not open');
+        assert.ok(form.headingEnd<=form.slotTop+2 && form.copyEnd<=form.slotTop+2,
+          width+'px: quote texts overlap fields: '+JSON.stringify(form));
+      }
+      console.log('Viewport '+width+'px OK, scrollWidth='+layout.scrollWidth);
+      await context.close();
+    }
+  }finally{await browser.close();await close();}
+}
+run().catch(err=>{console.error(err);server.close();process.exitCode=1;});
