@@ -25,8 +25,10 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
-      - name: Instalar ffmpeg
+      - name: Instalar FFmpeg (necessário para criar versões 480p)
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
           ffmpeg -version | head -n 1
           ffprobe -version | head -n 1
       - name: Gerar versões leves 480p somente quando ausentes
