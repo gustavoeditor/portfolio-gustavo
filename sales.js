@@ -36,6 +36,12 @@ document.querySelectorAll('.case-watch').forEach(button=>{
    track('case_study_watch',src.split('/').pop().replace(/[^a-z0-9_-]/gi,'').slice(0,40));
  });
 });
+// Measure anonymous interest in real creator collaborations (no user identifiers).
+document.addEventListener('click',event=>{
+ const link=event.target.closest?.('.hero-proof, .channel-card');
+ if(!link)return;
+ track('client_channel_visit',link.matches('.hero-proof')?'hero':'collaborations');
+});
 document.querySelectorAll('a[href^="https://wa.me/"]').forEach(link=>{
  link.addEventListener('click',()=>{
    const source=link.classList.contains('contact-float')?'floating':link.closest('.hero')?'hero':'direct';
