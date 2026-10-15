@@ -764,6 +764,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
         }
         media.replaceChildren(player);
         stopActivePlayer = stop;
+        try { window.va?.('event', {name:'video_play',data:{source:category}}); } catch (_) {}
         if (player.tagName === 'VIDEO') {
           const playback = player.play();
           if (playback && typeof playback.catch === 'function') playback.catch(() => {});
