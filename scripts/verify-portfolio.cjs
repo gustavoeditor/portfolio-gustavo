@@ -42,7 +42,7 @@ for(const match of html.matchAll(/<script(?:\s+[^>]*)?>([\s\S]*?)<\/script>/g)){
  if(match[0].includes('src='))continue;
  new Function(match[1]);
 }
-assert.ok(html.includes('/player.js?v=1')&&html.includes('/player.css?v=1'),'Player assets missing');
+assert.ok(html.includes('/player.js?v=2')&&html.includes('/player.css?v=1'),'Player assets missing');
 assert.ok(html.includes('GustavoPlayer.mount(player'),'Custom player integration missing');
 assert.ok(html.includes('playerUI.destroy()'),'Custom player cleanup missing');
 new Function(read('player.js'));
@@ -70,7 +70,7 @@ assert.ok(ambienceCSS.includes('prefers-reduced-motion:reduce'),'Reduced motion 
 assert.ok(ambienceCSS.includes('body.ambient-static'),'Save-data and low-power fallback required');
 assert.ok(ambienceCSS.includes('.channels::before')&&ambienceCSS.includes('.case-studies::before')&&ambienceCSS.includes('.portfolio::before'),'Parallax layers missing across site');
 // All page sections, including asynchronously rendered project/channel cards, reveal safely.
-assert.ok(html.includes('/reveal.js?v=1')&&html.includes('/reveal.css?v=1'),'Missing universal reveal assets');
+assert.ok(html.includes('/reveal.js?v=2')&&html.includes('/reveal.css?v=1'),'Missing universal reveal assets');
 assert.ok(!html.includes('/* Scroll reveal: entrada gradual'),'Legacy limited reveal script still present');
 const revealJS=read('reveal.js');
 const revealCSS=read('reveal.css');
