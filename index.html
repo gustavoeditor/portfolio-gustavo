@@ -345,18 +345,6 @@ body{background:radial-gradient(ellipse at 50% -10%,rgba(91,55,147,.19),transpar
  .project-card,.project-card .project-media,.project-card .project-poster{transition:none!important;transform:none!important;filter:none!important}
 }
 
-/* Profundidade editorial: apenas ornamentos acompanham a rolagem. Textos e players permanecem fixos no fluxo. */
-@media (min-width:821px) and (prefers-reduced-motion:no-preference) {
-  .hero-stage .stage-inner {
-    transform:translate3d(0,var(--vip-depth-y,0px),0);
-  }
-  .hero::before,.hero::after,
-  .portfolio::before,.why::before,.services::before,
-  .contact::after,footer::before {
-    transform:translate3d(0,var(--vip-depth-y,0px),0);
-  }
-}
-
 /* Mobile viewport alignment: eliminate horizontal layout/paint overflow without
    disabling browser pinch zoom or clipping the video player's controls. */
 html{max-width:100%;overflow-x:clip;background-color:var(--bg)}
@@ -395,9 +383,15 @@ body{width:100%;min-width:0;max-width:100%;overflow-x:clip}
   }
   </script>
 <link rel="stylesheet" href="/player.css?v=1">
+<link rel="stylesheet" href="/ambient.css?v=1">
 </head>
 <body>
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+<div class="ambient-atmosphere" aria-hidden="true">
+  <span class="ambient-orb ambient-orb-one"></span>
+  <span class="ambient-orb ambient-orb-two"></span>
+  <span class="ambient-orb ambient-orb-three"></span>
+</div>
 <header class="wrap site-header">
   <a class="brand" href="#inicio" aria-label="Gustavo, editor de vídeo, voltar ao início"><img src="/logo-mark.svg" alt="" width="34" height="29" decoding="async"><span class="brand-identity">GUSTAVO<span class="brand-divider"> / </span><small>EDITOR DE VÍDEO</small></span></a>
   <nav aria-label="Navegação principal"><a href="#trabalhos">Trabalhos</a><a href="#servicos">Serviços</a><a href="#orcamento">Orçamento</a></nav>
@@ -593,52 +587,6 @@ body{width:100%;min-width:0;max-width:100%;overflow-x:clip}
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
 
-
-/* Parallax discreto de rolagem: uma leitura por frame, somente na área visível e no desktop. */
-(() => {
-  const motion = window.matchMedia('(min-width: 821px) and (prefers-reduced-motion: no-preference)');
-  const targets = Array.from(document.querySelectorAll('.hero, .portfolio, .why, .services, .contact, footer'));
-  if (!targets.length || !('requestAnimationFrame' in window)) return;
-  let frame = 0;
-  let listening = false;
-
-  function renderDepth() {
-    frame = 0;
-    if (!motion.matches || document.hidden) return;
-    const viewportHeight = window.innerHeight;
-    const midpoint = viewportHeight / 2;
-    for (const element of targets) {
-      const rect = element.getBoundingClientRect();
-      if (rect.bottom < -60 || rect.top > viewportHeight + 60) continue;
-      const distance = midpoint - (rect.top + rect.height / 2);
-      const offset = Math.max(-26, Math.min(26, distance * 0.075));
-      element.style.setProperty('--vip-depth-y', offset.toFixed(1) + 'px');
-    }
-  }
-  function requestDepth() {
-    if (frame === 0 && motion.matches && !document.hidden) {
-      frame = window.requestAnimationFrame(renderDepth);
-    }
-  }
-  function syncMotion() {
-    if (motion.matches && !listening) {
-      window.addEventListener('scroll', requestDepth, { passive: true });
-      window.addEventListener('resize', requestDepth, { passive: true });
-      listening = true;
-      requestDepth();
-    } else if (!motion.matches && listening) {
-      window.removeEventListener('scroll', requestDepth);
-      window.removeEventListener('resize', requestDepth);
-      listening = false;
-      if (frame) window.cancelAnimationFrame(frame);
-      frame = 0;
-      targets.forEach(element => element.style.removeProperty('--vip-depth-y'));
-    }
-  }
-  if (typeof motion.addEventListener === 'function') motion.addEventListener('change', syncMotion);
-  document.addEventListener('visibilitychange', requestDepth);
-  syncMotion();
-})();
 
 /* Scroll reveal: entrada gradual de baixo para cima, respeitando acessibilidade. */
 const revealTargets = document.querySelectorAll('.why-item, .service, .contact > div, .contact > a');
@@ -972,5 +920,6 @@ window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};
 <script defer src="/quote-modal.js?v=1"></script>
 <script defer src="/proof.js?v=1"></script>
 <script defer src="/channels.js?v=1"></script>
+<script defer src="/ambient.js?v=1"></script>
 </body>
 </html>

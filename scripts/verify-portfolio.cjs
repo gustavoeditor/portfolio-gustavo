@@ -60,4 +60,13 @@ assert.ok(html.includes('id="channels-title"') && html.includes('id="canais"'),'
 assert.ok(html.includes('/channels.js?v=1') && html.includes('/channels.css?v=1'),'Channel assets not included');
 new Function(read('channels.js'));
 assert.ok(read('channels.css').includes('.channel-card'),'Channel UI stylesheet missing');
+// Atmospheric motion is progressive decoration, not an interactive dependency.
+assert.ok(html.includes('/ambient.css?v=1')&&html.includes('/ambient.js?v=1'),'Missing site-wide ambience assets');
+assert.ok(html.includes('class="ambient-atmosphere" aria-hidden="true"'),'Ambience must be decorative and screen-reader hidden');
+assert.ok(!html.includes('vip-depth-y'),'Old partial parallax must be removed');
+new Function(read('ambient.js'));
+const ambienceCSS=read('ambient.css');
+assert.ok(ambienceCSS.includes('prefers-reduced-motion:reduce'),'Reduced motion fallback required');
+assert.ok(ambienceCSS.includes('body.ambient-static'),'Save-data and low-power fallback required');
+assert.ok(ambienceCSS.includes('.channels::before')&&ambienceCSS.includes('.case-studies::before')&&ambienceCSS.includes('.portfolio::before'),'Parallax layers missing across site');
 console.log('Portfolio validation OK: '+projects.length+' projects; anchors, scripts and assets verified.');
