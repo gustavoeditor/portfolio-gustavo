@@ -44,7 +44,12 @@
     }
     document.body.style.overflow = 'hidden';
     try { window.va?.('event',{name:'quote_modal_open',data:{source:event?.currentTarget?.classList?.contains('quote-float')?'floating':'page'}}); } catch (_) {}
-    requestAnimationFrame(() => firstField?.focus({preventScroll:true}));
+    requestAnimationFrame(() => {
+      // Avoid triggering the mobile keyboard before the visitor chooses a field.
+      if (window.matchMedia('(max-width: 600px)').matches) closeButton.focus({preventScroll:true});
+      else firstField?.focus({preventScroll:true});
+      syncKeyboardViewport();
+    });
   }
 
   document.querySelectorAll('[data-open-quote], a[href="#orcamento"]').forEach(trigger => {
@@ -62,5 +67,38 @@
     if (event.target === dialog) dialog.close();
   });
 
-  // Fallback: people can still navigate to /#orcamento and use the inline form.
+  // Chrome Android's software keyboard shrinks the visual viewport, not necessarily 100dvh.
+  const viewport=window.visualViewport;
+  const shell=dialog.querySelector('.quick-quote-shell');
+  let pendingFrame=0;
+  function syncKeyboardViewport() {
+    if (!active || !window.matchMedia('(max-width: 600px)').matches) return;
+    const height=viewport ? viewport.height : window.innerHeight;
+    const offset=viewport ? viewport.offsetTop : 0;
+    dialog.style.setProperty('--quote-visible-height',Math.round(height)+'px');
+    dialog.style.setProperty('--quote-visible-top',Math.round(offset)+'px');
+    if (pendingFrame) cancelAnimationFrame(pendingFrame);
+    pendingFrame=requestAnimationFrame(()=>{
+      pendingFrame=0;
+      const field=document.activeElement;
+      if (!field || !form.contains(field) || !shell) return;
+      const fieldRect=field.getBoundingClientRect();
+      const shellRect=shell.getBoundingClientRect();
+      const bottom= Math.min(shellRect.bottom, offset+height)-22;
+      const top= Math.max(shellRect.top, offset)+20;
+      if (fieldRect.bottom>bottom) shell.scrollTop+=fieldRect.bottom-bottom;
+      else if (fieldRect.top<top) shell.scrollTop+=fieldRect.top-top;
+    });
+  }
+  function clearKeyboardViewport() {
+    if(pendingFrame){cancelAnimationFrame(pendingFrame);pendingFrame=0;}
+    dialog.style.removeProperty('--quote-visible-height');
+    dialog.style.removeProperty('--quote-visible-top');
+  }
+  viewport?.addEventListener('resize',syncKeyboardViewport);
+  viewport?.addEventListener('scroll',syncKeyboardViewport);
+  dialog.addEventListener('focusin',()=>requestAnimationFrame(syncKeyboardViewport));
+  dialog.addEventListener('close',clearKeyboardViewport);
+  window.addEventListener('orientationchange',syncKeyboardViewport);
+    // Fallback: people can still navigate to /#orcamento and use the inline form.
 })();
