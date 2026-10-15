@@ -58,3 +58,13 @@
 }
 @media(max-width:380px){.vip-volume{width:42px}.vip-clock{font-size:9px}.vip-left{gap:2px}}
 @media(prefers-reduced-motion:reduce){.vip-player *, .vip-player *::before, .vip-player *::after{transition:none!important}}
+
+
+/* Quality choices appear only when an alternate encode actually exists. */
+.vip-quality-box{display:flex;align-items:center;justify-content:center;min-width:0}
+.vip-quality-box[hidden]{display:none!important}
+.vip-quality-label{display:flex;align-items:center;gap:6px;font-size:9px;font-weight:800;letter-spacing:.08em;color:#c8b8dd}
+.vip-quality{max-width:90px;min-width:70px;appearance:none;-webkit-appearance:none;border:1px solid #8d6db28c;border-radius:7px;background:#21172fe8;color:#f7f0ff;font:inherit;font-weight:700;font-size:11px;line-height:1.2;padding:8px 14px 8px 9px;cursor:pointer;outline-offset:2px}
+.vip-quality:focus-visible{outline:2px solid #d6c0ff}
+.vip-quality option{background:#21172f;color:#fff}
+@media(max-width:600px){.vip-quality-label{font-size:0}.vip-quality{min-width:61px;max-width:72px;font-size:10px;padding:7px 8px}.vip-player-brand{display:none}}
