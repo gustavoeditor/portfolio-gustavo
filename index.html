@@ -721,6 +721,11 @@ document.getElementById('year').textContent = new Date().getFullYear();
     const embed = embedUrl(source);
     const poster = safeUrl(project.poster);
     const title = String(project.title || 'Projeto sem título');
+    const pathName = source.split('?')[0].split('/').pop() || '';
+    const slug = pathName.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,72);
+    card.id = 'projeto-' + (slug || 'edicao-'+String(position+1));
+    // A managed project may collide with a static filename: do not duplicate IDs.
+    if (document.getElementById(card.id)) card.id += '-'+String(position+1);
     let player = null;
     let playerUI = null;
 
@@ -821,6 +826,35 @@ document.getElementById('year').textContent = new Date().getFullYear();
     info.append(make('div', 'project-category', categoryLabel(project.category)));
     info.append(make('h3', '', title));
     if (project.description) info.append(make('p', 'project-description', project.description));
+    const share = make('button','project-share','Compartilhar projeto ↗');
+    share.type = 'button';
+    share.setAttribute('aria-label','Compartilhar o projeto: '+title);
+    let feedbackTimer = 0;
+    share.addEventListener('click',async () => {
+      const url = new URL('/#'+card.id,window.location.origin).href;
+      const feedback = (message) => {
+        share.textContent = message;
+        if(feedbackTimer) clearTimeout(feedbackTimer);
+        feedbackTimer = setTimeout(()=>{share.textContent='Compartilhar projeto ↗';},2400);
+      };
+      try{
+        if(typeof navigator.share==='function' && window.matchMedia('(pointer: coarse)').matches){
+          await navigator.share({title,url,text:'Confira este trabalho de edição de vídeo.'});
+        }else if(navigator.clipboard?.writeText){
+          await navigator.clipboard.writeText(url);
+          feedback('Link copiado ✓');
+        }else{
+          window.location.hash=card.id;
+          feedback('Link no endereço ✓');
+        }
+        try{window.va?.('event',{name:'project_shared',data:{source:category}});}catch(_){}
+      }catch(error){
+        if(error?.name==='AbortError')return;
+        window.location.hash=card.id;
+        feedback('Link no endereço ✓');
+      }
+    });
+    info.append(share);
     card.append(media, info);
     // A posição do cursor move levemente a perspectiva e a capa, sem carregar scripts externos.
     if (window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
@@ -865,6 +899,17 @@ document.getElementById('year').textContent = new Date().getFullYear();
       return entry;
     });
     grid.replaceChildren(fragment);
+    // Deep links open the intended project even when cards are injected via fetch.
+    function scrollToLinkedProject(){
+      const targetId=decodeURIComponent(window.location.hash.slice(1));
+      if(!/^projeto-[a-z0-9-]+$/.test(targetId))return;
+      const target=cardEntries.find(({card})=>card.id===targetId)?.card;
+      if(!target)return;
+      if(target.hidden)filters.querySelector('[data-filter="all"]')?.click();
+      requestAnimationFrame(()=>target.scrollIntoView({behavior:'auto',block:'center'}));
+    }
+    window.addEventListener('hashchange',scrollToLinkedProject);
+    if(window.location.hash.startsWith('#projeto-'))scrollToLinkedProject();
     const categories = [...new Set(cardEntries.map(({ category }) => category))];
     categories.forEach((category) => {
       const button = make('button', 'filter', categoryLabel(category));
@@ -923,6 +968,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
           categories.add(category);
         });
         updateVisibleCards();
+        if(window.location.hash.startsWith('#projeto-'))scrollToLinkedProject();
       } catch (_) { /* The GitHub gallery never depends on optional Blob storage. */ }
     })();
   } catch (_) {
