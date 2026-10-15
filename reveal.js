@@ -19,6 +19,7 @@
     '.portfolio > .section-head > p',
     '.project-toolbar',
     '.project-status',
+    '.portfolio-next-step',
     '.projects-empty',
     '#project-grid > .project-card',
     '.case-studies > .section-head > div',
