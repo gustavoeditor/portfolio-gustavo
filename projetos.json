@@ -1,1 +1,121 @@
-[]
+[
+  {
+    "title": "AWP The Prince | Cinematic Edit",
+    "category": "cs2",
+    "src": "videos/awp-the-prince.mp4",
+    "poster": "capas/awp-the-prince.webp",
+    "description": "Montagem de AWP com trocas de cenário, ritmo e sound design."
+  },
+  {
+    "title": "Butterfly Gamma Doppler | Dark Studio",
+    "category": "cinematics",
+    "src": "videos/butterfly-gamma-dark.mp4",
+    "poster": "capas/butterfly-gamma-dark.webp",
+    "description": "Cinematic de produto com iluminação dramática e detalhes macro."
+  },
+  {
+    "title": "KeyDrop | AWP Product Cinematic",
+    "category": "cinematics",
+    "src": "videos/keydrop-awp-cinematic.mp4",
+    "poster": "capas/keydrop-awp-cinematic.webp",
+    "description": "Animação de produto em ambiente escuro, com luzes e composição 3D."
+  },
+  {
+    "title": "Flip Emerald | Sound Design Cut",
+    "category": "cs2",
+    "src": "videos/flip-emerald-sfx.mp4",
+    "poster": "capas/flip-emerald-sfx.webp",
+    "description": "Edição dinâmica em primeira pessoa com transições e efeitos sonoros."
+  },
+  {
+    "title": "AWP | Studio Product Reveal",
+    "category": "cinematics",
+    "src": "videos/awp-orange-studio.mp4",
+    "poster": "capas/awp-orange-studio.webp",
+    "description": "Reveal em estúdio com iluminação quente e detalhes da skin."
+  },
+  {
+    "title": "CS2 | The Exchange",
+    "category": "cinematics",
+    "src": "videos/cs2-the-exchange.mp4",
+    "poster": "capas/cs2-the-exchange.webp",
+    "description": "Cena com personagens, atuação e foco nos detalhes das mãos."
+  },
+  {
+    "title": "CS2 Golden Hour | Close-Up Cut",
+    "category": "cinematics",
+    "src": "videos/cs2-golden-hour-directors-cut.mp4",
+    "poster": "capas/cs2-golden-hour-directors-cut.webp",
+    "description": "Cinematic de personagens com contraluz dourada e enquadramentos próximos."
+  },
+  {
+    "title": "CS2 Golden Hour | Wide Cut",
+    "category": "cinematics",
+    "src": "videos/cs2-golden-hour-wide-cut.mp4",
+    "poster": "capas/cs2-golden-hour-wide-cut.webp",
+    "description": "Variação com planos abertos e luz de fundo cinematográfica."
+  },
+  {
+    "title": "Flip Emerald | Original Cut",
+    "category": "cs2",
+    "src": "videos/flip-emerald-original.mp4",
+    "poster": "capas/flip-emerald-original.webp",
+    "description": "Variação do edit de faca verde com câmera dinâmica e transições."
+  },
+  {
+    "title": "Neon Gloves | Reveal",
+    "category": "cinematics",
+    "src": "videos/neon-gloves-reveal.mp4",
+    "poster": "capas/neon-gloves-reveal.webp",
+    "description": "Apresentação 3D de luvas e faca sob luz violeta."
+  },
+  {
+    "title": "Purple Gloves | Studio Animation",
+    "category": "cinematics",
+    "src": "videos/purple-gloves-studio.mp4",
+    "poster": "capas/purple-gloves-studio.webp",
+    "description": "Animação de luvas em estúdio roxo com iluminação de produto."
+  },
+  {
+    "title": "AWP | Creator Showcase",
+    "category": "youtube",
+    "src": "videos/awp-creator-intro.mp4",
+    "poster": "capas/awp-creator-intro.webp",
+    "description": "Trecho de apresentação com criador em câmera e product shot da AWP."
+  },
+  {
+    "title": "AWP | Gameplay Showcase",
+    "category": "youtube",
+    "src": "videos/awp-gameplay-showcase.mp4",
+    "poster": "capas/awp-gameplay-showcase.webp",
+    "description": "Cortes de gameplay e apresentação de uma AWP estilizada."
+  },
+  {
+    "title": "Karambit | Floating Shot",
+    "category": "cinematics",
+    "src": "videos/karambit-floating.mp4",
+    "poster": "capas/karambit-floating.webp",
+    "description": "Estudo 3D de produto com faca suspensa e iluminação diurna."
+  },
+  {
+    "title": "Purple Karambit | Inspect Animation",
+    "category": "cs2",
+    "src": "videos/purple-karambit-inspect.mp4",
+    "poster": "capas/purple-karambit-inspect.webp",
+    "description": "Inspeção de faca em primeira pessoa com luvas roxas."
+  },
+  {
+    "title": "Kinetic Type | Coral",
+    "category": "motion",
+    "src": "videos/kinetic-type-coral.mp4",
+    "poster": "capas/kinetic-type-coral.webp",
+    "description": "Animação de tipografia 3D em fundo coral."
+  },
+  {
+    "title": "Kinetic Type | Mint",
+    "category": "motion",
+    "src": "videos/kinetic-type-mint.mp4",
+    "poster": "capas/kinetic-type-mint.webp",
+    "description": "Estudo de animação tipográfica 3D em paleta suave."
+  }
+]
