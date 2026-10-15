@@ -273,10 +273,35 @@ document.querySelectorAll(".media-shell").forEach((shell) => {
     })
     .catch(showFallback);
 });
+
+// Mensagem de contato: aparece uma vez após alguns segundos e pode ser fechada.
+const nudge = document.getElementById('contact-nudge');
+const nudgeBubble = document.getElementById('nudge-bubble');
+const nudgeLaunch = document.getElementById('nudge-launch');
+const nudgeClose = document.getElementById('nudge-close');
+if (nudge && nudgeBubble && nudgeLaunch && nudgeClose) {
+  let bubbleDismissed = false;
+  nudgeClose.addEventListener('click', () => {
+    bubbleDismissed = true;
+    nudgeBubble.hidden = true;
+    nudgeLaunch.setAttribute('aria-expanded', 'false');
+  });
+  nudgeLaunch.addEventListener('click', () => {
+    nudgeBubble.hidden = !nudgeBubble.hidden;
+    nudgeLaunch.setAttribute('aria-expanded', String(!nudgeBubble.hidden));
+  });
+  window.setTimeout(() => {
+    if (!bubbleDismissed) {
+      nudgeBubble.hidden = false;
+      nudgeLaunch.setAttribute('aria-expanded', 'true');
+    }
+  }, 4200);
+}
+
 </script>
 
 <div class="contact-nudge" id="contact-nudge" aria-label="Contato rápido">
-  <div class="nudge-bubble" id="nudge-bubble" role="status">
+  <div class="nudge-bubble" id="nudge-bubble" role="status" hidden>
     <button class="nudge-close" id="nudge-close" type="button" aria-label="Fechar mensagem">×</button>
     <p class="nudge-copy">Tem um projeto em mente? Vamos dar vida a ele.</p>
     <div class="nudge-actions">
