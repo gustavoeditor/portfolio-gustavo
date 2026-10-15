@@ -90,6 +90,41 @@ nav a{transition:color .25s ease}
 @media(max-width:760px){.hero:before{width:280px;height:280px;left:-130px;filter:blur(75px)}.hero:after{width:180px;height:180px;right:-70px;filter:blur(65px)}}
 
 
+/* Luz ambiente violeta distribuída pelo site, com intensidade baixa para preservar contraste e leitura. */
+.why,.portfolio,.services,.about,footer{position:relative;isolation:isolate}
+.why:before,.portfolio:before,.services:before,.about:before,footer:before{
+  content:"";position:absolute;inset:-36px -8vw;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 12% 28%,rgba(126,78,220,.105),transparent 34%),
+    radial-gradient(ellipse at 88% 68%,rgba(153,112,255,.075),transparent 32%);
+  opacity:.9;
+}
+.portfolio:before{
+  background:
+    radial-gradient(ellipse at 78% 12%,rgba(126,78,220,.12),transparent 31%),
+    radial-gradient(ellipse at 18% 76%,rgba(153,112,255,.065),transparent 34%);
+}
+.services:before{
+  background:
+    radial-gradient(ellipse at 50% 10%,rgba(126,78,220,.105),transparent 40%),
+    radial-gradient(ellipse at 4% 78%,rgba(153,112,255,.07),transparent 30%);
+}
+.about:before{
+  background:
+    radial-gradient(ellipse at 25% 45%,rgba(126,78,220,.11),transparent 38%),
+    radial-gradient(ellipse at 92% 20%,rgba(153,112,255,.06),transparent 32%);
+}
+footer:before{
+  inset:-28px -8vw 0;
+  background:radial-gradient(ellipse at 50% 100%,rgba(126,78,220,.11),transparent 55%);
+}
+@media(max-width:760px){
+  .why:before,.portfolio:before,.services:before,.about:before,footer:before{inset:-18px -16px;opacity:.72}
+}
+@media(prefers-reduced-motion:reduce){
+  .why:before,.portfolio:before,.services:before,.about:before,footer:before{opacity:.65}
+}
+
 /* Seção de valor: explica o diferencial sem promessas vazias. */
 .why{padding:28px 0 82px}
 .why .section-head{margin-bottom:34px}
