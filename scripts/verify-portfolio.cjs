@@ -42,4 +42,9 @@ for(const match of html.matchAll(/<script(?:\s+[^>]*)?>([\s\S]*?)<\/script>/g)){
  if(match[0].includes('src='))continue;
  new Function(match[1]);
 }
+assert.ok(html.includes('/player.js?v=1')&&html.includes('/player.css?v=1'),'Player assets missing');
+assert.ok(html.includes('GustavoPlayer.mount(player'),'Custom player integration missing');
+assert.ok(html.includes('playerUI.destroy()'),'Custom player cleanup missing');
+new Function(read('player.js'));
+assert.ok(read('player.css').includes('.vip-timeline-wrap'),'Branded seek bar missing');
 console.log('Portfolio validation OK: '+projects.length+' projects; anchors, scripts and assets verified.');
