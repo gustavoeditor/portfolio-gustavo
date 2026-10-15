@@ -1,0 +1,77 @@
+name: Gerar qualidades otimizadas dos vídeos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/video-qualities.yml'
+      - 'videos/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generate-video-qualities
+  cancel-in-progress: false
+
+jobs:
+  encode:
+    name: Criar arquivos 480p
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Instalar ffmpeg
+        run: |
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+      - name: Gerar versões leves 480p somente quando ausentes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p videos-480
+          shopt -s nullglob
+          for src in videos/*.mp4; do
+            filename="${src##*/}"
+            dest="videos-480/$filename"
+            if [[ -s "$dest" ]]; then
+              echo "Já existe: $dest"
+              continue
+            fi
+            height="$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=nokey=1:noprint_wrappers=1 "$src" | head -n 1)"
+            if [[ ! "$height" =~ ^[0-9]+$ ]]; then
+              echo "::error::Não foi possível ler altura de $src"
+              exit 1
+            fi
+            if (( height <= 480 )); then
+              cp "$src" "$dest"
+              echo "Mantendo resolução original inferior ou igual a 480p: $filename"
+            else
+              ffmpeg -hide_banner -loglevel error -nostdin -i "$src" \
+                -map 0:v:0 -map 0:a:0? -vf "scale=-2:480" \
+                -c:v libx264 -preset veryfast -crf 29 -pix_fmt yuv420p \
+                -c:a aac -b:a 80k -ac 2 -movflags +faststart \
+                -max_muxing_queue_size 1024 -y "$dest"
+            fi
+            test -s "$dest"
+            ffprobe -v error "$dest" > /dev/null
+            echo "Gerado $dest"
+          done
+      - name: Publicar versões reduzidas
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- videos-480/
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração."
+            exit 0
+          fi
+          git commit -m "Generate optimized 480p variants for portfolio players"
+          git pull --rebase origin main
+          git push origin HEAD:main
