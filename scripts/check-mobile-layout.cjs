@@ -66,6 +66,25 @@ async function run(){
       }
       assert.ok(layout.floating.right<=width+2 && layout.floating.left>=-2,
         width+'px: floating quote button outside viewport');
+      const ambient=await page.evaluate(()=>{
+        const layer=document.querySelector('.ambient-atmosphere');
+        const orb=layer?.querySelector('.ambient-orb-one');
+        const r=layer?.getBoundingClientRect();
+        const hero=document.querySelector('.hero')?.getBoundingClientRect();
+        return {
+          available:!!layer&&!!orb,
+          hiddenFromA11y:layer?.getAttribute('aria-hidden')==='true',
+          bounds:r?{left:r.left,right:r.right}:null,
+          heroAfter:hero?{left:hero.left,right:hero.right}:null,
+          pointerEvents:layer?getComputedStyle(layer).pointerEvents:'',
+          animation:orb?getComputedStyle(orb).animationName:''
+        };
+      });
+      assert.ok(ambient.available && ambient.hiddenFromA11y,
+        width+'px: decorative atmosphere missing or exposed to accessibility tree');
+      assert.equal(ambient.pointerEvents,'none',width+'px: glow blocking clicks');
+      assert.ok(ambient.bounds.left>=-2 && ambient.bounds.right<=width+2,
+        width+'px: glow viewport overflows: '+JSON.stringify(ambient));
       if(width<=600){
         await page.locator('.quote-float').click();
         await page.waitForTimeout(80);
@@ -84,7 +103,33 @@ async function run(){
       console.log('Viewport '+width+'px OK, scrollWidth='+layout.scrollWidth);
       await context.close();
     }
-    // Real partnership cards are injected only for the test: the committed registry remains empty.
+    // Verify full-page parallax is present yet respects user motion preferences.
+    {
+      const context=await browser.newContext({viewport:{width:1280,height:800}});
+      const page=await context.newPage();
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.locator('#trabalhos').scrollIntoViewIfNeeded();
+      await page.waitForTimeout(120);
+      const depth=await page.evaluate(()=>({
+        section:document.querySelector('#trabalhos')?.style.getPropertyValue('--ambient-y'),
+        layer:!!document.querySelector('.ambient-atmosphere'),
+        pointerEvents:getComputedStyle(document.querySelector('.ambient-atmosphere')).pointerEvents
+      }));
+      assert.ok(depth.section?.endsWith('px'),'Desktop scroll parallax did not update');
+      assert.equal(depth.pointerEvents,'none');
+      await page.emulateMedia({reducedMotion:'reduce'});
+      await page.waitForTimeout(80);
+      const accessible=await page.evaluate(()=>({
+        static:document.body.classList.contains('ambient-static'),
+        section:document.querySelector('#trabalhos')?.style.getPropertyValue('--ambient-y'),
+        animation:getComputedStyle(document.querySelector('.ambient-orb-one')).animationName
+      }));
+      assert.ok(accessible.static && accessible.section==='' && accessible.animation==='none',
+        'Reduced motion must disable parallax and idle glow animations: '+JSON.stringify(accessible));
+      await context.close();
+      console.log('Desktop scroll parallax and reduced motion OK');
+    }
+        // Real partnership cards are injected only for the test: the committed registry remains empty.
     for(const width of [390,1024]){
       const context=await browser.newContext({viewport:{width,height:844},deviceScaleFactor:2,isMobile:width<600,hasTouch:width<600});
       const page=await context.newPage();
