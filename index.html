@@ -782,7 +782,13 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
         let mounted = player;
         if (player.tagName === 'VIDEO' && window.GustavoPlayer) {
           try {
-            playerUI = window.GustavoPlayer.mount(player, {title});
+            playerUI = window.GustavoPlayer.mount(player, {
+              title,
+              source,
+              lowSource: /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(source)
+                ? '/videos-480/' + source.replace(/^\/?videos\//,'')
+                : ''
+            });
             mounted = playerUI.element;
           } catch (error) {
             player.controls = true;
