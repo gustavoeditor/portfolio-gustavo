@@ -131,7 +131,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;fle
       const data = await response.json();
       if (!Array.isArray(data)) throw new Error('format');
       projects = data.map(normalize);
-      persistAndRender();
+      render();
     } catch (_) {
       projects = [];
       try {
@@ -194,7 +194,10 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;fle
     event.target.value = '';
   });
   $('reload-button').addEventListener('click', () => {
-    if (confirm('Isso descarta o rascunho atual e carrega a versão publicada. Continuar?')) loadPublished();
+    if (confirm('Isso descarta o rascunho atual e carrega a versão publicada. Continuar?')) {
+      try { localStorage.removeItem(draftKey); } catch (_) {}
+      loadPublished();
+    }
   });
   loadPublished().then(() => {
     try {
