@@ -245,6 +245,29 @@ async function run(){
       console.log('Channels layout '+width+'px OK');
       await context.close();
     }
+    // Accessibility smoke audit using axe-core on mobile and desktop, including modal.
+    const axePath=require.resolve('axe-core/axe.min.js');
+    for(const width of [390,1280]){
+      const context=await browser.newContext({viewport:{width,height:850},deviceScaleFactor:2,isMobile:width<700,hasTouch:width<700});
+      const page=await context.newPage();
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length>=17);
+      await page.addScriptTag({path:axePath});
+      async function audit(which){
+        const findings=await page.evaluate(async()=>{
+          const response=await window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});
+          return response.violations.map(v=>({id:v.id,impact:v.impact,description:v.help,nodes:v.nodes.slice(0,5).map(n=>n.target.join(' '))}));
+        });
+        console.log('Accessibility '+width+'px '+which+': '+JSON.stringify(findings));
+        const severe=findings.filter(v=>['critical','serious'].includes(v.impact));
+        assert.equal(severe.length,0,width+'px '+which+' has serious accessibility issues: '+JSON.stringify(severe));
+      }
+      await audit('site');
+      await page.locator('.quote-float').click();
+      await page.waitForTimeout(80);
+      await audit('quote-modal');
+      await context.close();
+    }
   }finally{await browser.close();await close();}
 }
 run().catch(err=>{console.error(err);server.close();process.exitCode=1;});
