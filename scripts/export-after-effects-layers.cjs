@@ -132,7 +132,8 @@ async function main(){
    '*{animation:none!important;transition:none!important;scroll-behavior:auto!important;}',
    '.reveal-entry,.reveal{opacity:1!important;translate:none!important;transform:none!important;}',
    '.project-card{opacity:1!important;filter:none!important;transform:none!important;}',
-   '.project-card .project-poster{transform:none!important;}'
+   '.project-card .project-poster{transform:none!important;}',
+   '.services,.contact{content-visibility:visible!important;contain-intrinsic-size:none!important;}'
   ].join('')});
   await pause(400);
   const size=await page.evaluate(()=>({height:Math.ceil(document.documentElement.scrollHeight),width:document.documentElement.clientWidth}));
