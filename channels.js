@@ -91,6 +91,7 @@
       if (!current.length && !former.length) return;
       renderGroup(current,activeList,activeGroup,'ATUAL');
       renderGroup(former,pastList,pastGroup,'ANTERIOR');
+      if ((current.length===0)!==(former.length===0)) section.classList.add('channels-single');
       section.hidden = false;
     }).catch(() => {
       // No manufactured associations: don't expose an empty section.
