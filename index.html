@@ -698,6 +698,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
     const category = String(project.category || 'outros').toLowerCase();
     const card = make('article', 'project project-card');
     card.dataset.category = category;
+    card.dataset.source = String(project.src || '');
     if (position === 0) card.classList.add('featured');
     const media = make('div', 'project-media');
     const source = safeUrl(project.src);
