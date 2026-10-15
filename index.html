@@ -854,21 +854,9 @@ document.getElementById('year').textContent = new Date().getFullYear();
     if (!response.ok) throw new Error('Não foi possível ler projetos.json');
     const data = await response.json();
     const originals = Array.isArray(data) ? data.filter((p) => p && typeof p === 'object') : [];
-    // Trabalhos adicionados pelo painel seguro do site, sem alterar os 17 originais.
-    let automatic = [];
-    try {
-      const extraResponse = await fetch('/api/managed-projects', {cache:'no-store'});
-      if (extraResponse.ok) {
-        const managed = await extraResponse.json();
-        if (Array.isArray(managed.projects)) automatic = managed.projects;
-      }
-    } catch (_) { /* Sem Vercel Blob, os projetos do GitHub continuam visíveis. */ }
+    // Render the 17 static projects immediately. A cold admin API must not
+    // delay the entire client gallery or postpone the first poster image.
     projects = [...originals];
-    automatic.forEach((project) => {
-      if (!project || typeof project !== 'object' || !safeUrl(project.src)) return;
-      const place = Number.isInteger(project.position) ? Math.max(0,Math.min(projects.length,project.position)) : projects.length;
-      if (!projects.some(p => p.src === project.src)) projects.splice(place,0,project);
-    });
     const fragment = document.createDocumentFragment();
     cardEntries = projects.map((project, index) => {
       const entry = createProjectCard(project, index);
@@ -894,6 +882,48 @@ document.getElementById('year').textContent = new Date().getFullYear();
       if (document.hidden && stopActivePlayer) stopActivePlayer();
     });
     updateVisibleCards();
+
+    // Add optional admin-managed projects when they arrive, without replacing
+    // the initial cards or stopping a video the visitor is already playing.
+    void (async () => {
+      try {
+        const response = await fetch('/api/managed-projects', {cache:'no-store'});
+        if (!response.ok) return;
+        const managed = await response.json();
+        if (!Array.isArray(managed.projects) || !managed.projects.length) return;
+        const known = new Set(projects.map(p => p.src));
+        let added = false;
+        for (const project of managed.projects) {
+          if (!project || typeof project !== 'object' || !safeUrl(project.src) || known.has(project.src)) continue;
+          const place = Number.isInteger(project.position)
+            ? Math.max(0,Math.min(projects.length,project.position))
+            : projects.length;
+          const entry = createProjectCard(project,place);
+          grid.insertBefore(entry.card,grid.children[place] || null);
+          projects.splice(place,0,project);
+          cardEntries.splice(place,0,entry);
+          known.add(project.src);
+          added = true;
+        }
+        if (!added) return;
+        cardEntries.forEach(({card},i) => {
+          card.classList.toggle('featured',i===0);
+          const number=card.querySelector('.project-index');
+          if (number) number.textContent=String(i+1).padStart(2,'0');
+        });
+        const categories = new Set([...filters.querySelectorAll('[data-filter]')].map(el=>el.dataset.filter));
+        cardEntries.forEach(({category})=>{
+          if(categories.has(category))return;
+          const button = make('button','filter',categoryLabel(category));
+          button.type='button';
+          button.dataset.filter=category;
+          button.setAttribute('aria-pressed','false');
+          filters.append(button);
+          categories.add(category);
+        });
+        updateVisibleCards();
+      } catch (_) { /* The GitHub gallery never depends on optional Blob storage. */ }
+    })();
   } catch (_) {
     status.hidden = false;
     status.textContent = 'A biblioteca não carregou. Confira se projetos.json está publicado junto com o site.';
