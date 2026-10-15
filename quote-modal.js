@@ -35,13 +35,13 @@
     restoreFocus = (event && event.currentTarget) || document.activeElement;
     savedOverflow = document.body.style.overflow;
     slot.appendChild(form);
+    active = true;
     try {
       dialog.showModal();
     } catch (_) {
       restoreForm();
       return;
     }
-    active = true;
     document.body.style.overflow = 'hidden';
     try { window.va?.('event',{name:'quote_modal_open',data:{source:event?.currentTarget?.classList?.contains('quote-float')?'floating':'page'}}); } catch (_) {}
     requestAnimationFrame(() => firstField?.focus({preventScroll:true}));
