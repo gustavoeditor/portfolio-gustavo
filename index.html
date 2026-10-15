@@ -908,7 +908,8 @@ document.getElementById('year').textContent = new Date().getFullYear();
     grid.replaceChildren(fragment);
     // Deep links open the intended project even when cards are injected via fetch.
     function scrollToLinkedProject(){
-      const targetId=decodeURIComponent(window.location.hash.slice(1));
+      let targetId='';
+      try{targetId=decodeURIComponent(window.location.hash.slice(1));}catch(_){return;}
       if(!/^projeto-[a-z0-9-]+$/.test(targetId))return;
       const target=cardEntries.find(({card})=>card.id===targetId)?.card;
       if(!target)return;
