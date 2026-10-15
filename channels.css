@@ -24,3 +24,6 @@
 @media(max-width:820px){.channels-groups{grid-template-columns:minmax(0,1fr);gap:27px}.channels{padding:20px 0 60px}}
 @media(max-width:420px){.channel-card{padding:13px 12px;gap:10px}.channel-avatar{flex-basis:43px;width:43px;height:43px}.channel-name{font-size:14px}.channel-status{font-size:8px}.channels .section-head{gap:9px}}
 @media(hover:none),(prefers-reduced-motion:reduce){.channel-card{transition:none}.channel-card:hover{transform:none}}
+
+.channels-single .channels-groups{grid-template-columns:minmax(0,1fr)}
+@media(min-width:821px){.channels-single .channels-group{max-width:760px}}
