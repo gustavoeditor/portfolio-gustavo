@@ -298,7 +298,38 @@ async function run(){
       console.log('Static gallery loads immediately; late admin project preserves active player');
     }
 
-    // Contact flow: required inputs, service selection and final WhatsApp URL.
+    // Quality and volume persist across two different video cards without
+    // temporary 720p loading or unnecessary availability requests.
+    {
+      const context=await browser.newContext({viewport:{width:1280,height:850}});
+      await context.addInitScript(()=>{
+        localStorage.setItem('gustavo-video-quality-v1','full');
+        localStorage.setItem('gustavo-video-audio-v1',JSON.stringify({volume:.42,muted:false}));
+      });
+      const page=await context.newPage();
+      const altRequests=[];
+      page.on('request',request=>{
+        if(request.method()==='HEAD'&&/\/videos-(480|1080)\//.test(request.url()))altRequests.push(request.url());
+      });
+      await page.route('**/*.mp4',route=>route.fulfill({status:200,contentType:'video/mp4',body:''}));
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length>=17);
+      for(const index of [0,1]){
+        await page.locator('#project-grid .project-card').nth(index).locator('.project-play').click();
+        const state=await page.locator('#project-grid .project-card').nth(index).evaluate(card=>{
+          const v=card.querySelector('video');
+          return {src:v?.getAttribute('src'),volume:v?.volume,quality:card.querySelector('.vip-quality')?.textContent};
+        });
+        assert.ok(state.src?.includes('/videos-1080/'),index+' should start at Full HD: '+JSON.stringify(state));
+        assert.ok(Math.abs(state.volume-.42)<.011,'Remembered volume should not reset');
+        assert.ok(state.quality?.includes('1080p'),'Quality picker must show selected Full HD immediately');
+      }
+      assert.equal(altRequests.length,0,'Local variants should not trigger HEAD checks');
+      await context.close();
+      console.log('Persistent Full HD + volume, zero variant probes across two videos OK');
+    }
+
+        // Contact flow: required inputs, service selection and final WhatsApp URL.
     {
       const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
       const page=await context.newPage();
