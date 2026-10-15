@@ -103,7 +103,67 @@ async function run(){
       console.log('Viewport '+width+'px OK, scrollWidth='+layout.scrollWidth);
       await context.close();
     }
-    // Verify full-page parallax is present yet respects user motion preferences.
+    // Dynamically generated video cards must enter on scroll, but hover transforms must stay smooth.
+    {
+      const context=await browser.newContext({viewport:{width:1280,height:800}});
+      const page=await context.newPage();
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(() => document.querySelectorAll('#project-grid > .project-card.reveal-entry').length >= 17);
+      const before=await page.evaluate(()=>{
+        const cards=[...document.querySelectorAll('#project-grid > .project-card')];
+        const distant=cards[12];
+        return {
+          cards:cards.length,
+          animated:cards.every(el=>el.classList.contains('reveal-entry')),
+          initiallyHidden:!distant.classList.contains('is-visible'),
+          opacity:getComputedStyle(distant).opacity,
+          translates:getComputedStyle(distant).translate,
+          hero:document.querySelector('.hero h1')?.classList.contains('reveal-entry'),
+          caseStudy:document.querySelector('.case-card')?.classList.contains('reveal-entry'),
+          faq:document.querySelector('.faq-list details')?.classList.contains('reveal-entry'),
+          footer:document.querySelector('.site-footer nav')?.classList.contains('reveal-entry')
+        };
+      });
+      assert.ok(before.cards>=17 && before.animated,'All video cards should have reveal entrances');
+      assert.ok(before.initiallyHidden,'Off-screen videos should wait for their entrance');
+      assert.ok(before.hero&&before.caseStudy&&before.faq&&before.footer,'Entrance coverage missing in other sections');
+      const card=page.locator('#project-grid > .project-card').nth(12);
+      await card.scrollIntoViewIfNeeded();
+      await page.waitForFunction(()=>{
+        const el=document.querySelectorAll('#project-grid > .project-card')[12];
+        return el.classList.contains('is-visible') && Number(getComputedStyle(el).opacity)>.98;
+      },null,{timeout:4000});
+      await card.hover();
+      await page.waitForTimeout(600);
+      const after=await page.evaluate(()=>{
+        const el=document.querySelectorAll('#project-grid > .project-card')[12];
+        const css=getComputedStyle(el);
+        return {
+          opacity:Number(css.opacity),
+          translate:css.translate,
+          transform:css.transform,
+          transition:css.transitionProperty,
+          width:document.documentElement.scrollWidth
+        };
+      });
+      assert.ok(after.transform && after.transform !== 'none','Hover scale was overridden by reveal animation');
+      assert.ok(after.transition.includes('transform'),'Hover transition was removed');
+      assert.ok(after.width<=1282,'Entrance introduced horizontal scrolling');
+
+      await page.emulateMedia({reducedMotion:'reduce'});
+      await page.waitForTimeout(90);
+      const accessible=await page.evaluate(()=>{
+        const el=[...document.querySelectorAll('#project-grid > .project-card')].find(card=>!card.classList.contains('is-visible'));
+        if(!el)return null;
+        const css=getComputedStyle(el);
+        return {opacity:css.opacity,transition:css.transitionDuration};
+      });
+      if(accessible) assert.ok(accessible.opacity==='1'&&accessible.transition.split(',').every(v=>parseFloat(v)===0),
+        'Reduced motion must reveal off-screen video cards without animation: '+JSON.stringify(accessible));
+      await context.close();
+      console.log('All videos, section reveals, hover zoom and reduced motion OK');
+    }
+        // Verify full-page parallax is present yet respects user motion preferences.
     {
       const context=await browser.newContext({viewport:{width:1280,height:800}});
       const page=await context.newPage();
@@ -154,6 +214,9 @@ async function run(){
         };
       });
       assert.equal(result.cards,2,'Should only display real-valid tested links');
+      await page.waitForFunction(() => [...document.querySelectorAll('.channel-card')].every(el => el.classList.contains('reveal-entry')));
+      await page.locator('.channel-card').last().scrollIntoViewIfNeeded();
+      await page.waitForFunction(() => document.querySelectorAll('.channel-card')[1]?.classList.contains('is-visible'));
       assert.equal(result.current,1);
       assert.equal(result.past,1);
       assert.ok(result.links.every(link=>link.url.startsWith('https://')&&link.rel.includes('noopener')&&link.target==='_blank'));
