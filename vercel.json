@@ -1,0 +1,27 @@
+{
+  "rewrites": [
+    {
+      "source": "/gerenciar-projetos.html",
+      "destination": "/api/admin-panel"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin-login.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/admin-login.html",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ]
+}
