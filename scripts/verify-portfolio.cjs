@@ -47,4 +47,7 @@ assert.ok(html.includes('GustavoPlayer.mount(player'),'Custom player integration
 assert.ok(html.includes('playerUI.destroy()'),'Custom player cleanup missing');
 new Function(read('player.js'));
 assert.ok(read('player.css').includes('.vip-timeline-wrap'),'Branded seek bar missing');
+assert.ok(read('player.js').includes('qualitySelect'),'Quality selection missing');
+assert.ok(read('player.js').includes("method:'HEAD'"),'Missing alternate video availability validation');
+assert.ok(html.includes('videos-480/'),'Reduced video path not connected');
 console.log('Portfolio validation OK: '+projects.length+' projects; anchors, scripts and assets verified.');
