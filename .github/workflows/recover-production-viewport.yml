@@ -1,0 +1,59 @@
+name: Recover pending Vercel production update
+
+# Production deploys can be rejected temporarily by Vercel's Hobby build quota.
+# Recheck the public HTML before triggering any new deployment.
+on:
+  schedule:
+    - cron: '23 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: portfolio-production-recovery
+  cancel-in-progress: false
+
+jobs:
+  check-and-retry:
+    name: Check live viewport fix, retry only if still missing
+    if: github.repository == 'gustavoeditor/portfolio-gustavo'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 50
+          persist-credentials: true
+      - name: Verify public layout update is live
+        id: production
+        shell: bash
+        run: |
+          set -euo pipefail
+          if html="$(curl -fsSL -H 'Cache-Control: no-cache' --retry 2 --max-time 20 'https://portfolio-gustavo-chi.vercel.app/?check=viewport-20261015')"; then
+            if [[ "$html" == *"Mobile viewport alignment: eliminate horizontal"* ]]; then
+              echo "Current viewport update is live. No redeploy needed."
+              echo "live=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          echo "Viewport update not yet active on production."
+          echo "live=false" >> "$GITHUB_OUTPUT"
+      - name: Retry by triggering linked Git deployment
+        if: steps.production.outputs.live == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Bound retries to prevent endlessly consuming Vercel build quota.
+          attempts="$(git log --since='2026-10-15' --pretty=%s | grep -c '^chore: retry pending viewport deployment$' || true)"
+          if (( attempts >= 4 )); then
+            echo "::warning::Four redeploy attempts have already been made; stopping automatic retries."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit --allow-empty -m 'chore: retry pending viewport deployment'
+          git pull --rebase origin main
+          git push origin HEAD:main
