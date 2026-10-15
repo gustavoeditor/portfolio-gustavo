@@ -388,7 +388,7 @@ body{width:100%;min-width:0;max-width:100%;overflow-x:clip}
 </div>
 <header class="wrap site-header">
   <a class="brand" href="#inicio" aria-label="Gustavo, editor de vídeo, voltar ao início"><img src="/logo-mark.svg" alt="" width="34" height="29" decoding="async"><span class="brand-identity">GUSTAVO<span class="brand-divider"> / </span><small>EDITOR DE VÍDEO</small></span></a>
-  <nav aria-label="Navegação principal"><a href="#trabalhos">Trabalhos</a><a href="#servicos">Serviços</a><a href="#orcamento">Orçamento</a></nav>
+  <nav aria-label="Navegação principal"><a href="#trabalhos">Trabalhos</a><a href="#canais">Canais</a><a href="#servicos">Serviços</a><a href="#orcamento">Orçamento</a></nav>
   <a class="header-whatsapp" href="#orcamento" aria-label="Solicitar orçamento para edição de vídeo">Pedir orçamento <span aria-hidden="true">↗</span></a>
 </header>
 <main id="conteudo">
@@ -777,6 +777,9 @@ document.getElementById('year').textContent = new Date().getFullYear();
           video.volume = audioState.volume;
           video.muted = audioState.muted;
           video.addEventListener('volumechange', () => rememberAudio(video));
+          video.addEventListener('ended', () => {
+            try { window.va?.('event', {name:'video_completed',data:{source:category}}); } catch (_) {}
+          }, {once:true});
           if (poster) video.poster = poster;
           video.src = source;
           video.addEventListener('error', () => {
