@@ -69,4 +69,18 @@ const ambienceCSS=read('ambient.css');
 assert.ok(ambienceCSS.includes('prefers-reduced-motion:reduce'),'Reduced motion fallback required');
 assert.ok(ambienceCSS.includes('body.ambient-static'),'Save-data and low-power fallback required');
 assert.ok(ambienceCSS.includes('.channels::before')&&ambienceCSS.includes('.case-studies::before')&&ambienceCSS.includes('.portfolio::before'),'Parallax layers missing across site');
+// All page sections, including asynchronously rendered project/channel cards, reveal safely.
+assert.ok(html.includes('/reveal.js?v=1')&&html.includes('/reveal.css?v=1'),'Missing universal reveal assets');
+assert.ok(!html.includes('/* Scroll reveal: entrada gradual'),'Legacy limited reveal script still present');
+const revealJS=read('reveal.js');
+const revealCSS=read('reveal.css');
+new Function(revealJS);
+assert.ok(revealJS.includes("'.project-card'") || revealJS.includes('#project-grid > .project-card'),'Video card reveals are missing');
+assert.ok(revealJS.includes('.channel-card'),'Creator channel reveal missing');
+assert.ok(revealJS.includes('MutationObserver'),'Asynchronous card reveals need observation');
+assert.ok(revealCSS.includes('translate:0 22px'),'Entrance needs upward motion');
+assert.ok(revealCSS.includes('opacity:0'),'Entrance must fade in');
+assert.ok(revealCSS.includes('transform 440ms'),'Hover zoom transition must remain smooth');
+assert.ok(revealCSS.includes('prefers-reduced-motion:reduce'),'Accessibility motion fallback missing');
+assert.ok(revealCSS.includes('.quick-quote-dialog .reveal-entry'),'Modal must never hide the active quote form');
 console.log('Portfolio validation OK: '+projects.length+' projects; anchors, scripts and assets verified.');
