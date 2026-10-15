@@ -787,6 +787,9 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
               source,
               lowSource: /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(source)
                 ? '/videos-480/' + source.replace(/^\/?videos\//,'')
+                : '',
+              fullSource: /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(source)
+                ? '/videos-1080/' + source.replace(/^\/?videos\//,'')
                 : ''
             });
             mounted = playerUI.element;

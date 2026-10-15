@@ -20,8 +20,16 @@ function mount(video,options={}){
  const title=String(options.title||'Vídeo');
  const primarySource=String(options.source||video.currentSrc||video.src||'');
  const lowSource=typeof options.lowSource==='string'&&options.lowSource.startsWith('/videos-480/')?options.lowSource:'';
+ const fullSource=typeof options.fullSource==='string'&&options.fullSource.startsWith('/videos-1080/')?options.fullSource:'';
+ const qualityPreferenceKey='gustavo-video-quality-v1';
+ const validQualities=['auto','low','high','full'];
  let qualityChoice='auto';
+ try{
+   const saved=localStorage.getItem(qualityPreferenceKey);
+   if(validQualities.includes(saved))qualityChoice=saved;
+ }catch(_){}
  let lowReady=false;
+ let fullReady=false;
  let currentQuality='high';
  let switching=false;
  const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
@@ -59,59 +67,98 @@ function mount(video,options={}){
  const subscriptions=[];
  const on=(el,event,handler,opts)=>{el.addEventListener(event,handler,opts);subscriptions.push(()=>el.removeEventListener(event,handler,opts));};
  function effectiveQuality(){
-   return qualityChoice==='auto'?(slowNetwork()&&lowReady?'low':'high'):qualityChoice;
+   if(qualityChoice==='auto')return slowNetwork()&&lowReady?'low':'high';
+   if(qualityChoice==='full')return fullReady?'full':'high';
+   if(qualityChoice==='low')return lowReady?'low':'high';
+   return 'high';
  }
  function renderQualityOptions(){
    qualitySelect.replaceChildren();
-   for(const [value,label] of [['auto','Auto'],['high','720p'],['low','480p']]){
+   for(const [value,label] of [['auto','Auto'],['full','1080p'],['high','720p'],['low','480p']]){
      if(value==='low'&&!lowReady)continue;
-     const option=document.createElement('option');option.value=value;option.textContent=label;qualitySelect.append(option);
+     if(value==='full'&&!fullReady)continue;
+     const option=document.createElement('option');
+     option.value=value;option.textContent=label;qualitySelect.append(option);
    }
-   qualitySelect.value=qualityChoice;
-   qualityBox.hidden=!lowReady;
+   const shown=(qualityChoice==='full'&&!fullReady)||(qualityChoice==='low'&&!lowReady)?'high':qualityChoice;
+   qualitySelect.value=shown;
+   qualityBox.hidden=!lowReady&&!fullReady;
+ }
+ function selectedSource(key){
+   return key==='low'&&lowReady?lowSource:key==='full'&&fullReady?fullSource:primarySource;
  }
  function changeSource(key){
-   const selected=key==='low'&&lowReady?'low':'high';
+   const selected=key==='low'&&lowReady?'low':key==='full'&&fullReady?'full':'high';
    if(selected===currentQuality||!primarySource||switching||disposed)return;
    const previousTime=Number.isFinite(video.currentTime)?video.currentTime:0;
    const shouldResume=!video.paused&&!video.ended;
    const previousVolume=video.volume;
    const previousMute=video.muted;
+   const oldSource=selectedSource(currentQuality);
    switching=true;
    video.pause();
-   const restore=()=>{
-     if(disposed)return;
-     switching=false;
-     video.currentTime=Math.min(previousTime,Number.isFinite(video.duration)&&video.duration>0?Math.max(0,video.duration-.05):previousTime);
+   let settled=false;
+   let restore,failed;
+   const cleanup=()=>{
+     video.removeEventListener('loadedmetadata',restore);
+     video.removeEventListener('error',failed);
+   };
+   restore=()=>{
+     if(settled||disposed)return;
+     settled=true;cleanup();switching=false;
+     try{video.currentTime=Math.min(previousTime,Number.isFinite(video.duration)&&video.duration>0?Math.max(0,video.duration-.05):previousTime);}catch(_){}
      video.volume=previousVolume;video.muted=previousMute;
      currentQuality=selected;
      if(shouldResume){const result=video.play();if(result?.catch)result.catch(()=>{});}
      draw();
+     if(effectiveQuality()!==currentQuality)applyQuality();
    };
-   const failed=()=>{
-     switching=false;
-     if(selected==='low'){
-       lowReady=false;qualityChoice='high';renderQualityOptions();
-       video.src=primarySource;video.load();
-     }
+   failed=()=>{
+     if(settled||disposed)return;
+     settled=true;cleanup();switching=false;
+     if(selected==='low')lowReady=false;
+     if(selected==='full')fullReady=false;
+     renderQualityOptions();
+     video.src=oldSource||primarySource;
+     video.load();
+     video.addEventListener('loadedmetadata',()=>{
+       if(disposed)return;
+       try{video.currentTime=previousTime;}catch(_){}
+       video.volume=previousVolume;video.muted=previousMute;
+       if(shouldResume){const result=video.play();if(result?.catch)result.catch(()=>{});}
+     },{once:true});
    };
-   video.addEventListener('loadedmetadata',restore,{once:true});
-   video.addEventListener('error',failed,{once:true});
-   video.src=selected==='low'?lowSource:primarySource;
+   video.addEventListener('loadedmetadata',restore);
+   video.addEventListener('error',failed);
+   video.src=selectedSource(selected);
    video.load();
  }
  function applyQuality(){changeSource(effectiveQuality());}
- function loadQualityAvailability(){
-   if(!lowSource||typeof fetch!=='function')return;
-   fetch(lowSource,{method:'HEAD',cache:'force-cache'}).then(response=>{
-     if(disposed||!response.ok||!String(response.headers.get('content-type')||'').includes('video/'))return;
-     lowReady=true;renderQualityOptions();applyQuality();
+ function probeVariant(src,key){
+   if(!src||typeof fetch!=='function')return;
+   // Metadata only; no additional media is downloaded until selected.
+   fetch(src,{method:'HEAD',cache:'force-cache'}).then(response=>{
+     if(disposed||!response.ok||!String(response.headers.get('content-type')||'').toLowerCase().includes('video/'))return;
+     if(key==='low')lowReady=true;
+     if(key==='full')fullReady=true;
+     renderQualityOptions();
+     applyQuality();
    }).catch(()=>{});
  }
  renderQualityOptions();
- on(qualitySelect,'change',()=>{qualityChoice=qualitySelect.value;applyQuality();});
+ on(qualitySelect,'change',()=>{
+   qualityChoice=qualitySelect.value;
+   try{localStorage.setItem(qualityPreferenceKey,qualityChoice);}catch(_){}
+   applyQuality();
+ });
+ on(window,'storage',(event)=>{
+   if(event.key!==qualityPreferenceKey)return;
+   if(!validQualities.includes(event.newValue))return;
+   qualityChoice=event.newValue;renderQualityOptions();applyQuality();
+ });
  if(connection&&typeof connection.addEventListener==='function')on(connection,'change',()=>{if(qualityChoice==='auto')applyQuality();});
- loadQualityAvailability();
+ probeVariant(lowSource,'low');
+ probeVariant(fullSource,'full');
  const raf=()=>{
    if(frame||disposed)return;
    frame=requestAnimationFrame(()=>{frame=0;draw();});

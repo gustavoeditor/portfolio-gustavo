@@ -50,4 +50,8 @@ assert.ok(read('player.css').includes('.vip-timeline-wrap'),'Branded seek bar mi
 assert.ok(read('player.js').includes('qualitySelect'),'Quality selection missing');
 assert.ok(read('player.js').includes("method:'HEAD'"),'Missing alternate video availability validation');
 assert.ok(html.includes('videos-480/'),'Reduced video path not connected');
+assert.ok(html.includes('videos-1080/'),'Full HD video paths not connected');
+assert.ok(read('player.js').includes('gustavo-video-quality-v1'),'Quality preference must persist across videos');
+assert.ok(read('player.js').includes('localStorage.setItem(qualityPreferenceKey'),'Quality setting is not saved');
+assert.ok(read('player.js').includes("probeVariant(fullSource,'full')"),'1080p variants are not checked');
 console.log('Portfolio validation OK: '+projects.length+' projects; anchors, scripts and assets verified.');
