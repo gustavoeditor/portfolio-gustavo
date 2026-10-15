@@ -355,6 +355,31 @@ body{background:radial-gradient(ellipse at 50% -10%,rgba(91,55,147,.19),transpar
     transform:translate3d(0,var(--vip-depth-y,0px),0);
   }
 }
+
+/* Mobile viewport alignment: eliminate horizontal layout/paint overflow without
+   disabling browser pinch zoom or clipping the video player's controls. */
+html{max-width:100%;overflow-x:clip;background-color:var(--bg)}
+body{width:100%;min-width:0;max-width:100%;overflow-x:clip}
+#conteudo{display:block;width:100%;min-width:0;max-width:100%}
+@supports not (overflow:clip){
+  html{overflow-x:hidden}
+  body{overflow-x:hidden}
+}
+@media(max-width:820px){
+  .wrap{box-sizing:border-box;width:calc(100% - 32px);max-width:var(--max);margin-inline:auto}
+  .site-header,.hero,.portfolio,.why,.services,.contact,
+  .case-studies,.workflow,.faq,.comparison,.reviews,.quote,.site-footer{
+    min-width:0;
+  }
+  .project-grid,.case-grid,.service-grid,.why-grid{min-width:0;max-width:100%}
+  .project-card,.project-media,.project-info{min-width:0;max-width:100%}
+  .capability-strip,.portfolio,.why,.services,.about,.site-footer{
+    overflow-x:clip;
+  }
+  .hero-copy,.section-head,.project-info{overflow-wrap:anywhere}
+  .site-header .brand{min-width:0;max-width:calc(100% - 64px)}
+  .site-header .brand-identity{min-width:0}
+}
 </style>
   <script type="application/ld+json">
   {
