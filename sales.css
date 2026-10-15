@@ -4,3 +4,15 @@
 @media(max-width:760px){.case-grid{grid-template-columns:1fr;gap:17px}.case-art{aspect-ratio:16/8.8}.case-studies{padding:25px 0 60px}.workflow,.faq{padding:63px 0}.reviews-grid,.compare-list{grid-template-columns:1fr}.quote{margin:25px auto 75px}.sales-head{flex-direction:column;align-items:flex-start;gap:10px}.sales-head h2{font-size:clamp(32px,7vw,46px)}}
 @media(max-width:520px){.workflow-grid{grid-template-columns:1fr;gap:10px}.workflow-grid li{padding:19px}.workflow-grid h3{margin-top:11px}.quote{border-radius:12px;padding:23px 16px}.quote-form{padding:17px;gap:16px}.quote-row{grid-template-columns:1fr}.case-art{aspect-ratio:16/9}.offer-card{min-height:0}.faq-list summary{font-size:15px;padding:20px 0}}
 @media(hover:none),(prefers-reduced-motion:reduce){.case-art img{transition:none!important;transform:none!important}}
+
+
+/* Official social destinations near the main contact CTA. */
+.contact-actions{display:flex;flex-direction:column;align-items:flex-start;gap:17px}
+.contact-socials{display:flex;flex-wrap:wrap;gap:10px}
+.contact-socials a{display:inline-flex;align-items:center;gap:9px;padding:11px 14px;background:#ffffff08;border:1px solid #665178;border-radius:9px;color:#e9dcf8;font-size:12px;font-weight:720;text-decoration:none;transition:border-color .2s,background .2s,transform .2s}
+.contact-socials a:hover{border-color:#c0a4f5;background:#bfa9ff1b;transform:translateY(-2px)}
+.contact-socials a:focus-visible{outline:2px solid #cdb3ff;outline-offset:3px}
+.contact-socials .social-icon{display:grid;place-items:center;width:23px;height:23px;border-radius:7px;background:#bfa9ff20;color:#d5bfff;font-size:18px}
+.site-footer .social{flex-wrap:wrap}
+@media(max-width:600px){.contact-socials a{padding:11px 12px}.contact-actions{width:100%}.contact-actions>.btn{width:100%;justify-content:center}}
+@media(prefers-reduced-motion:reduce){.contact-socials a{transition:none!important;transform:none!important}}
