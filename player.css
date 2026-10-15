@@ -68,3 +68,14 @@
 .vip-quality:focus-visible{outline:2px solid #d6c0ff}
 .vip-quality option{background:#21172f;color:#fff}
 @media(max-width:600px){.vip-quality-label{font-size:0}.vip-quality{min-width:61px;max-width:72px;font-size:10px;padding:7px 8px}.vip-player-brand{display:none}}
+
+/* Mobile quality popover, no Android system selector. */
+.vip-quality-box{position:relative}
+.vip-quality{min-width:64px;white-space:nowrap;touch-action:manipulation}
+.vip-quality-menu{position:absolute;right:-28px;bottom:calc(100% + 17px);width:132px;display:grid;gap:3px;padding:7px;background:#21172ff5;border:1px solid #9679c2;border-radius:12px;box-shadow:0 16px 45px #000c;z-index:20;backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px)}
+.vip-quality-menu[hidden]{display:none!important}
+.vip-quality-option{display:flex;justify-content:space-between;align-items:center;min-height:40px;text-align:left;border:0;border-radius:7px;padding:9px 12px;background:transparent;color:#f4eaff;font:inherit;font-size:12px;font-weight:690;cursor:pointer}
+.vip-quality-option[aria-pressed="true"]{background:#9d78dc36;color:#fff}
+.vip-quality-option[aria-pressed="true"]::after{content:"✓";color:#d8bbff}
+.vip-quality-option:hover,.vip-quality-option:focus-visible{background:#a080dc40;outline:none}
+@media(max-width:600px){.vip-quality-menu{right:-30px;bottom:calc(100% + 12px);width:120px}.vip-quality-option{min-height:42px;font-size:13px}}
