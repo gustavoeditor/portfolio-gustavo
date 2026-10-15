@@ -33,7 +33,7 @@ async function run(){
   const base='http://127.0.0.1:'+server.address().port;
   const browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox']});
   try{
-    for(const width of [320,360,390,430,600,768]){
+    for(const width of [320,360,390,430,600,768,821,900,1024]){
       const context=await browser.newContext({
         viewport:{width,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true
       });
