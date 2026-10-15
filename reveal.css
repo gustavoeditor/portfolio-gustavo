@@ -1,0 +1,33 @@
+/* Unified opacity + upward entrance animation.
+   translate is independent of transform: video hover tilt/zoom remains intact. */
+body.reveal-enabled .reveal-entry{
+  opacity:0;
+  translate:0 22px;
+  transition-property:opacity,translate;
+  transition-duration:760ms,780ms;
+  transition-timing-function:cubic-bezier(.2,.74,.25,1);
+  transition-delay:var(--reveal-delay,0ms);
+}
+body.reveal-enabled .reveal-entry.is-visible{
+  opacity:1;
+  translate:0 0;
+}
+/* Focused content must never disappear as it is moved into the quote dialog. */
+body.reveal-enabled .quick-quote-dialog .reveal-entry{
+  opacity:1!important;
+  translate:0 0!important;
+  transition:none!important;
+}
+/* Hidden conditional sections and filters stay hidden; reveal only on display. */
+body.reveal-enabled .reveal-entry[hidden]{display:none!important}
+@media(max-width:600px){
+  body.reveal-enabled .reveal-entry{translate:0 15px;transition-duration:620ms,640ms}
+}
+@media(prefers-reduced-motion:reduce){
+  body.reveal-enabled .reveal-entry,
+  body.reveal-enabled .reveal-entry.is-visible{
+    opacity:1!important;
+    translate:0 0!important;
+    transition:none!important;
+  }
+}
