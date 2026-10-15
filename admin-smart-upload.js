@@ -50,6 +50,7 @@
   function clearSelection() {
     if (uploading) return;
     releasePreview();
+    if (poster.src.startsWith('blob:')) URL.revokeObjectURL(poster.src);
     file = null;
     posterFile = null;
     frames = [];
@@ -212,6 +213,7 @@
       }));
       progress.value = 100;
       totalProjects++;
+      uploading = false;
       clearSelection();
       await reloadManaged();
       tell('Publicado! O vídeo foi adicionado à galeria. Atualize o portfólio para conferir.');
