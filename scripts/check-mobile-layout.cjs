@@ -329,6 +329,35 @@ async function run(){
       console.log('Persistent Full HD + volume, zero variant probes across two videos OK');
     }
 
+        // A project can be shared individually without losing the branded page.
+    {
+      const context=await browser.newContext({viewport:{width:1280,height:850}});
+      await context.addInitScript(()=>{
+        Object.defineProperty(navigator,'clipboard',{configurable:true,
+          value:{writeText:async url=>{window.__copiedProjectUrl=url;}}});
+      });
+      const page=await context.newPage();
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length>=17);
+      const first=page.locator('#project-grid .project-card').first();
+      assert.equal(await first.getAttribute('id'),'projeto-awp-the-prince');
+      await first.locator('.project-share').click();
+      await page.waitForFunction(()=>Boolean(window.__copiedProjectUrl));
+      const shared=await page.evaluate(()=>({
+        copied:window.__copiedProjectUrl,
+        label:document.querySelector('#project-grid .project-card .project-share')?.textContent
+      }));
+      assert.ok(shared.copied.endsWith('/#projeto-awp-the-prince'),'Copied link should target specific video');
+      assert.ok(shared.label.includes('Link copiado'),'Share action should have success feedback');
+      await page.goto(base+'/#projeto-awp-the-prince',{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>{
+        const card=document.getElementById('projeto-awp-the-prince');
+        return Boolean(card && card.getBoundingClientRect().top<window.innerHeight);
+      });
+      await context.close();
+      console.log('Deep-linked, shareable videos and accessible copy feedback OK');
+    }
+
         // Contact flow: required inputs, service selection and final WhatsApp URL.
     {
       const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
