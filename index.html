@@ -321,20 +321,12 @@ body{background:radial-gradient(ellipse at 50% -10%,rgba(91,55,147,.19),transpar
 .project-card.featured .project-media{aspect-ratio:16/7.6}
 .project-card .project-play-icon{width:64px;height:64px;box-shadow:0 12px 35px #0009}
 @media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
- .project-card{transition:opacity .35s ease,transform .5s cubic-bezier(.15,.85,.16,1),filter .35s ease}
- .project-grid:has(.project-card:hover) .project-card:not(:hover){opacity:.46;filter:brightness(.73)}
- .project-grid .project-card:hover{opacity:1;z-index:12;transform:translateY(-10px) scale(1.047)}
- .project-card:hover .project-media{border-color:#c5b2ff;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 38px rgba(163,111,255,.24);
+ .project-card{transition:opacity .28s ease,transform .45s cubic-bezier(.15,.85,.16,1),filter .3s ease}
+ .project-grid:has(.project-card:hover) .project-card:not(:hover){opacity:.84;filter:brightness(.94)}
+ .project-grid .project-card:hover{opacity:1;z-index:12;transform:translateY(-6px) scale(1.025)}
+ .project-card:hover .project-media{border-color:#c5b2ff;box-shadow:0 22px 64px rgba(0,0,0,.45),0 0 32px rgba(163,111,255,.17);
  transform:perspective(1200px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)) translateZ(0);transition:transform .2s ease-out,border-color .3s,box-shadow .3s}
- .project-card:hover .project-poster{transform:scale(1.10) translate(var(--shift-x,0px),var(--shift-y,0px))}
- body:has(.project-card:hover) .hero,
- body:has(.project-card:hover) .capability-strip,
- body:has(.project-card:hover) .why,
- body:has(.project-card:hover) .services,
- body:has(.project-card:hover) .contact,
- body:has(.project-card:hover) .site-footer,
- body:has(.project-card:hover) .portfolio .section-head,
- body:has(.project-card:hover) .project-toolbar{opacity:.65;transition:opacity .35s ease}
+ .project-card:hover .project-poster{transform:scale(1.065) translate(var(--shift-x,0px),var(--shift-y,0px))}
 }
 @media(max-width:600px){
  .project-grid{gap:34px}
