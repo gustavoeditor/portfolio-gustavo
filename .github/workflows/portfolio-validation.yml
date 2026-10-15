@@ -34,6 +34,6 @@ jobs:
         with:
           node-version: '22'
       - name: Install lightweight browser test harness
-        run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1 axe-core@4.10.3
       - name: Validate widths, centered sections and quote layout
         run: node scripts/check-mobile-layout.cjs
