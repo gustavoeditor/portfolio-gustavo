@@ -1,4 +1,16 @@
 {
-  "atuais": [],
-  "anteriores": []
+  "atuais": [
+    {
+      "nome": "SkinsMonkey",
+      "url": "https://www.youtube.com/@skinsmonkey_com",
+      "descricao": "Colaboração atual em edição de vídeo."
+    }
+  ],
+  "anteriores": [
+    {
+      "nome": "O Alex CS",
+      "url": "https://www.youtube.com/@oalexcs",
+      "descricao": "Colaboração anterior em edição de vídeo."
+    }
+  ]
 }
