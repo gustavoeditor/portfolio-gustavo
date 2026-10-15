@@ -88,6 +88,7 @@ function mount(video,options={}){
  on(center,'click',toggle);
  on(video,'click',toggle);
  on(video,'dblclick',(event)=>{event.preventDefault();event.stopPropagation();toggleFullscreen();});
+ on(video,'contextmenu',(event)=>event.stopPropagation());
  on(seek,'pointerdown',()=>{dragging=true;});
  on(seek,'input',()=>{
    const duration=video.duration;
@@ -116,9 +117,10 @@ function mount(video,options={}){
  });
  function toggleFullscreen(){
    if(document.fullscreenElement===root){
-     if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+     if(document.exitFullscreen){const exit=document.exitFullscreen();if(exit?.catch)exit.catch(()=>{});}
    }else if(root.requestFullscreen){
-     root.requestFullscreen().catch(()=>{if(video.webkitEnterFullscreen)video.webkitEnterFullscreen();});
+     const open=root.requestFullscreen();
+     if(open?.catch)open.catch(()=>{if(video.webkitEnterFullscreen)video.webkitEnterFullscreen();});
    }else if(video.webkitEnterFullscreen)video.webkitEnterFullscreen();
  }
  on(fullscreen,'click',toggleFullscreen);
