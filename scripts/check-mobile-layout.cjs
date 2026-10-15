@@ -245,7 +245,83 @@ async function run(){
       console.log('Channels layout '+width+'px OK');
       await context.close();
     }
-    // Accessibility smoke audit using axe-core on mobile and desktop, including modal.
+    // Works without JavaScript, with honest static links to all video files.
+    {
+      const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,javaScriptEnabled:false});
+      const page=await context.newPage();
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      const noJs=await page.evaluate(()=>{
+        const links=[...document.querySelectorAll('.projects-nojs li a')];
+        return {count:links.length,allLocal:links.every(a=>a.pathname.startsWith('/videos/')&&a.pathname.endsWith('.mp4')),
+          horizontal:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth};
+      });
+      assert.equal(noJs.count,17,'Video catalog should still work with JS disabled');
+      assert.ok(noJs.allLocal && noJs.horizontal<=noJs.viewport+2,'Non-script portfolio must remain usable and centered');
+      await context.close();
+      console.log('No-JavaScript gallery: 17 direct video links OK');
+    }
+
+    // The 17 originals must show before a slow optional admin API resolves;
+    // adding admin projects may NOT tear down an already-open player.
+    {
+      const context=await browser.newContext({viewport:{width:1280,height:850}});
+      const page=await context.newPage();
+      let resumeManaged;
+      const pending=new Promise(resolve=>{resumeManaged=resolve;});
+      await page.route('**/api/managed-projects',async route=>{
+        await pending;
+        await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+          projects:[{title:'Projeto gerenciado de teste',category:'outros',position:0,
+            src:'https://example.com/video-test.mp4',poster:'/capas/awp-the-prince.webp',
+            description:'Projeto adicional carregado depois da biblioteca.'}]
+        })});
+      });
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length===17);
+      assert.equal(await page.locator('#project-grid .project-card').count(),17);
+      await page.locator('#project-grid .project-play').first().click();
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid video').length===1);
+      await page.evaluate(()=>{document.querySelector('#project-grid video').dataset.testKeep='yes';});
+      resumeManaged();
+      await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length===18);
+      const managedResult=await page.evaluate(()=>({
+        first:document.querySelector('#project-grid .project-card h3')?.textContent,
+        featured:document.querySelectorAll('#project-grid .project-card.featured').length,
+        playerKept:document.querySelectorAll('#project-grid video[data-test-keep="yes"]').length,
+        extraFilter:!!document.querySelector('#project-filters [data-filter="outros"]')
+      }));
+      assert.equal(managedResult.first,'Projeto gerenciado de teste');
+      assert.equal(managedResult.featured,1);
+      assert.equal(managedResult.playerKept,1,'Admin additions must not interrupt a playing video');
+      assert.ok(managedResult.extraFilter,'New managed categories should be filterable');
+      await context.close();
+      console.log('Static gallery loads immediately; late admin project preserves active player');
+    }
+
+    // Contact flow: required inputs, service selection and final WhatsApp URL.
+    {
+      const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+      const page=await context.newPage();
+      await page.addInitScript(()=>{
+        window.open=(url)=>{window.__testOutboundUrl=url;return {opener:null};};
+      });
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.locator('.quote-float').click();
+      await page.locator('#quote-name').fill('Cliente Teste');
+      await page.locator('#quote-service').selectOption('cinematics');
+      await page.locator('#quote-details').fill('Quero um cinematic de Counter-Strike com iluminação cinematográfica.');
+      await page.locator('#quote-form button[type="submit"]').click();
+      await page.waitForFunction(()=>Boolean(window.__testOutboundUrl));
+      const lead=await page.evaluate(()=>window.__testOutboundUrl);
+      const text=new URL(lead).searchParams.get('text');
+      assert.ok(lead.startsWith('https://wa.me/5537988445372?text='),'WhatsApp lead URL missing');
+      assert.ok(text.includes('Cliente Teste')&&text.includes('Cinematics / Gaming')&&text.includes('iluminação cinematográfica'),
+        'User briefing lost fields: '+text);
+      await context.close();
+      console.log('Real quote-to-WhatsApp funnel OK on mobile');
+    }
+
+        // Accessibility smoke audit using axe-core on mobile and desktop, including modal.
     const axePath=require.resolve('axe-core/axe.min.js');
     for(const width of [390,1280]){
       const context=await browser.newContext({viewport:{width,height:850},deviceScaleFactor:2,isMobile:width<700,hasTouch:width<700});
