@@ -829,13 +829,20 @@ document.getElementById('year').textContent = new Date().getFullYear();
     const share = make('button','project-share','Compartilhar projeto ↗');
     share.type = 'button';
     share.setAttribute('aria-label','Compartilhar o projeto: '+title);
+    const shareStatus=make('span','project-share-status','');
+    shareStatus.setAttribute('role','status');
+    shareStatus.setAttribute('aria-live','polite');
     let feedbackTimer = 0;
     share.addEventListener('click',async () => {
       const url = new URL('/#'+card.id,window.location.origin).href;
       const feedback = (message) => {
         share.textContent = message;
+        shareStatus.textContent = message;
         if(feedbackTimer) clearTimeout(feedbackTimer);
-        feedbackTimer = setTimeout(()=>{share.textContent='Compartilhar projeto ↗';},2400);
+        feedbackTimer = setTimeout(()=>{
+          share.textContent='Compartilhar projeto ↗';
+          shareStatus.textContent='';
+        },2400);
       };
       try{
         if(typeof navigator.share==='function' && window.matchMedia('(pointer: coarse)').matches){
@@ -854,7 +861,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
         feedback('Link no endereço ✓');
       }
     });
-    info.append(share);
+    info.append(share,shareStatus);
     card.append(media, info);
     // A posição do cursor move levemente a perspectiva e a capa, sem carregar scripts externos.
     if (window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
