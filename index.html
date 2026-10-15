@@ -29,6 +29,22 @@ footer{border-top:1px solid var(--line);padding:22px 0 28px;display:flex;justify
 @media(max-width:980px){.projects{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.wrap{width:min(var(--max),calc(100% - 32px))}header{height:68px}nav{gap:14px;font-size:12px}.hero{padding:76px 0 60px;grid-template-columns:1fr;gap:32px}.hero-side{border-left:0;border-top:1px solid var(--line);padding:22px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:8px 22px}.hero-side p{margin-bottom:12px}.projects{grid-template-columns:1fr;gap:26px}.section-head{align-items:start;flex-direction:column}.service-grid{grid-template-columns:1fr;gap:24px}.about{grid-template-columns:1fr;gap:24px;padding:62px 0}.contact{align-items:flex-start;flex-direction:column;margin-bottom:54px}.contact .btn{width:100%}footer{gap:15px;flex-direction:column}.tag{font-size:9px}}
 
+/* Reveal dedicado aos elementos visuais: entrada ascendente, fade e escala discreta. */
+.visual-reveal{opacity:0;transform:translate3d(0,22px,0) scale(.985);transition:opacity .85s var(--ease),transform .85s var(--ease);transition-delay:var(--visual-delay,0ms);will-change:opacity,transform}
+.visual-reveal.visual-visible{opacity:1;transform:translate3d(0,0,0) scale(1)}
+.hero h1.visual-reveal{transform:translate3d(0,24px,0);transition-duration:1s}
+.actions .btn.visual-reveal{transform:translate3d(0,16px,0) scale(.98)}
+.actions .btn.visual-reveal.visual-visible{transform:translate3d(0,0,0) scale(1)}
+@media(prefers-reduced-motion:reduce){.visual-reveal,.hero h1.visual-reveal,.actions .btn.visual-reveal{opacity:1!important;transform:none!important;transition:none!important;will-change:auto}}
+
+/* Reveal dedicado aos elementos visuais: entrada ascendente, fade e escala discreta. */
+.visual-reveal{opacity:0;transform:translate3d(0,22px,0) scale(.985);transition:opacity .85s var(--ease),transform .85s var(--ease);transition-delay:var(--visual-delay,0ms);will-change:opacity,transform}
+.visual-reveal.visual-visible{opacity:1;transform:translate3d(0,0,0) scale(1)}
+.hero h1.visual-reveal{transform:translate3d(0,24px,0);transition-duration:1s}
+.actions .btn.visual-reveal{transform:translate3d(0,16px,0) scale(.98)}
+.actions .btn.visual-reveal.visual-visible{transform:translate3d(0,0,0) scale(1)}
+@media(prefers-reduced-motion:reduce){.visual-reveal,.hero h1.visual-reveal,.actions .btn.visual-reveal{opacity:1!important;transform:none!important;transition:none!important;will-change:auto}}
+
 /* UI polish: ambient light, glass surfaces and restrained violet bloom */
 :root{--accent:#b69aff;--accent-strong:#8c5bff;--ease:cubic-bezier(.2,.75,.25,1)}
 body{background:radial-gradient(ellipse at 50% -18%,rgba(111,63,185,.2),transparent 48%),radial-gradient(ellipse at 100% 42%,rgba(85,54,145,.08),transparent 34%),var(--bg);overflow-x:hidden}
@@ -162,6 +178,25 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -35px 0px' });
   revealTargets.forEach((element) => revealObserver.observe(element));
+}
+
+/* Elementos visuais recebem o mesmo movimento, com um fade mais cinematográfico. */
+const visualTargets = document.querySelectorAll('.hero h1, .actions .btn, .media-shell, .project h3, .service .num');
+visualTargets.forEach((element, index) => {
+  element.classList.add('visual-reveal');
+  element.style.setProperty('--visual-delay', (index % 4) * 100 + 'ms');
+});
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+  visualTargets.forEach((element) => element.classList.add('visual-visible'));
+} else {
+  const visualObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('visual-visible');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.14, rootMargin: '0px 0px -30px 0px' });
+  visualTargets.forEach((element) => visualObserver.observe(element));
 }
 
 // Só exibe o player quando o arquivo existe; evita controles quebrados para caminhos ausentes.
