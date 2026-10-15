@@ -83,4 +83,11 @@ assert.ok(revealCSS.includes('opacity:0'),'Entrance must fade in');
 assert.ok(revealCSS.includes('transform 440ms'),'Hover zoom transition must remain smooth');
 assert.ok(revealCSS.includes('prefers-reduced-motion:reduce'),'Accessibility motion fallback missing');
 assert.ok(revealCSS.includes('.quick-quote-dialog .reveal-entry'),'Modal must never hide the active quote form');
+// Hero should identify the professional and explain the result for prospective clients.
+const hero=html.match(/<div class="hero-copy">([\s\S]*?)<div class="actions hero-actions">/);
+assert.ok(hero,'Hero value proposition not found');
+assert.ok(hero[1].includes('GUSTAVO') && hero[1].includes('EDITOR DE VÍDEO'),'Hero must identify Gustavo clearly');
+assert.ok(hero[1].includes('Edição que <em>prende.</em>') && hero[1].includes('Visual que <em>marca.</em>'),'Hero value headline was lost');
+assert.ok(hero[1].includes('Cinematics de CS2') && hero[1].includes('edição para YouTube'),'Hero must specify editing specialties');
+assert.ok(html.includes('<title>GUSTAVO | EDITOR DE VÍDEO</title>'),'Preserve page SEO title');
 console.log('Portfolio validation OK: '+projects.length+' projects; anchors, scripts and assets verified.');
