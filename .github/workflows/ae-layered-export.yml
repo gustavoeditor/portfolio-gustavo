@@ -1,0 +1,40 @@
+name: Export portfolio layers for After Effects
+
+on:
+  push:
+    branches: [tools/after-effects-layered-export]
+    paths:
+      - 'scripts/export-after-effects-layers.cjs'
+      - '.github/workflows/ae-layered-export.yml'
+      - 'index.html'
+      - 'projetos.json'
+      - 'canais.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    name: Capture complete editable AE composition
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Check out the real site and media
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium automation
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
+      - name: Export full page reference and 50+ transparent layers
+        run: node scripts/export-after-effects-layers.cjs
+      - name: Publish ZIP package
+        uses: actions/upload-artifact@v4
+        with:
+          name: GUSTAVO-SITE-CAMADAS-AFTER-EFFECTS
+          path: out/AE_GUSTAVO_CAMADAS.zip
+          retention-days: 14
+          compression-level: 0
+          if-no-files-found: error
