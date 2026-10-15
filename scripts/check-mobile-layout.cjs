@@ -84,6 +84,39 @@ async function run(){
       console.log('Viewport '+width+'px OK, scrollWidth='+layout.scrollWidth);
       await context.close();
     }
+    // Real partnership cards are injected only for the test: the committed registry remains empty.
+    for(const width of [390,1024]){
+      const context=await browser.newContext({viewport:{width,height:844},deviceScaleFactor:2,isMobile:width<600,hasTouch:width<600});
+      const page=await context.newPage();
+      await page.route('**/canais.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+        atuais:[{nome:'Canal teste atual',url:'https://www.youtube.com/@teste-atual',descricao:'Trabalho de edição para YouTube'}],
+        anteriores:[{nome:'Canal teste anterior',url:'https://www.youtube.com/@teste-anterior'},
+          {nome:'Link inseguro',url:'javascript:alert(1)'}]
+      })}));
+      await page.goto(base,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>!document.getElementById('canais').hidden);
+      const result=await page.evaluate(()=>{
+        const section=document.getElementById('canais');
+        const area=section.getBoundingClientRect();
+        return {
+          visible:!section.hidden,
+          cards:section.querySelectorAll('.channel-card').length,
+          current:section.querySelectorAll('#channels-current .channel-card').length,
+          past:section.querySelectorAll('#channels-past .channel-card').length,
+          left:area.left,right:area.right,
+          scrollWidth:document.documentElement.scrollWidth,
+          links:[...section.querySelectorAll('.channel-card')].map(a=>({url:a.href,rel:a.rel,target:a.target}))
+        };
+      });
+      assert.equal(result.cards,2,'Should only display real-valid tested links');
+      assert.equal(result.current,1);
+      assert.equal(result.past,1);
+      assert.ok(result.links.every(link=>link.url.startsWith('https://')&&link.rel.includes('noopener')&&link.target==='_blank'));
+      assert.ok(result.scrollWidth<=width+2,'Channel cards caused horizontal overflow: '+JSON.stringify(result));
+      assert.ok(Math.abs(result.left-(width-result.right))<=3,'Channel section off-center');
+      console.log('Channels layout '+width+'px OK');
+      await context.close();
+    }
   }finally{await browser.close();await close();}
 }
 run().catch(err=>{console.error(err);server.close();process.exitCode=1;});
