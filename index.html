@@ -39,6 +39,16 @@ footer{border-top:1px solid var(--line);padding:22px 0 28px;display:flex;justify
 
 
 
+
+/* Grid técnico discreto, restrito às zonas de luz ambiente */
+.hero{isolation:isolate}
+.hero .hero-grid-glow{position:absolute;inset:-36px -24px -18px;z-index:-1;pointer-events:none;overflow:hidden;opacity:.52;
+  background-image:linear-gradient(rgba(182,154,255,.075) 1px,transparent 1px),linear-gradient(90deg,rgba(182,154,255,.075) 1px,transparent 1px);
+  background-size:34px 34px;mask-image:radial-gradient(ellipse at 50% 40%,#000 0%,rgba(0,0,0,.82) 28%,transparent 72%);-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 0%,rgba(0,0,0,.82) 28%,transparent 72%)}
+.hero .hero-grid-glow:after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,transparent 0%,rgba(11,11,13,.08) 45%,var(--bg) 100%)}
+.hero-divider{grid-column:1/-1;height:1px;width:100%;margin-top:4px;background:linear-gradient(90deg,transparent 0%,rgba(167,139,250,.5) 18%,rgba(255,255,255,.12) 50%,rgba(167,139,250,.28) 82%,transparent 100%);box-shadow:0 0 14px rgba(167,139,250,.1)}
+@media(max-width:760px){.hero .hero-grid-glow{inset:-20px -16px 0;background-size:28px 28px;opacity:.42}.hero-divider{margin-top:0}}
+
 /* UI polish: ambient light, glass surfaces and restrained violet bloom */
 :root{--accent:#b69aff;--accent-strong:#8c5bff;--ease:cubic-bezier(.2,.75,.25,1)}
 body{background:radial-gradient(ellipse at 50% -18%,rgba(111,63,185,.2),transparent 48%),radial-gradient(ellipse at 100% 42%,rgba(85,54,145,.08),transparent 34%),var(--bg);overflow-x:hidden}
@@ -166,12 +176,14 @@ nav a{transition:color .25s ease}
 </header>
 <main id="conteudo">
   <section class="hero wrap" id="inicio">
+      <div class="hero-grid-glow" aria-hidden="true"></div>
     <div>
       <div class="eyebrow"><span class="dot"></span> Video editor · Motion design</div>
       <h1>Gustavo<br><em>Editor de vídeo.</em></h1>
       <p class="intro">Edição, motion design e cinematics para transformar ideias em vídeos com identidade visual, ritmo e intenção.</p>
       <div class="actions"><a class="btn primary" href="#trabalhos">Ver meu trabalho <span>↘</span></a><a class="btn secondary" href="https://wa.me/5537988445372?text=Ol%C3%A1%2C%20Gustavo!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto." target="_blank" rel="noopener noreferrer">Vamos conversar ↗</a></div>
     </div>
+    <div class="hero-divider" aria-hidden="true"></div>
     <aside class="hero-side">
       <div><strong>O que eu faço</strong><p>Edição · Motion graphics · Cinematics</p></div>
       <div><strong>Projetos</strong><p>Games · YouTube · Conteúdo digital</p></div>
