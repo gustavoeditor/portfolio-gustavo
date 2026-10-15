@@ -91,7 +91,7 @@ nav a{transition:color .25s ease}
 
 /* Assistente discreto de contato */
 .contact-nudge {
-  position: fixed; right: 24px; bottom: 24px; z-index: 1000;
+  position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 2147483000;
   display: flex; align-items: flex-end; gap: 10px;
   max-width: min(360px, calc(100vw - 32px));
   font-family: inherit;
@@ -114,7 +114,7 @@ nav a{transition:color .25s ease}
 }
 .nudge-close:hover { background: rgba(255,255,255,.1); color: #fff; }
 .nudge-launch {
-  flex: 0 0 48px; width: 48px; height: 48px; border: 1px solid rgba(255,255,255,.15);
+  flex: 0 0 52px; width: 52px; height: 52px; min-width: 52px; min-height: 52px; border: 1px solid rgba(255,255,255,.2);
   border-radius: 50%; display: grid; place-items: center; cursor: pointer;
   color: #fff; background: #4d2673; box-shadow: 0 8px 26px rgba(0,0,0,.3);
   transition: transform .2s ease, background .2s ease;
@@ -123,10 +123,12 @@ nav a{transition:color .25s ease}
 .nudge-launch svg { width: 21px; height: 21px; }
 @keyframes nudge-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 600px) {
-  .contact-nudge { right: 14px; bottom: 14px; gap: 8px; }
+  .contact-nudge { right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); gap: 8px; max-width: calc(100vw - 24px); }
   .nudge-bubble { padding: 13px 14px; }
   .nudge-copy { font-size: 12px; }
-  .nudge-launch { flex-basis: 44px; width: 44px; height: 44px; }
+  .nudge-launch { flex-basis: 48px; width: 48px; height: 48px; min-width: 48px; min-height: 48px; }
+  .nudge-launch svg { width: 23px; height: 23px; }
+  .nudge-bubble { max-width: min(270px, calc(100vw - 82px)); }
 }
 @media (prefers-reduced-motion: reduce) { .nudge-bubble { animation: none; } .nudge-launch { transition: none; } }
 
@@ -274,15 +276,55 @@ document.querySelectorAll(".media-shell").forEach((shell) => {
     .catch(showFallback);
 });
 
-// Mensagem de contato: aparece uma vez após alguns segundos e pode ser fechada.
-const nudge = document.getElementById('contact-nudge');
-const nudgeBubble = document.getElementById('nudge-bubble');
-const nudgeLaunch = document.getElementById('nudge-launch');
-const nudgeClose = document.getElementById('nudge-close');
-if (nudge && nudgeBubble && nudgeLaunch && nudgeClose) {
-  let bubbleDismissed = false;
+
+
+</script>
+
+<div class="contact-nudge" id="contact-nudge" aria-label="Contato rápido">
+  <div class="nudge-bubble" id="nudge-bubble" role="status" hidden>
+    <button class="nudge-close" id="nudge-close" type="button" aria-label="Fechar mensagem">×</button>
+    <p class="nudge-copy" id="nudge-copy">Tem um projeto em mente? Vamos dar vida a ele.</p>
+    <div class="nudge-actions">
+      <a class="nudge-cta" href="https://wa.me/5537988445372?text=Ol%C3%A1%2C%20Gustavo!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto." target="_blank" rel="noopener noreferrer">Vamos conversar ↗</a>
+    </div>
+  </div>
+  <button class="nudge-launch" id="nudge-launch" type="button" aria-label="Abrir mensagem de contato" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l1.7-3.1A7.5 7.5 0 1 1 20 11.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 11.5h7M8.5 14.5h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+
+<script>
+// O widget fica depois do conteúdo e só é inicializado quando seus elementos existem.
+(() => {
+  const nudgeBubble = document.getElementById('nudge-bubble');
+  const nudgeLaunch = document.getElementById('nudge-launch');
+  const nudgeClose = document.getElementById('nudge-close');
+  const nudgeCopy = document.getElementById('nudge-copy');
+  if (!nudgeBubble || !nudgeLaunch || !nudgeClose || !nudgeCopy) return;
+
+  const messages = [
+    'Seu próximo vídeo pode começar aqui.',
+    'Vamos transformar sua ideia em um vídeo marcante?',
+    'Precisa de edição com identidade? Vamos conversar.',
+    'Seu projeto merece uma edição à altura.',
+    'Vamos tirar seu próximo projeto do papel?',
+    'Edição, motion e impacto visual para sua ideia.',
+    'Curtiu o estilo? Vamos criar algo para você.',
+    'Tem um projeto em mente? Vamos dar vida a ele.',
+    'Bora criar um vídeo que prenda a atenção?',
+    'Sua ideia, minha edição. Vamos conversar.'
+  ];
+  let previous = -1;
+  try { previous = Number(sessionStorage.getItem('portfolio-nudge-message-index') ?? -1); } catch (_) {}
+  let index = Math.floor(Math.random() * messages.length);
+  if (messages.length > 1 && index === previous) index = (index + 1 + Math.floor(Math.random() * (messages.length - 1))) % messages.length;
+  nudgeCopy.textContent = messages[index];
+  try { sessionStorage.setItem('portfolio-nudge-message-index', String(index)); } catch (_) {}
+
+  let dismissed = false;
   nudgeClose.addEventListener('click', () => {
-    bubbleDismissed = true;
+    dismissed = true;
     nudgeBubble.hidden = true;
     nudgeLaunch.setAttribute('aria-expanded', 'false');
   });
@@ -291,27 +333,13 @@ if (nudge && nudgeBubble && nudgeLaunch && nudgeClose) {
     nudgeLaunch.setAttribute('aria-expanded', String(!nudgeBubble.hidden));
   });
   window.setTimeout(() => {
-    if (!bubbleDismissed) {
+    if (!dismissed) {
       nudgeBubble.hidden = false;
       nudgeLaunch.setAttribute('aria-expanded', 'true');
     }
-  }, 4200);
-}
-
+  }, 3200);
+})();
 </script>
-
-<div class="contact-nudge" id="contact-nudge" aria-label="Contato rápido">
-  <div class="nudge-bubble" id="nudge-bubble" role="status" hidden>
-    <button class="nudge-close" id="nudge-close" type="button" aria-label="Fechar mensagem">×</button>
-    <p class="nudge-copy">Tem um projeto em mente? Vamos dar vida a ele.</p>
-    <div class="nudge-actions">
-      <a class="nudge-cta" href="https://wa.me/5537988445372?text=Ol%C3%A1%2C%20Gustavo!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto." target="_blank" rel="noopener noreferrer">Vamos conversar ↗</a>
-    </div>
-  </div>
-  <button class="nudge-launch" id="nudge-launch" type="button" aria-label="Abrir mensagem de contato" aria-expanded="true">
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l1.7-3.1A7.5 7.5 0 1 1 20 11.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 11.5h7M8.5 14.5h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-  </button>
-</div>
 
 </body>
 </html>
