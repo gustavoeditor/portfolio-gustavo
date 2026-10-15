@@ -1,5 +1,5 @@
 const { handleUpload } = require('@vercel/blob/client');
-const { validMutation, privateHeaders, parseJsonBody } = require('../lib/admin-session');
+const { validSameOriginAdmin, privateHeaders, parseJsonBody } = require('../lib/admin-session');
 module.exports = async function handler(req, res) {
   privateHeaders(res);
   if (req.method !== 'POST') { res.setHeader('Allow','POST'); return res.status(405).end(); }
@@ -7,7 +7,7 @@ module.exports = async function handler(req, res) {
   let body;
   try { body = parseJsonBody(req); } catch (_) { return res.status(400).json({error:'Formato inválido.'}); }
   // O callback do serviço de Blob precisa ser validado pela própria biblioteca.
-  if (body.type !== 'blob.upload-completed' && !validMutation(req)) {
+  if (body.type !== 'blob.upload-completed' && !validSameOriginAdmin(req)) {
     return res.status(403).json({error:'Acesso privado necessário.'});
   }
   try {
