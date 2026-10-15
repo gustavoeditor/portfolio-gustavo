@@ -180,7 +180,7 @@ async function main(){
      const name=label+(total>1?String(i+1).padStart(2,'0'):'');
      const rel='camadas/'+group+'/'+String(++counter).padStart(3,'0')+'_'+slug(name)+'.png';
      await node.evaluate(el=>el.setAttribute('data-ae-capture','1'));
-     await page.screenshot({path:path.join(out,rel),clip:{x,y,width:w,height:h},omitBackground:true,animations:'disabled',timeout:90000});
+     await page.screenshot({path:path.join(out,rel),fullPage:true,clip:{x,y,width:w,height:h},omitBackground:true,animations:'disabled',timeout:90000});
      await node.evaluate(el=>el.removeAttribute('data-ae-capture'));
      meta.layers.push({group,name,file:rel,x,y,width:w,height:h});
      console.log('LAYER '+counter+' '+group+' '+name+' '+x+','+y+' '+w+'x'+h);
