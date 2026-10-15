@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Gustavo é editor de vídeo freelancer especializado em CS2, cinematics, motion design e vídeos para YouTube. Veja projetos e entre em contato para seu próximo vídeo.">
+<meta name="description" content="Portfólio de Gustavo, editor de vídeo especializado em edição para games, cinematics, motion design e conteúdo para YouTube. Conheça os projetos e entre em contato.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#0b0b0d">
 <link rel="canonical" href="https://portfolio-gustavo-chi.vercel.app/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Gustavo — Video Editor">
-<meta property="og:title" content="Gustavo — Editor de Vídeo | CS2, Cinematics e Motion Design">
-<meta property="og:description" content="Edição de vídeo, cinematics e motion design para gaming, YouTube e conteúdo digital.">
+<meta property="og:title" content="Gustavo | Editor de Vídeo, Cinematics e Motion Design">
+<meta property="og:description" content="Edição, motion design e cinematics com direção visual, ritmo e atenção aos detalhes. Conheça o portfólio de Gustavo.">
 <meta property="og:url" content="https://portfolio-gustavo-chi.vercel.app/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Gustavo — Editor de Vídeo">
+<meta name="twitter:title" content="Gustavo | Editor de Vídeo">
 <meta name="twitter:description" content="Portfólio de edição de vídeo, cinematics e motion design.">
-<title>Gustavo — Editor de Vídeo | CS2, Cinematics e Motion Design</title>
+<title>Gustavo | Editor de Vídeo, Cinematics e Motion Design</title>
 <style>
 :root{--bg:#0b0b0d;--panel:#131316;--text:#f4f3f0;--muted:#96969e;--line:#28282e;--accent:#a78bfa;--max:1120px}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible,video:focus-visible{outline:2px solid var(--accent);outline-offset:4px}.skip-link{position:absolute;left:12px;top:-60px;z-index:2000;background:var(--accent);color:#101108;padding:10px 14px;border-radius:4px}.skip-link:focus{top:12px}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}.wrap{width:min(var(--max),calc(100% - 48px));margin:auto}
@@ -37,13 +37,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 28px;display:flex;justify
 .actions .btn.visual-reveal.visual-visible{transform:translate3d(0,0,0) scale(1)}
 @media(prefers-reduced-motion:reduce){.visual-reveal,.hero h1.visual-reveal,.actions .btn.visual-reveal{opacity:1!important;transform:none!important;transition:none!important;will-change:auto}}
 
-/* Reveal dedicado aos elementos visuais: entrada ascendente, fade e escala discreta. */
-.visual-reveal{opacity:0;transform:translate3d(0,22px,0) scale(.985);transition:opacity .85s var(--ease),transform .85s var(--ease);transition-delay:var(--visual-delay,0ms);will-change:opacity,transform}
-.visual-reveal.visual-visible{opacity:1;transform:translate3d(0,0,0) scale(1)}
-.hero h1.visual-reveal{transform:translate3d(0,24px,0);transition-duration:1s}
-.actions .btn.visual-reveal{transform:translate3d(0,16px,0) scale(.98)}
-.actions .btn.visual-reveal.visual-visible{transform:translate3d(0,0,0) scale(1)}
-@media(prefers-reduced-motion:reduce){.visual-reveal,.hero h1.visual-reveal,.actions .btn.visual-reveal{opacity:1!important;transform:none!important;transition:none!important;will-change:auto}}
+
 
 /* UI polish: ambient light, glass surfaces and restrained violet bloom */
 :root{--accent:#b69aff;--accent-strong:#8c5bff;--ease:cubic-bezier(.2,.75,.25,1)}
@@ -82,6 +76,18 @@ nav a{transition:color .25s ease}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important;transition:none!important;will-change:auto}}
 @media(max-width:760px){.hero:before{width:280px;height:280px;left:-130px;filter:blur(75px)}.hero:after{width:180px;height:180px;right:-70px;filter:blur(65px)}}
 
+
+/* Seção de valor: explica o diferencial sem promessas vazias. */
+.why{padding:28px 0 82px}
+.why .section-head{margin-bottom:34px}
+.why-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.why-item{padding:22px 20px 24px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,255,255,.008));transition:transform .3s var(--ease),border-color .3s ease,background .3s ease}
+.why-item:hover{transform:translateY(-4px);border-color:rgba(182,154,255,.45);background:linear-gradient(145deg,rgba(182,154,255,.07),rgba(255,255,255,.01))}
+.why-item .num{font-size:10px;letter-spacing:.12em;color:var(--accent)}
+.why-item h3{font-size:18px;letter-spacing:-.035em;margin:18px 0 9px}
+.why-item p{font-size:13px;line-height:1.75;color:var(--muted);margin:0}
+@media(max-width:760px){.why{padding:10px 0 62px}.why-grid{grid-template-columns:1fr;gap:12px}.why-item{padding:20px}}
+
 </style>
   <script type="application/ld+json">
   {
@@ -99,14 +105,14 @@ nav a{transition:color .25s ease}
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
 <header class="wrap">
   <a class="brand" href="#inicio">GUSTAVO<span>.</span></a>
-  <nav aria-label="Navegação principal"><a href="#trabalhos">Melhores resultados</a><a href="#contato">Contato ↗</a></nav>
+  <nav aria-label="Navegação principal"><a href="#trabalhos">Projetos</a><a href="#porque">Por que eu?</a><a href="#contato">Contato ↗</a></nav>
 </header>
 <main id="conteudo">
   <section class="hero wrap" id="inicio">
     <div>
       <div class="eyebrow"><span class="dot"></span> Video editor · Motion design</div>
-      <h1>Vídeos que<br>fazem <em>sentir.</em></h1>
-      <p class="intro">Edição, ritmo e visual trabalhando juntos para transformar boas ideias em vídeos que prendem a atenção.</p>
+      <h1>Gustavo<br><em>Editor de vídeo.</em></h1>
+      <p class="intro">Edição, motion design e cinematics para transformar ideias em vídeos com identidade visual, ritmo e intenção.</p>
       <div class="actions"><a class="btn primary" href="#trabalhos">Ver meu trabalho <span>↘</span></a><a class="btn secondary" href="https://wa.me/5537988445372?text=Ol%C3%A1%2C%20Gustavo!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto." target="_blank" rel="noopener noreferrer">Vamos conversar ↗</a></div>
     </div>
     <aside class="hero-side">
@@ -117,8 +123,17 @@ nav a{transition:color .25s ease}
     </aside>
   </section>
 
+  <section class="why wrap" id="porque" aria-labelledby="why-title">
+    <div class="section-head"><div><div class="eyebrow">Além de editar</div><h2 id="why-title">Por que trabalhar comigo?</h2></div><p>Não é só juntar cortes. É fazer cada escolha visual servir à ideia.</p></div>
+    <div class="why-grid">
+      <article class="why-item"><span class="num">01 / INTENÇÃO</span><h3>Visual com propósito</h3><p>Cor, composição, efeitos e movimento escolhidos para combinar com a identidade de cada projeto, sem enfeite gratuito.</p></article>
+      <article class="why-item"><span class="num">02 / RITMO</span><h3>Edição que conduz</h3><p>Cortes, trilha e sound design trabalhando juntos para dar clareza, energia e ritmo ao vídeo.</p></article>
+      <article class="why-item"><span class="num">03 / ACABAMENTO</span><h3>Atenção aos detalhes</h3><p>Transições, timing e acabamento visual tratados como parte da experiência, não como última tarefa da lista.</p></article>
+    </div>
+  </section>
+
   <section class="portfolio wrap" id="trabalhos">
-    <div class="section-head"><div><div class="eyebrow">Seleção principal</div><h2>Melhores resultados</h2></div><p>Os projetos que melhor representam meu trabalho.</p></div>
+    <div class="section-head"><div><div class="eyebrow">Trabalhos selecionados</div><h2>Projetos em destaque</h2></div><p>Os projetos que melhor representam meu trabalho.</p></div>
     <div class="projects">
       <article class="project" data-category="cs2">
         <div class="media-shell"><video class="video-slot" controls preload="none" playsinline hidden aria-label="CS2 Cinematic Showcase"><source src="videos/projeto-01.mp4" type="video/mp4">Seu navegador não suporta a reprodução deste vídeo.</video><div class="video-placeholder" aria-hidden="true"></div></div>
@@ -162,7 +177,7 @@ nav a{transition:color .25s ease}
 document.getElementById('year').textContent = new Date().getFullYear();
 
 /* Scroll reveal: entrada gradual de baixo para cima, respeitando acessibilidade. */
-const revealTargets = document.querySelectorAll('.hero > div, .hero-side, .section-head, .project, .service, .contact > div, .contact > a');
+const revealTargets = document.querySelectorAll('.hero > div, .hero-side, .section-head, .why-item, .project, .service, .contact > div, .contact > a');
 revealTargets.forEach((element, index) => {
   element.classList.add('reveal');
   element.style.setProperty('--reveal-delay', (index % 4) * 85 + 'ms');
@@ -181,7 +196,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
 }
 
 /* Elementos visuais recebem o mesmo movimento, com um fade mais cinematográfico. */
-const visualTargets = document.querySelectorAll('.hero h1, .actions .btn, .media-shell, .project h3, .service .num');
+const visualTargets = document.querySelectorAll('.hero h1, .actions .btn, .media-shell, .project h3, .service .num, .why-item .num');
 visualTargets.forEach((element, index) => {
   element.classList.add('visual-reveal');
   element.style.setProperty('--visual-delay', (index % 4) * 100 + 'ms');
