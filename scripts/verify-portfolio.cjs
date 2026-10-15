@@ -90,4 +90,31 @@ assert.ok(hero[1].includes('GUSTAVO') && hero[1].includes('EDITOR DE VÍDEO'),'H
 assert.ok(hero[1].includes('Edição que <em>prende.</em>') && hero[1].includes('Visual que <em>marca.</em>'),'Hero value headline was lost');
 assert.ok(hero[1].includes('Cinematics de CS2') && hero[1].includes('edição para YouTube'),'Hero must specify editing specialties');
 assert.ok(html.includes('<title>GUSTAVO | EDITOR DE VÍDEO</title>'),'Preserve page SEO title');
+// Real-project discoverability and performance fallback.
+const mainSchema=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+ .map(m=>JSON.parse(m[1])).find(x=>x['@type']==='ItemList');
+assert.ok(mainSchema && mainSchema.itemListElement.length===projects.length,'Structured catalog must cover every existing video');
+assert.ok(html.includes('<noscript>')&&html.includes('projects-nojs'),'No-JS portfolio list missing');
+assert.equal((html.match(/<li><a href="\/videos\//g)||[]).length,projects.length,'Every project must be playable without JavaScript');
+assert.ok(html.includes('portfolio-next-step')&&html.includes('href="#orcamento"'),'Conversion step beneath the gallery missing');
+assert.ok(html.includes('Colaboração atual: SkinsMonkey'),'Verified current client proof missing');
+assert.ok(html.includes('aria-label="Galeria de trabalhos de edição de vídeo"'),'Accessible gallery name missing');
+assert.ok(!html.includes('id="project-grid" aria-live="polite"'),'Adding many cards must not spam screen readers');
+for(const p of projects){
+ const filename=p.src.split('/').pop();
+ for(const folder of ['videos','videos-480','videos-1080']){
+  const f=path.join(root,folder,filename);
+  assert.ok(fs.existsSync(f)&&fs.statSync(f).size>1000,
+    'Quality '+folder+' missing/empty: '+filename);
+ }
+}
+const rules=JSON.parse(read('vercel.json'));
+const sources=new Map(rules.headers.map(x=>[x.source,x.headers]));
+for(const source of ['/videos/(.*)','/videos-480/(.*)','/videos-1080/(.*)','/canais.json']){
+ assert.ok(sources.has(source),'Missing cache rules for '+source);
+}
+assert.ok(sources.get('/(.*)').some(x=>x.key==='X-Content-Type-Options'&&x.value==='nosniff'),'Missing MIME-sniffing protection');
+assert.ok(sources.get('/(.*)').some(x=>x.key==='Referrer-Policy'),'Missing privacy referrer header');
+assert.ok(read('.github/workflows/recover-production-viewport.yml').includes('check-production.sh'),'Deploy recovery must check current production');
+require('node:child_process').execFileSync('bash',['-n',path.join(root,'scripts/check-production.sh')]);
 console.log('Portfolio validation OK: '+projects.length+' projects; anchors, scripts and assets verified.');
