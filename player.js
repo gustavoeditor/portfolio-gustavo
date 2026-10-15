@@ -56,8 +56,9 @@ function mount(video,options={}){
  const brand=document.createElement('span');brand.className='vip-player-brand';brand.textContent='G / PLAYER';
  const qualityBox=document.createElement('div');qualityBox.className='vip-quality-box';
  const qualityLabel=document.createElement('label');qualityLabel.className='vip-quality-label';qualityLabel.textContent='QUALIDADE';
- const qualitySelect=document.createElement('select');qualitySelect.className='vip-quality';qualitySelect.setAttribute('aria-label','Qualidade do vídeo');
- qualityLabel.append(qualitySelect);qualityBox.append(qualityLabel);qualityBox.hidden=true;
+ const qualitySelect=document.createElement('button');qualitySelect.type='button';qualitySelect.className='vip-quality';qualitySelect.setAttribute('aria-label','Escolher qualidade do vídeo');qualitySelect.setAttribute('aria-haspopup','true');qualitySelect.setAttribute('aria-expanded','false');
+ const qualityMenu=document.createElement('div');qualityMenu.className='vip-quality-menu';qualityMenu.setAttribute('role','group');qualityMenu.setAttribute('aria-label','Resoluções disponíveis');qualityMenu.hidden=true;
+ qualityLabel.append(qualitySelect);qualityBox.append(qualityLabel,qualityMenu);qualityBox.hidden=true;
  left.append(playButton,clock,volumeBox);
  bottom.append(left,brand,qualityBox,fullscreen);
  controls.append(timeline,bottom);
@@ -73,15 +74,25 @@ function mount(video,options={}){
    return 'high';
  }
  function renderQualityOptions(){
-   qualitySelect.replaceChildren();
+   const shown=(qualityChoice==='full'&&!fullReady)||(qualityChoice==='low'&&!lowReady)?'high':qualityChoice;
+   const names={auto:'Auto',full:'1080p',high:'720p',low:'480p'};
+   qualitySelect.textContent=names[shown]+' ▾';
+   qualityMenu.replaceChildren();
    for(const [value,label] of [['auto','Auto'],['full','1080p'],['high','720p'],['low','480p']]){
      if(value==='low'&&!lowReady)continue;
      if(value==='full'&&!fullReady)continue;
-     const option=document.createElement('option');
-     option.value=value;option.textContent=label;qualitySelect.append(option);
+     const option=document.createElement('button');option.type='button';option.className='vip-quality-option';
+     option.textContent=label;option.dataset.quality=value;
+     option.setAttribute('aria-pressed',String(shown===value));
+     option.addEventListener('click',(event)=>{
+       event.stopPropagation();
+       qualityChoice=value;
+       try{localStorage.setItem(qualityPreferenceKey,qualityChoice);}catch(_){}
+       closeQualityMenu();renderQualityOptions();applyQuality();
+       qualitySelect.focus({preventScroll:true});
+     });
+     qualityMenu.append(option);
    }
-   const shown=(qualityChoice==='full'&&!fullReady)||(qualityChoice==='low'&&!lowReady)?'high':qualityChoice;
-   qualitySelect.value=shown;
    qualityBox.hidden=!lowReady&&!fullReady;
  }
  function selectedSource(key){
@@ -145,12 +156,18 @@ function mount(video,options={}){
      applyQuality();
    }).catch(()=>{});
  }
- renderQualityOptions();
- on(qualitySelect,'change',()=>{
-   qualityChoice=qualitySelect.value;
-   try{localStorage.setItem(qualityPreferenceKey,qualityChoice);}catch(_){}
-   applyQuality();
+ function closeQualityMenu(){
+   qualityMenu.hidden=true;qualitySelect.setAttribute('aria-expanded','false');
+ }
+ on(qualitySelect,'click',(event)=>{
+   event.stopPropagation();
+   if(qualityMenu.hidden){qualityMenu.hidden=false;qualitySelect.setAttribute('aria-expanded','true');}
+   else closeQualityMenu();
  });
+ on(qualitySelect,'keydown',(event)=>{if(event.key==='ArrowDown'){event.preventDefault();if(qualityMenu.hidden)qualitySelect.click();qualityMenu.querySelector('button')?.focus();}});
+ on(qualityBox,'keydown',(event)=>{if(event.key==='Escape'){event.stopPropagation();closeQualityMenu();qualitySelect.focus();}});
+ on(document,'pointerdown',(event)=>{if(!qualityBox.contains(event.target))closeQualityMenu();});
+ renderQualityOptions();
  on(window,'storage',(event)=>{
    if(event.key!==qualityPreferenceKey)return;
    if(!validQualities.includes(event.newValue))return;
