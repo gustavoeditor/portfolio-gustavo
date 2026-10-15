@@ -6,8 +6,8 @@
 <meta name="description" content="Portfólio de Gustavo, editor de vídeo especializado em edição para games, cinematics, motion design e conteúdo para YouTube. Conheça os projetos e entre em contato.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#0b0b0d">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1">
-<link rel="alternate icon" href="/favicon.svg?v=1">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2">
+<link rel="alternate icon" href="/favicon.svg?v=2">
 <link rel="canonical" href="https://portfolio-gustavo-chi.vercel.app/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
@@ -127,16 +127,7 @@ footer:before{
   .why:before,.portfolio:before,.services:before,.about:before,footer:before{opacity:.65}
 }
 
-.project-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:7px;color:#9b91ad;font-size:10px;letter-spacing:.035em}
-.project-meta time{color:#c2b0ee;font-variant-numeric:tabular-nums}
-.project-meta span{text-align:right}
-.behance-frame{position:relative;aspect-ratio:16/9;width:100%;overflow:hidden;border:1px solid rgba(182,154,255,.2);border-radius:9px;background:radial-gradient(ellipse at 50% 30%,rgba(126,78,220,.16),transparent 60%),#101014;box-shadow:0 14px 38px rgba(0,0,0,.2);transition:border-color .3s ease,box-shadow .3s ease}
-.behance-frame iframe{display:block;width:100%;height:100%;border:0;background:transparent}
-.project:hover .behance-frame{border-color:rgba(182,154,255,.55);box-shadow:0 18px 48px rgba(0,0,0,.3),0 0 26px rgba(140,91,255,.12)}
-.project-link{display:inline-block;margin-top:8px;font-size:11px;color:#b9a4ef;transition:color .2s ease}
-.project-link:hover{color:#fff}
-.behance-more{display:flex;justify-content:center;margin-top:34px}
-@media(max-width:760px){.behance-frame{aspect-ratio:16/10}.behance-more .btn{width:100%;text-align:center}}
+
 
 /* Seção de valor: explica o diferencial sem promessas vazias. */
 .why{padding:28px 0 82px}
@@ -203,6 +194,36 @@ footer:before{
 }
 @media (prefers-reduced-motion: reduce) { .nudge-bubble { animation: none; } .nudge-launch { transition: none; } }
 
+
+
+/* Biblioteca de vídeos: grade de três colunas no desktop e responsiva em telas menores. */
+.project-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin:24px 0 20px}
+.project-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.manage-projects-link{display:inline-flex;align-items:center;gap:8px;color:#c7b5f3;font-size:12px;font-weight:650;border-bottom:1px solid rgba(182,154,255,.32);padding:8px 0;transition:color .2s,border-color .2s}
+.manage-projects-link:hover{color:#fff;border-color:var(--accent)}
+.project-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 22px}
+.project-card{min-width:0;animation:project-enter .45s var(--ease) both}
+@keyframes project-enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.project-media{position:relative;aspect-ratio:16/9;overflow:hidden;border:1px solid rgba(182,154,255,.22);border-radius:9px;background:radial-gradient(ellipse at 60% 20%,rgba(126,78,220,.15),transparent 60%),#09090c;box-shadow:0 14px 38px rgba(0,0,0,.22);transition:border-color .3s,box-shadow .3s}
+.project-media video,.project-media iframe{display:block;width:100%;height:100%;position:absolute;inset:0;border:0;object-fit:cover;background:#08080a}
+.project-media video{color:#f4f3f0}
+.project-card:hover .project-media{border-color:rgba(182,154,255,.58);box-shadow:0 18px 46px rgba(0,0,0,.32),0 0 24px rgba(140,91,255,.1)}
+.project-info{padding:14px 2px 0}
+.project-category{color:#b9a4ef;font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:7px}
+.project-card h3{margin:0;font-size:16px;font-weight:650;letter-spacing:-.025em;line-height:1.35}
+.project-description{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.65}
+.project-status{font-size:12px;color:var(--muted);margin:18px 0}
+.project-status[hidden]{display:none}
+.projects-empty{margin-top:10px;padding:clamp(30px,6vw,64px) 22px;text-align:center;border:1px dashed rgba(182,154,255,.26);border-radius:12px;background:radial-gradient(ellipse at 50% 0%,rgba(126,78,220,.11),transparent 65%),rgba(255,255,255,.012)}
+.projects-empty[hidden]{display:none}
+.empty-mark{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid rgba(182,154,255,.3);color:var(--accent);font-size:25px;margin-bottom:14px}
+.projects-empty h3{font-size:20px;letter-spacing:-.04em;margin:0 0 8px}
+.projects-empty p{max-width:430px;margin:0 auto 20px;color:var(--muted);font-size:13px}
+.media-error-note{position:absolute;inset:0;display:grid;place-items:center;padding:22px;text-align:center;color:#c5bbd6;font-size:12px;background:#0b0b0d}
+@media(max-width:980px){.project-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.project-grid{grid-template-columns:1fr;gap:27px}.project-toolbar{align-items:flex-start;flex-direction:column}.manage-projects-link{margin-top:0}.project-card h3{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.project-card{animation:none}}
+
 </style>
   <script type="application/ld+json">
   {
@@ -249,25 +270,26 @@ footer:before{
     </div>
   </section>
 
-  <section class="portfolio wrap" id="trabalhos">
-    <div class="section-head"><div><div class="eyebrow">Trabalhos selecionados · Behance</div><h2>Projetos em destaque</h2></div><p>Ordenados do mais recente ao mais antigo.</p></div>
-    <div class="projects behance-projects">
-      <article class="project" data-category="cs2">
-        <div class="behance-frame"><iframe src="https://www.behance.net/embed/project/248759485?ilo0=1" title="Edit HL CS2, projeto de Gustavo Soares no Behance" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-        <div class="project-info"><div class="project-meta"><time datetime="2026-05-04">04 mai 2026</time><span>CS2 · Highlights</span></div><h3>Edit HL CS2</h3><a class="project-link" href="https://www.behance.net/gallery/248759485/Edit-Hl-cS2" target="_blank" rel="noopener noreferrer">Abrir projeto no Behance ↗</a></div>
-      </article>
-      <article class="project" data-category="motion">
-        <div class="behance-frame"><iframe src="https://www.behance.net/embed/project/248347117?ilo0=1" title="Cenário caixa abrindo do CS, projeto de Gustavo Soares no Behance" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-        <div class="project-info"><div class="project-meta"><time datetime="2026-04-27">27 abr 2026</time><span>CS2 · 3D / Motion</span></div><h3>Cenário: caixa abrindo do CS</h3><a class="project-link" href="https://www.behance.net/gallery/248347117/cenario-caixa-abrindo-do-CS" target="_blank" rel="noopener noreferrer">Abrir projeto no Behance ↗</a></div>
-      </article>
-      <article class="project" data-category="motion">
-        <div class="behance-frame"><iframe src="https://www.behance.net/embed/project/244230163?ilo0=1" title="Motion design de CS2, projeto de Gustavo Soares no Behance" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-        <div class="project-info"><div class="project-meta"><time datetime="2026-02-16">16 fev 2026</time><span>CS2 · Motion design</span></div><h3>Motion design de CS2</h3><a class="project-link" href="https://www.behance.net/gallery/244230163/Motion-design-de-cs2" target="_blank" rel="noopener noreferrer">Abrir projeto no Behance ↗</a></div>
-      </article>
+  <section class="portfolio wrap" id="trabalhos" aria-labelledby="projects-title">
+  <div class="section-head">
+    <div><div class="eyebrow">Biblioteca de projetos</div><h2 id="projects-title">Trabalhos em destaque</h2></div>
+    <p>3 vídeos por linha · atualize pelo gerenciador.</p>
+  </div>
+  <div class="project-toolbar">
+    <div class="project-filters" id="project-filters" aria-label="Filtrar projetos">
+      <button class="filter active" type="button" data-filter="all" aria-pressed="true">Todos</button>
     </div>
-    <div class="behance-more"><a class="btn secondary" href="https://www.behance.net/search/projects/cs2%20edit" target="_blank" rel="noopener noreferrer">Explorar mais projetos no Behance ↗</a></div>
-
-  </section>
+    <a class="manage-projects-link" href="/gerenciar-projetos.html">Gerenciar vídeos <span aria-hidden="true">↗</span></a>
+  </div>
+  <p class="project-status" id="project-status" role="status">Carregando projetos…</p>
+  <div class="projects project-grid" id="project-grid" aria-live="polite"></div>
+  <div class="projects-empty" id="projects-empty" hidden>
+    <span class="empty-mark" aria-hidden="true">＋</span>
+    <h3>Seu próximo projeto começa aqui.</h3>
+    <p>Adicione seus vídeos pelo gerenciador. A grade se organiza sozinha em três colunas no desktop.</p>
+    <a class="btn secondary" href="/gerenciar-projetos.html">Adicionar primeiro vídeo ↗</a>
+  </div>
+</section>
 
   <section class="services">
     <div class="wrap">
@@ -328,25 +350,138 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('Intersec
   visualTargets.forEach((element) => visualObserver.observe(element));
 }
 
-// Só exibe o player quando o arquivo existe; evita controles quebrados para caminhos ausentes.
-// Use MP4/H.264 para melhor compatibilidade e mantenha os nomes abaixo.
-// projeto-01.mp4 = CS2 Cinematic; projeto-02.mp4 = Motion/VFX; projeto-03.mp4 = YouTube; projeto-04.mp4 = Vertigo → Inferno.
-document.querySelectorAll(".media-shell").forEach((shell) => {
-  const video = shell.querySelector("video");
-  const source = video.querySelector("source");
-  const placeholder = shell.querySelector(".video-placeholder");
-  const showFallback = () => { video.hidden = true; placeholder.hidden = false; };
-  video.addEventListener("error", showFallback);
-  fetch(source.getAttribute("src"), { method: "HEAD" })
-    .then((response) => {
-      if (!response.ok) return;
-      placeholder.hidden = true;
-      video.hidden = false;
-    })
-    .catch(showFallback);
-});
+// Carrega a biblioteca editável de projetos a partir de projetos.json.
+(async () => {
+  const grid = document.getElementById('project-grid');
+  const filters = document.getElementById('project-filters');
+  const status = document.getElementById('project-status');
+  const empty = document.getElementById('projects-empty');
+  if (!grid || !filters || !status || !empty) return;
 
+  const safeUrl = (value) => {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    if (/^(https?:\/\/|\/|\.\/|\.\.\/|[\w.-]+\/)/i.test(raw)) return raw;
+    return '';
+  };
+  const embedUrl = (value) => {
+    try {
+      const u = new URL(value, window.location.href);
+      const host = u.hostname.replace(/^www\./, '');
+      if (host === 'youtu.be') return 'https://www.youtube-nocookie.com/embed/' + u.pathname.slice(1).split('/')[0];
+      if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+        const id = u.searchParams.get('v') || (u.pathname.match(/\/embed\/([^/]+)/) || [])[1] || (u.pathname.match(/\/shorts\/([^/]+)/) || [])[1];
+        return id ? 'https://www.youtube-nocookie.com/embed/' + id : '';
+      }
+      if (host === 'vimeo.com') {
+        const id = u.pathname.split('/').filter(Boolean).pop();
+        return id && /^\d+$/.test(id) ? 'https://player.vimeo.com/video/' + id : '';
+      }
+    } catch (_) {}
+    return '';
+  };
+  const make = (tag, className, text) => {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text !== undefined) el.textContent = text;
+    return el;
+  };
+  const categoryLabel = (category) => ({
+    cs2: 'CS2', motion: 'Motion design', youtube: 'YouTube',
+    cinematics: 'Cinematics', outros: 'Outros'
+  }[String(category || '').toLowerCase()] || String(category || 'Projeto'));
+  let projects = [];
+  let activeFilter = 'all';
 
+  function render() {
+    grid.replaceChildren();
+    const visible = projects.filter((p) => activeFilter === 'all' || String(p.category || 'outros').toLowerCase() === activeFilter);
+    visible.forEach((p) => {
+      const card = make('article', 'project project-card');
+      card.dataset.category = String(p.category || 'outros').toLowerCase();
+      const media = make('div', 'project-media');
+      const source = safeUrl(p.src);
+      const embed = embedUrl(source);
+      const poster = safeUrl(p.poster);
+      if (embed) {
+        const frame = make('iframe', 'project-embed');
+        frame.src = embed;
+        frame.title = 'Vídeo: ' + (p.title || 'Projeto de Gustavo');
+        frame.loading = 'lazy';
+        frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        frame.allowFullscreen = true;
+        frame.referrerPolicy = 'strict-origin-when-cross-origin';
+        media.append(frame);
+      } else if (source) {
+        const video = make('video', 'project-video');
+        video.controls = true;
+        video.preload = 'metadata';
+        video.playsInline = true;
+        if (poster) video.poster = poster;
+        const src = make('source');
+        src.src = source;
+        src.type = /\.webm(?:$|\?)/i.test(source) ? 'video/webm' : 'video/mp4';
+        video.append(src);
+        video.append(document.createTextNode('Seu navegador não conseguiu reproduzir este vídeo.'));
+        video.addEventListener('error', () => {
+          media.classList.add('media-error');
+          const note = make('span', 'media-error-note', 'Não foi possível carregar o vídeo. Confira o caminho em projetos.json.');
+          if (!media.querySelector('.media-error-note')) media.append(note);
+        });
+        media.append(video);
+      } else {
+        media.append(make('span', 'media-error-note', 'Adicione um caminho de vídeo em projetos.json.'));
+      }
+      card.append(media);
+      const info = make('div', 'project-info');
+      info.append(make('div', 'project-category', categoryLabel(p.category)));
+      info.append(make('h3', '', p.title || 'Projeto sem título'));
+      if (p.description) info.append(make('p', 'project-description', p.description));
+      card.append(info);
+      grid.append(card);
+    });
+
+    filters.querySelectorAll('[data-filter]').forEach((button) => {
+      const active = button.dataset.filter === activeFilter;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    status.hidden = projects.length === 0;
+    status.textContent = projects.length ? visible.length + (visible.length === 1 ? ' projeto' : ' projetos') + (activeFilter === 'all' ? ' na biblioteca' : ' nesta categoria') : '';
+    empty.hidden = projects.length !== 0;
+    grid.hidden = projects.length === 0 || visible.length === 0;
+    if (projects.length && visible.length === 0) {
+      status.hidden = false;
+      status.textContent = 'Nenhum projeto nesta categoria.';
+    }
+  }
+
+  try {
+    const response = await fetch('/projetos.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Não foi possível ler projetos.json');
+    const data = await response.json();
+    projects = Array.isArray(data) ? data.filter((p) => p && typeof p === 'object') : [];
+    const categories = [...new Set(projects.map((p) => String(p.category || 'outros').toLowerCase()))];
+    categories.forEach((category) => {
+      const button = make('button', 'filter', categoryLabel(category));
+      button.type = 'button';
+      button.dataset.filter = category;
+      button.setAttribute('aria-pressed', 'false');
+      filters.append(button);
+    });
+    filters.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-filter]');
+      if (!button) return;
+      activeFilter = button.dataset.filter;
+      render();
+    });
+    render();
+  } catch (error) {
+    status.hidden = false;
+    status.textContent = 'A biblioteca não carregou. Confira se projetos.json está publicado junto com o site.';
+    empty.hidden = true;
+  }
+})();
 
 </script>
 
