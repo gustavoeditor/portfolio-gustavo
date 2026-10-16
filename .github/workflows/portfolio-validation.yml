@@ -55,3 +55,11 @@ jobs:
         env:
           CHECK_PRODUCTION_THUMBS: '1'
         run: node scripts/check-thumbnails.cjs
+      - name: Save full thumbnail reference sheet
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: thumbnail-contact-sheets
+          path: out/thumbs-contact-sheet-*.png
+          retention-days: 7
+          if-no-files-found: warn
