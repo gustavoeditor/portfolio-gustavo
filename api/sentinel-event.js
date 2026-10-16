@@ -16,9 +16,8 @@ module.exports=async function handler(req,res){
  const event=sentinel.sanitize(body);
  if(!event)return res.status(400).end();
  try{
-  if(!await sentinel.allowRate(req))return res.status(429).end();
-  await sentinel.record(event);
-  return res.status(204).end();
+  const accepted=await sentinel.record(req,event);
+  return accepted?res.status(204).end():res.status(429).end();
  }catch(error){
   console.error('Sentinel event write failed:',error?.name||'unknown');
   return res.status(503).end();
