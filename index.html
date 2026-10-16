@@ -388,6 +388,7 @@ body{
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
+<link rel="stylesheet" href="/ambience.css?v=1">
 </head>
 <body>
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -685,5 +686,22 @@ document.getElementById('brief-form').addEventListener('submit',e=>{e.preventDef
 </script>
 <script defer src="/sales.js?v=2"></script>
 <script defer src="/quote-modal.js?v=1"></script>
+<!-- G / AMBIENCE: completamente opcional; música e efeitos desligados na primeira visita. -->
+<aside class="ambience-dock" id="ambience-dock" data-playing="false" aria-label="Controles de áudio ambiente">
+ <div class="ambience-popover" id="ambience-popover" hidden role="region" aria-label="Preferências de áudio">
+  <div class="ambience-panel-head"><div><div class="ambience-kicker">G / EXPERIENCE SYSTEM — SOUND</div><h2>Uma atmosfera só sua.</h2><p>Lo-fi discreto para acompanhar a experiência. Você decide o que ouvir.</p></div><button class="ambience-close" id="ambience-close" type="button" aria-label="Fechar controles de áudio">×</button></div>
+  <div class="ambience-row"><span class="ambience-row-label"><b>Música ambiente</b><small>Original · piano, synth e batidas suaves</small></span><button type="button" class="ambience-switch" id="ambience-music" aria-pressed="false">Desligado</button></div>
+  <div class="ambience-row"><span class="ambience-row-label"><b>Microefeitos</b><small>Cliques discretos em ações principais</small></span><button type="button" class="ambience-switch" id="ambience-fx" aria-pressed="false">Desligados</button></div>
+  <label class="ambience-slider-row" for="ambience-volume"><span>Volume da trilha</span><output id="ambience-volume-display" for="ambience-volume">12%</output></label>
+  <input type="range" class="ambience-volume" id="ambience-volume" min="0" max="35" value="12" step="1" aria-label="Volume da música ambiente">
+  <p class="ambience-panel-foot">Sem reprodução automática na primeira visita. A trilha silencia ao assistir aos vídeos. Preferências salvas neste navegador.</p>
+  <p class="ambience-panel-status" id="ambience-status" role="status" aria-live="polite"></p>
+ </div>
+ <button class="ambience-trigger" type="button" id="ambience-trigger" aria-expanded="false" aria-controls="ambience-popover" aria-label="Abrir controles de som">
+  <svg class="ambience-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9v6m4-9v12m4-15v18m4-13v8m4-12v16m4-9v2"/></svg>
+  <span class="ambience-trigger-label">G / AMBIENCE</span><i class="ambience-state-dot" aria-hidden="true"></i>
+ </button>
+</aside>
+<script defer src="/ambience.js?v=1"></script>
 </body>
 </html>
