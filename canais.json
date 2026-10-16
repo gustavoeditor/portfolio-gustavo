@@ -2,6 +2,7 @@
   "atuais": [
     {
       "nome": "SkinsMonkey",
+      "imagem": "canais/skinsmonkey.webp",
       "url": "https://www.youtube.com/@skinsmonkey_com",
       "descricao": "Colaboração atual em edição de vídeo."
     }
@@ -9,6 +10,7 @@
   "anteriores": [
     {
       "nome": "O Alex CS",
+      "imagem": "canais/oalexcs.webp",
       "url": "https://www.youtube.com/@oalexcs",
       "descricao": "Colaboração anterior em edição de vídeo."
     }

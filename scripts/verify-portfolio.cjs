@@ -57,7 +57,7 @@ assert.ok(read('player.js').includes("probeVariant(fullSource,'full')"),'1080p v
 const channels=JSON.parse(read('canais.json'));
 assert.ok(Array.isArray(channels.atuais) && Array.isArray(channels.anteriores),'Channel registry categories must be arrays');
 assert.ok(html.includes('id="channels-title"') && html.includes('id="canais"'),'Channel showcase section missing');
-assert.ok(html.includes('/channels.js?v=1') && html.includes('/channels.css?v=1'),'Channel assets not included');
+assert.ok(html.includes('/channels.js?v=2') && html.includes('/channels.css?v=1'),'Channel assets not included');
 new Function(read('channels.js'));
 assert.ok(read('channels.css').includes('.channel-card'),'Channel UI stylesheet missing');
 // Atmospheric motion is progressive decoration, not an interactive dependency.

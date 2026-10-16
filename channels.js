@@ -46,16 +46,29 @@
 
       const avatar = document.createElement('span');
       avatar.className = 'channel-avatar';
-      const image = safeImage(entry.imagem);
+      const fallback = safeImage(entry.imagem);
+      const channel = new URL(safeURL(entry.url));
+      const automatic = ['youtube.com','www.youtube.com'].includes(channel.hostname)
+        ? '/api/channel-avatar?channel=' + encodeURIComponent(channel.href) : '';
+      const image = automatic || fallback;
       if (image) {
         const img = document.createElement('img');
         img.src = image;
         img.alt = '';
         img.loading = 'lazy';
         img.decoding = 'async';
+        img.width = 49;
+        img.height = 49;
+        img.referrerPolicy = 'no-referrer';
+        let triedFallback = !automatic || !fallback;
         img.addEventListener('error', () => {
+          if (!triedFallback) {
+            triedFallback = true;
+            img.src = fallback;
+            return;
+          }
           avatar.replaceChildren(text('span','channel-initial',name.slice(0,1).toUpperCase()));
-        }, {once:true});
+        });
         avatar.append(img);
       } else avatar.append(text('span','channel-initial',name.slice(0,1).toUpperCase()));
 
