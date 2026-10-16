@@ -73,7 +73,7 @@ test('Anonymous counts and interactions must use a strict whitelist',()=>{
 });
 test('Private route, important UI and automatic monitor stay present',()=>{
  const html=readFileSync(path.join(root,'index.html'),'utf8');
- assert.match(html,/src="\/sentinel-client\.js\?v=1"/);
+ assert.match(html,/src="\/sentinel-client\.js\?v=2"/);
  assert.match(html,/id="quote-floating-trigger"/);
  assert.match(html,/GustavoPlayer\.mount/);
  assert.match(html,/data:image\/webp;base64/);
