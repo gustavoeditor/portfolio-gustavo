@@ -23,6 +23,8 @@
 <meta name="twitter:description" content="Cinematics, motion design e edição para YouTube.">
 <meta name="twitter:image" content="https://portfolio-gustavo-chi.vercel.app/api/social-image">
 <link rel="stylesheet" href="/player.css?v=1">
+<link rel="stylesheet" href="/quote-modal.css?v=1">
+
 
 <title>GUSTAVO | Editor de Vídeo, Cinematics e Motion Design</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -338,6 +340,48 @@ body{
  .modal-panel .vip-quality{min-width:56px;padding:6px}
 }
 
+
+/* Orçamento VIP: restaurado na V4 sem alterar os estilos do G / PLAYER. */
+#quote-floating-trigger{
+  position:fixed;z-index:260;right:max(24px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom));
+  display:inline-flex;align-items:center;justify-content:center;gap:12px;
+  min-height:54px;padding:14px 19px;border:1px solid #bda4ff8a;border-radius:13px;
+  background:linear-gradient(128deg,#d6c8ff,#af90f5);color:#180f29;
+  font:750 12px var(--font);letter-spacing:.01em;
+  box-shadow:0 14px 50px #030208a3,0 0 35px #9f78e836,inset 0 1px #fff8;
+  transition:transform .25s var(--ease),box-shadow .25s,border-color .25s;
+  isolation:isolate;
+}
+#quote-floating-trigger .quote-icon{display:grid;place-items:center;width:26px;height:26px;border:1px solid #2f1b4f42;border-radius:8px;font-size:15px}
+#quote-floating-trigger .quote-arrow{font-size:18px;margin-left:5px}
+#quote-floating-trigger:hover{transform:translateY(-4px);box-shadow:0 21px 60px #030208ba,0 0 45px #a57cfc5e}
+#quote-floating-trigger:focus-visible{outline:3px solid #fff;outline-offset:3px}
+#quote-floating-trigger[hidden],body.modal-open #quote-floating-trigger{display:none!important}
+/* Formulário original, agora visualmente compatível com a Experience V4. */
+#quick-quote-dialog{font-family:var(--font-body)}
+#quick-quote-dialog .quick-quote-shell{background:radial-gradient(ellipse at 8% 2%,#8059c238,transparent 54%),linear-gradient(135deg,#211829,#100e18)}
+#quick-quote-dialog .quote-form{display:grid;gap:17px;margin:0;padding:0;background:transparent;border:none}
+#quick-quote-dialog .quote-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#quick-quote-dialog .quote-field{display:grid;gap:8px;min-width:0}
+#quick-quote-dialog .quote-field label{font:650 12px var(--font);color:#f4eaff;line-height:1.5}
+#quick-quote-dialog .quote-field label span{color:#ada2c0;font-size:11px;font-weight:400}
+#quick-quote-dialog .quote-field :is(input,select,textarea){display:block;width:100%;min-width:0;min-height:46px;border:1px solid #5f4d74;border-radius:9px;background:#0f0d16;color:#fff;padding:12px 13px;box-sizing:border-box;font:500 13px var(--font-body);color-scheme:dark}
+#quick-quote-dialog .quote-field textarea{min-height:110px;resize:vertical;line-height:1.6}
+#quick-quote-dialog .quote-field :is(input,select,textarea)::placeholder{color:#a39ab4}
+#quick-quote-dialog .quote-field :is(input,select,textarea):focus-visible{outline:2px solid #c6acff;outline-offset:1px;border-color:#b296ec}
+#quick-quote-dialog .quote-submit{width:100%;display:flex;justify-content:space-between;align-items:center;min-height:52px;padding:15px 18px;margin-top:3px;background:#c7b1ff;color:#17101f;border:1px solid #dacbff;border-radius:9px;font:750 12px var(--font);transition:background .2s,transform .2s}
+#quick-quote-dialog .quote-submit:hover{background:#e0d2ff;transform:translateY(-2px)}
+#quick-quote-dialog .quote-privacy,#quick-quote-dialog .quote-status{margin:0;color:#b6a9c7;font-size:11px;line-height:1.65}
+#quick-quote-dialog .quote-status{color:#dfcaff;min-height:1em}
+#quick-quote-dialog .float-live{width:7px;height:7px;display:inline-block;flex:none;border-radius:50%;background:#b7f8cd;box-shadow:0 0 13px #b7f8cd}
+@media(max-width:600px){
+ #quote-floating-trigger{right:max(12px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));min-height:49px;padding:11px 13px;font-size:11px;gap:7px;border-radius:12px}
+ #quote-floating-trigger .quote-icon{width:24px;height:24px}
+ #quick-quote-dialog .quote-row{grid-template-columns:1fr;gap:15px}
+ #quick-quote-dialog .quote-field :is(input,select,textarea){font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){#quote-floating-trigger,#quick-quote-dialog .quote-submit{transition:none!important}}
+
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -438,6 +482,41 @@ body{
 <footer class="footer"><div class="container"><div class="footer-row"><a class="logo" href="#inicio"><span class="logo-text">GUSTAVO<small>VISUAL STUDIO®</small></span></a><span class="footer-center">DESIGN É INTENÇÃO. MOVIMENTO É LINGUAGEM.</span><div class="socials"><a href="https://www.instagram.com/gustaeditor0812/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="https://github.com/gustavoeditor/portfolio-gustavo" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="#inicio">Voltar ao topo ↑</a></div></div><div class="footnote"><span>© 2026 GUSTAVO · PORTFÓLIO CRIATIVO</span><span>EXPERIENCE LAB 04 / VERSÃO OFICIAL</span></div></div></footer>
 </div>
 <div class="modal" id="video-modal" role="dialog" aria-modal="true" aria-hidden="true" inert aria-label="Reprodutor de projeto"><div class="modal-panel"><div class="modal-top"><div class="titles"><b id="modal-title">Projeto</b><small id="modal-category">CINEMATIC</small></div><button class="modal-close" type="button" id="modal-close" aria-label="Fechar vídeo">×</button></div><video id="modal-player" controls playsinline preload="none"></video><div class="modal-foot"><span id="modal-desc">Projeto do portfólio.</span><a id="modal-source" target="_blank" rel="noopener noreferrer" href="https://portfolio-gustavo-chi.vercel.app/">Abrir original ↗</a></div></div></div>
+
+<!-- Orçamento flutuante restaurado: reutiliza o formulário e o envio pelo WhatsApp já validados. -->
+<button id="quote-floating-trigger" class="quote-float" type="button" data-open-quote aria-haspopup="dialog" aria-controls="quick-quote-dialog" aria-label="Abrir formulário de orçamento de edição">
+  <span class="quote-icon" aria-hidden="true">✦</span><span>Solicitar orçamento</span><span class="quote-arrow" aria-hidden="true">↗</span>
+</button>
+<dialog class="quick-quote-dialog" id="quick-quote-dialog" aria-labelledby="quick-quote-title" aria-describedby="quick-quote-description">
+  <div class="quick-quote-shell">
+    <header class="quick-quote-heading">
+      <div><span class="quick-quote-kicker"><span class="float-live" aria-hidden="true"></span> SEU PRÓXIMO PROJETO</span>
+        <h2 id="quick-quote-title">Vamos criar algo <em>incrível.</em></h2>
+        <p id="quick-quote-description">Conte os detalhes da sua edição e envie a mensagem diretamente pelo WhatsApp.</p>
+      </div>
+      <button class="quick-quote-close" id="quick-quote-close" type="button" aria-label="Fechar formulário">✕</button>
+    </header>
+    <div class="quick-quote-form-slot" id="quick-quote-form-slot">
+      <form id="quote-form" class="quote-form" autocomplete="on">
+        <div class="quote-row">
+          <div class="quote-field"><label for="quote-name">Como posso te chamar? <span>Opcional</span></label><input id="quote-name" name="clientName" type="text" maxlength="60" autocomplete="name" placeholder="Seu nome"></div>
+          <div class="quote-field"><label for="quote-service">Que tipo de edição você precisa? *</label><select id="quote-service" name="service" required><option value="">Selecionar serviço</option><option value="youtube">Edição para YouTube</option><option value="cinematics">Cinematics / Gaming</option><option value="motion">Motion design / VFX</option><option value="outros">Outro tipo de projeto</option></select></div>
+        </div>
+        <div class="quote-row">
+          <div class="quote-field"><label for="quote-duration">Duração aproximada <span>Opcional</span></label><select id="quote-duration" name="duration"><option value="">Ainda não sei</option><option>Até 30 segundos</option><option>30 segundos a 2 minutos</option><option>2 a 10 minutos</option><option>Mais de 10 minutos</option></select></div>
+          <div class="quote-field"><label for="quote-deadline">Prazo desejado <span>Opcional</span></label><select id="quote-deadline" name="deadline"><option value="">A combinar</option><option>Até 7 dias</option><option>Até 15 dias</option><option>Até 30 dias</option><option>Sem prazo definido</option></select></div>
+        </div>
+        <div class="quote-field"><label for="quote-details">Me conte sua ideia *</label><textarea id="quote-details" name="details" required minlength="10" maxlength="1100" rows="4" placeholder="Ex.: Quero um cinematic de CS2 com iluminação dramática e edição no ritmo da música."></textarea></div>
+        <div class="quote-field"><label for="quote-reference">Link de referência <span>Opcional</span></label><input id="quote-reference" name="reference" type="url" maxlength="350" placeholder="https://..."></div>
+        <button type="submit" class="quote-submit">Montar mensagem e abrir WhatsApp <span aria-hidden="true">↗</span></button>
+        <p class="quote-privacy">Os dados ficam no navegador até você abrir o WhatsApp para revisar e enviar. Não são salvos neste site.</p>
+        <p class="quote-status" id="quote-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+    <p class="quick-quote-footer"><span class="float-live" aria-hidden="true"></span> Atendimento remoto · Projeto sob medida</p>
+  </div>
+</dialog>
+
 <div class="pack-toast" id="pack-toast" role="status" aria-live="polite" hidden>O Pack de edição ainda não está disponível para compra. O botão já está reservado para o futuro lançamento.</div>
 <script src="/player.js?v=2"></script>
 <script>
@@ -601,5 +680,7 @@ document.querySelectorAll('[data-service]').forEach(link=>link.addEventListener(
 document.getElementById('brief-form').addEventListener('submit',e=>{e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return;const name=document.getElementById('brief-name').value.trim().slice(0,60),type=document.getElementById('brief-type').value,detail=document.getElementById('brief-detail').value.trim().slice(0,1100);if(detail.length<10){document.getElementById('brief-detail').setCustomValidity('Escreva pelo menos 10 caracteres.');form.reportValidity();document.getElementById('brief-detail').setCustomValidity('');return}const msg=['Olá, Gustavo! Vi seu portfólio e gostaria de conversar sobre um projeto.',name?'Nome: '+name:'','Tipo de projeto: '+type,'Minha ideia: '+detail,'Podemos conversar sobre um orçamento?'].filter(Boolean).join('\n');const url='https://wa.me/5537988445372?text='+encodeURIComponent(msg);const popup=window.open(url,'_blank');if(popup){try{popup.opener=null}catch(_){}}else{window.location.assign(url)}});
 })();
 </script>
+<script defer src="/sales.js?v=2"></script>
+<script defer src="/quote-modal.js?v=1"></script>
 </body>
 </html>
