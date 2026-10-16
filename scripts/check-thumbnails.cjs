@@ -64,6 +64,52 @@ async function checkSite(browser,base,label,width,mobile){
   return {count:found.length,bad,responses,failures};
  }finally{await context.close();}
 }
+async function makeContactSheet(browser,base,label){
+ const context=await browser.newContext({viewport:{width:1360,height:800},deviceScaleFactor:1});
+ const page=await context.newPage();
+ try{
+  await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});
+  const result=await page.evaluate(async items=>{
+   const columns=4,cellW=320,cellH=225;
+   const rows=Math.ceil(items.length/columns);
+   const canvas=document.createElement('canvas');
+   canvas.width=columns*cellW;canvas.height=rows*cellH;
+   const ctx=canvas.getContext('2d',{willReadFrequently:true});
+   ctx.fillStyle='#101016';ctx.fillRect(0,0,canvas.width,canvas.height);
+   const metrics=[];
+   for(let i=0;i<items.length;i++){
+     const project=items[i],x=(i%columns)*cellW,y=Math.floor(i/columns)*cellH;
+     ctx.fillStyle='#22212c';ctx.fillRect(x+3,y+3,cellW-6,cellH-6);
+     const image=new Image();
+     image.src='/'+project.src.replace(/^\//,'');
+     let ok=true;try{await image.decode();}catch(e){ok=false;}
+     if(ok){
+       const scale=Math.max((cellW-16)/image.naturalWidth,160/image.naturalHeight);
+       const drawWidth=image.naturalWidth*scale,drawHeight=image.naturalHeight*scale;
+       ctx.save();ctx.beginPath();ctx.rect(x+8,y+8,cellW-16,160);ctx.clip();
+       ctx.drawImage(image,x+8+(cellW-16-drawWidth)/2,y+8+(160-drawHeight)/2,drawWidth,drawHeight);ctx.restore();
+     }
+     ctx.fillStyle='#eae6f1';ctx.font='bold 13px Arial';ctx.fillText(String(i+1).padStart(2,'0')+' '+project.title.slice(0,37),x+9,y+189);
+     ctx.fillStyle=ok?'#7ad8ac':'#f87171';ctx.font='11px Arial';
+     ctx.fillText(ok?'WebP carregado':'ERRO DE IMAGEM',x+9,y+207);
+     const raw=ctx.getImageData(x+8,y+8,cellW-16,160).data;
+     let luma=0, dark=0;
+     for(let j=0;j<raw.length;j+=4){
+       const value=.2126*raw[j]+.7152*raw[j+1]+.0722*raw[j+2];
+       luma+=value;if(value<18)dark++;
+     }
+     metrics.push({title:project.title,ok,averageBrightness:Math.round(luma/(raw.length/4)),fractionVeryDark:+(dark/(raw.length/4)).toFixed(3)});
+   }
+   return {url:canvas.toDataURL('image/png'),metrics};
+  },expected);
+  const dir=path.join(root,'out');
+  fs.mkdirSync(dir,{recursive:true});
+  const target=path.join(dir,'thumbs-contact-sheet-'+label+'.png');
+  fs.writeFileSync(target,Buffer.from(result.url.split(',')[1],'base64'));
+  console.log('CONTACT_SHEET '+label+': '+JSON.stringify(result.metrics));
+  console.log('CONTACT_SHEET_FILE '+target);
+ }finally{await context.close();}
+}
 async function run(){
  // Require that every static video has exactly one valid, decodable poster.
  for(const p of expected){
@@ -76,10 +122,12 @@ async function run(){
  try{
   const base='http://127.0.0.1:'+server.address().port+'/';
   for(const [width,mobile] of [[390,true],[1280,false]]) await checkSite(browser,base,'local',width,mobile);
+  await makeContactSheet(browser,base,'local');
   if(process.env.CHECK_PRODUCTION_THUMBS==='1'){
    try{
     const remote=await checkSite(browser,'https://portfolio-gustavo-chi.vercel.app/','PRODUCTION',390,true);
     console.log('LIVE_PRODUCTION_SUMMARY',JSON.stringify(remote.bad));
+    await makeContactSheet(browser,'https://portfolio-gustavo-chi.vercel.app/','production');
    }catch(error){console.log('PRODUCTION_CHECK_UNAVAILABLE',String(error));}
   }
  }finally{await browser.close();await close();}
