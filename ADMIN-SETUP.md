@@ -62,7 +62,7 @@ Estas camadas reduzem o risco; não são uma garantia de impossibilidade de inva
 
 ```sh
 npm ci
-npm run build
+npm run build:upload-client
 npm test
 ```
 

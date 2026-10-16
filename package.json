@@ -13,7 +13,7 @@
   },
   "scripts": {
     "test": "node scripts/verify-portfolio.cjs && node scripts/check-channel-avatar.cjs && node --test tests/admin-upload.test.cjs",
-    "build": "esbuild scripts/blob-client-entry.mjs --bundle --format=esm --platform=browser --minify --legal-comments=eof --outfile=vendor/blob-client.js"
+    "build:upload-client": "esbuild scripts/blob-client-entry.mjs --bundle --format=esm --platform=browser --minify --legal-comments=eof --outfile=vendor/blob-client.js"
   },
   "devDependencies": {
     "esbuild": "^0.28.2"
