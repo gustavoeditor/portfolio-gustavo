@@ -1,0 +1,57 @@
+name: GUSTAVO Sentinel / Saúde do site
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: gustavo-sentinel-production
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testar produção
+        id: audit
+        continue-on-error: true
+        run: node scripts/sentinel-check.cjs
+      - name: Abrir ou encerrar incidente
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          AUDIT_RESULT: ${{ steps.audit.outcome }}
+        with:
+          script: |
+            const fs = require('fs');
+            const {owner, repo} = context.repo;
+            const title = '[SENTINEL] Problema no portfólio público';
+            const {data: open} = await github.rest.issues.listForRepo({owner,repo,state:'open',per_page:100});
+            const incident = open.find(issue => !issue.pull_request && issue.title === title);
+            const unhealthy = process.env.AUDIT_RESULT !== 'success';
+            let report = null;
+            try {report = JSON.parse(fs.readFileSync('sentinel-results.json','utf8'));} catch {}
+            const findings = (report?.results||[]).filter(x=>!x.ok);
+            const details = findings.map(x => '- '+x.name+': '+(x.reason||'sem resposta')+' ('+x.path+')').join('\n');
+            if (unhealthy && !incident) {
+              await github.rest.issues.create({owner,repo,title,body:
+                'O monitor de produção detectou uma falha após três tentativas.\n\n'+
+                (details || 'A execução falhou antes de gerar o relatório.')+
+                '\n\nExecução: '+context.serverUrl+'/'+owner+'/'+repo+'/actions/runs/'+context.runId+
+                '\n\n**Não executar deploy ou rollback automático sem validação.**'});
+            } else if (!unhealthy && incident) {
+              await github.rest.issues.createComment({owner,repo,issue_number:incident.number,
+                body:'✅ Os testes de produção voltaram a passar. Incidente encerrado automaticamente.'});
+              await github.rest.issues.update({owner,repo,issue_number:incident.number,state:'closed'});
+            }
+      - name: Registrar falha no histórico
+        if: steps.audit.outcome != 'success'
+        run: exit 1
