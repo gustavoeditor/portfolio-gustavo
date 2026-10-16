@@ -5,7 +5,8 @@
  // Honor explicit privacy signals before any telemetry is initialized.
  if(navigator.globalPrivacyControl===true||navigator.doNotTrack==='1'||window.doNotTrack==='1')return;
  const endpoint='/api/sentinel-event';
- let disabled=false,remaining=12;
+ let disabled=false,enabled=false,initializing=true,remaining=12;
+ const pending=[];
  const reported=new Map();
  const validComponents=new Set(['hero','feature','gallery','player','page','catalog','navigation','contact','pack','quote','video','work','sound']);
  const category=element=>{
@@ -19,6 +20,10 @@
  function send(type,component){
   if(disabled||remaining<=0||document.hidden)return;
   if(!validComponents.has(component))return;
+  if(!enabled){
+   if(initializing && pending.length<8)pending.push({type,component});
+   return;
+  }
   const key=type+':'+component,now=Date.now();
   const throttle=type==='click'?1800:type==='interaction'?15000:15*60*1000;
   if(now-(reported.get(key)||0)<throttle)return;
@@ -30,14 +35,24 @@
    }).then(response=>{if(response.status===503||response.status===403)disabled=true;}).catch(()=>{disabled=true;});
   }catch(_){disabled=true;}
  }
- // Anonymous session count: once per browser tab session, no stable visitor ID.
- try{
+ // Avoid a write attempt when the server has no configured rate limiter.
+ function visitOnce(){
+  try{
    const key='gustavo-sentinel-visit-v1';
-   if(sessionStorage.getItem(key)!=='1'){
-     sessionStorage.setItem(key,'1');
-     send('visit','page');
-   }
- }catch(_){send('visit','page');}
+   if(sessionStorage.getItem(key)==='1')return;
+   sessionStorage.setItem(key,'1');
+  }catch(_){}
+  send('visit','page');
+ }
+ fetch(endpoint,{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(5000)})
+  .then(response=>response.ok?response.json():{enabled:false})
+  .then(config=>{
+   initializing=false;enabled=config?.enabled===true;
+   if(!enabled){disabled=true;pending.length=0;return;}
+   visitOnce();
+   for(const item of pending.splice(0))send(item.type,item.component);
+  })
+  .catch(()=>{initializing=false;disabled=true;pending.length=0;});
  // Track only intentionally labeled UI interactions, never typing or personal data.
  document.addEventListener('click',event=>{
    if(!event.isTrusted)return;
@@ -89,5 +104,5 @@
   document.addEventListener(type,event=>{if(event.target?.tagName==='VIDEO')cancel(event.target);},true);
  }
  // Failure recovery stays local: established fallback posters and media quality remain unchanged.
- window.GustavoSentinel={version:'1.0',localChecks:true,hasPersistentEvents:()=>!disabled};
+ window.GustavoSentinel={version:'1.1',localChecks:true,hasPersistentEvents:()=>enabled&&!disabled};
 })();

@@ -45,3 +45,7 @@ O monitor de disponibilidade verifica respostas HTTP e marcadores no HTML/JS; n�
 - Respeita Global Privacy Control e Do Not Track. Os campos digitados nunca são medidos e o formulário não registra o conteúdo do briefing.
 - A página pública /privacidade.html explica a coleta e pode ser acessada no rodapé.
 - Vercel Web Analytics não está habilitado no projeto atualmente; o SENTINEL coleta suas próprias métricas agregadas quando a infraestrutura de limitação estiver disponível.
+
+## Implantação segura sem Redis
+
+A página pública consulta `GET /api/sentinel-event` antes de enviar eventos. Quando Redis ou Blob não estão disponíveis, essa rota retorna apenas `{\"enabled\":false}`, e o navegador interrompe a telemetria sem enviar POSTs adicionais. A central exibe dados indisponíveis em vez de contagens inventadas.
