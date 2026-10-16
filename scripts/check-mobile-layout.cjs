@@ -133,6 +133,33 @@ async function run(){
    await context.close();
    console.log('SENTINEL dashboard '+mode+' mobile render OK');
   }
+
+  // Mobile/desktop entry regression: plain visits start at the hero,
+  // while explicitly requested hash anchors continue to work.
+  for(const width of [390,1440]){
+   const ctx=await browser.newContext({viewport:{width,height:844},
+    isMobile:width===390,hasTouch:width===390});
+   const page=await ctx.newPage();
+   await page.goto(base+'?utm_source=entry-smoke',{waitUntil:'load'});
+   await page.waitForTimeout(170); // Wait until initial pageshow callbacks have run.
+   await page.evaluate(()=>{
+    document.documentElement.style.scrollBehavior='auto';
+    scrollTo(0,document.querySelector('#contato').offsetTop);
+   });
+   await page.waitForFunction(()=>scrollY>500,null,{timeout:5000});
+   await page.reload({waitUntil:'load'});
+   await page.waitForTimeout(220);
+   const entry=await page.evaluate(()=>({y:scrollY,mode:history.scrollRestoration}));
+   assert.ok(entry.y<6,width+'px: homepage restored an old contact position '+JSON.stringify(entry));
+   assert.equal(entry.mode,'manual',width+'px: initial scroll restoration should be explicit');
+   await page.goto(base+'#contato',{waitUntil:'load'});
+   await page.waitForFunction(()=>scrollY>500,null,{timeout:5000});
+   assert.equal(await page.evaluate(()=>location.hash),'#contato');
+   await page.goto(base,{waitUntil:'load'});
+   assert.ok(await page.evaluate(()=>scrollY)<6,width+'px: homepage should begin at the hero');
+   console.log('Homepage entry and deep links '+width+'px OK');
+   await ctx.close();
+  }
  }finally{await browser.close();await close();}
 }
 run().catch(error=>{console.error(error?.stack||error);server.close();process.exitCode=1;});
