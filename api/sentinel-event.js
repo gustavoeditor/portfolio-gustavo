@@ -5,7 +5,8 @@ module.exports=async function handler(req,res){
  res.setHeader('Cache-Control','no-store');
  res.setHeader('X-Content-Type-Options','nosniff');
  res.setHeader('X-Robots-Tag','noindex');
- if(req.method!=='POST'){res.setHeader('Allow','POST');return res.status(405).end();}
+ if(req.method==='GET')return res.status(200).json({enabled:sentinel.enabled()});
+ if(req.method!=='POST'){res.setHeader('Allow','GET, POST');return res.status(405).end();}
  // Require same-site browser submissions. Do not permit cross-origin CORS.
  if(!sameOrigin(req)||!['same-origin','none'].includes(req.headers['sec-fetch-site']||'same-origin'))
   return res.status(403).end();
