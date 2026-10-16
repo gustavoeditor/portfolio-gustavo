@@ -2,6 +2,8 @@
    Never collect typed text, URLs, cookies, IP, stack traces or personal details. */
 (()=>{
  'use strict';
+ // Honor explicit privacy signals before any telemetry is initialized.
+ if(navigator.globalPrivacyControl===true||navigator.doNotTrack==='1'||window.doNotTrack==='1')return;
  const endpoint='/api/sentinel-event';
  let disabled=false,remaining=12;
  const reported=new Map();
