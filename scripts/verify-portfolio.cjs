@@ -62,4 +62,20 @@ async function validateCoverDecoding(){
 }
 void validateCoverDecoding().catch(e=>{console.error(e);process.exitCode=1;});
 
+
+/* Sound is opt-in; the audio panel may never remove the booking CTA or video player. */
+for(const selector of ['id="ambience-dock"','id="ambience-trigger"','id="ambience-popover"','id="ambience-music"','id="ambience-fx"','id="ambience-volume"','/ambience.css?v=1','/ambience.js?v=1']){
+ assert.ok(html.includes(selector),'Ambience preview missing: '+selector);
+}
+assert.equal((html.match(/id="ambience-dock"/g)||[]).length,1,'Ambience dock must not duplicate');
+assert.ok(fs.existsSync(path.join(root,'ambience.js'))&&fs.existsSync(path.join(root,'ambience.css')),'Ambience assets missing');
+const ambienceScript=read('ambience.js');
+new Function(ambienceScript);
+assert.ok(ambienceScript.includes("preferences.music = stored.music === true"),'Saved music preference not restored');
+assert.ok(ambienceScript.includes("music:false, fx:false, volume:12"),'Initial audio must be off');
+assert.ok(ambienceScript.includes("document.addEventListener('play',synchronize,true)"),'Pause/duck when video plays');
+assert.ok(ambienceScript.includes('document.hidden'),'Pause on background tabs');
+assert.ok(ambienceScript.includes('prefers-reduced-motion')===false,'Sound must be optional, not tied to animation preferences');
+assert.ok(read('ambience.css').includes('body.modal-open .ambience-dock'),'Audio widget must not overlay video player');
+
 console.log('Portfolio V4 validado: '+projects.length+' vídeos, admin, SEO e interface.');
