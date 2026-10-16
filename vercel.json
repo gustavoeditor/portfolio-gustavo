@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/admin/sentinel",
+      "destination": "/api/sentinel-panel"
+    },
+    {
+      "source": "/sentinel",
+      "destination": "/api/sentinel-panel"
+    },
+    {
       "source": "/gerenciar-projetos.html",
       "destination": "/api/admin-panel"
     },
@@ -139,6 +147,32 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=604800, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/sentinel",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        }
+      ]
+    },
+    {
+      "source": "/admin/sentinel",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
         }
       ]
     }
