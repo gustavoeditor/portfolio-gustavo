@@ -41,6 +41,25 @@ test('No remote writes without Redis-backed shared rate limiting',async()=>{
   if(prior.token!==undefined)process.env.UPSTASH_REDIS_REST_TOKEN=prior.token;
  }
 });
+test('Anonymous counts and interactions must use a strict whitelist',()=>{
+ for(const [type,component] of [['visit','page'],['click','quote'],['click','pack'],['click','video'],['click','navigation'],['click','sound'],['interaction','player']]){
+  assert.deepEqual(sentinel.sanitize({type,component,visitorId:'private'}),{type,component});
+ }
+ assert.equal(sentinel.sanitize({type:'click',component:'password'}),null);
+ const dashboard=readFileSync(path.join(root,'lib/sentinel-dashboard.js'),'utf8');
+ new Function(dashboard);
+ for(const id of ['metric-visits','metric-clicks','metric-interactions','visits-chart','clicks-chart'])assert.ok(dashboard.includes(id));
+ assert.match(dashboard,/Coleta não habilitada/);
+ assert.match(dashboard,/Sem histórico de visitas/);
+ const collector=readFileSync(path.join(root,'sentinel-client.js'),'utf8');
+ assert.match(collector,/sessionStorage.getItem/);
+ assert.match(collector,/globalPrivacyControl/);
+ assert.match(collector,/doNotTrack/);
+ assert.match(collector,/click','pack/);
+ assert.match(collector,/click','quote/);
+ assert.doesNotMatch(collector,/localStorage\.setItem/);
+ assert.match(readFileSync(path.join(root,'index.html'),'utf8'),/href="\/privacidade.html"/);
+});
 test('Private route, important UI and automatic monitor stay present',()=>{
  const html=readFileSync(path.join(root,'index.html'),'utf8');
  assert.match(html,/src="\/sentinel-client\.js\?v=1"/);
