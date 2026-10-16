@@ -79,3 +79,24 @@
 .vip-quality-option[aria-pressed="true"]::after{content:"✓";color:#d8bbff}
 .vip-quality-option:hover,.vip-quality-option:focus-visible{background:#a080dc40;outline:none}
 @media(max-width:600px){.vip-quality-menu{right:-30px;bottom:calc(100% + 12px);width:120px}.vip-quality-option{min-height:42px;font-size:13px}}
+
+/* G / PLAYER V4.3: responsive idle-aware controls.
+   A hovering pointer alone must NOT reveal UI after 3.2 seconds of inactivity. */
+.vip-player .vip-controls,.vip-player .vip-player-caption,.vip-player::after{
+ transition:opacity .22s ease;
+}
+.vip-player[data-playing="true"][data-ui-visible="false"] .vip-controls,
+.vip-player[data-playing="true"][data-ui-visible="false"] .vip-player-caption,
+.vip-player[data-playing="true"][data-ui-visible="false"]::after{
+ opacity:0!important;pointer-events:none;
+}
+.vip-player[data-playing="true"][data-ui-visible="false"] .vip-controls :is(button,input){
+ pointer-events:none;
+}
+.vip-player[data-playing="true"][data-ui-visible="true"] .vip-controls{opacity:1}
+@media(hover:hover) and (pointer:fine){
+ .vip-player[data-playing="true"][data-ui-visible="false"][data-pointer-inside="true"]{cursor:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .vip-player .vip-controls,.vip-player .vip-player-caption,.vip-player::after{transition:none!important}
+}
