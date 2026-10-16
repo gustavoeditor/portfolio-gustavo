@@ -10,5 +10,5 @@ module.exports = function handler(req, res) {
   if (!process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) return res.status(503).setHeader('Content-Type', 'text/plain; charset=utf-8').end('Painel temporariamente indisponível. Configure as variáveis privadas ADMIN_PASSWORD e ADMIN_SESSION_SECRET na Vercel.');
   if (!validSession(req)) { res.setHeader('Location', '/admin'); return res.status(302).end(); }
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  return res.status(200).send(PANEL_HTML);
+  return res.status(200).send(PANEL_HTML.replace('<button class="btn" id="logout-button"', '<a class="back" href="/sentinel">SENTINEL / MONITORAMENTO ↗</a><button class="btn" id="logout-button"'));
 }
