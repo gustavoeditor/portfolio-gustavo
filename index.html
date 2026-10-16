@@ -3,6 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+/* Start every plain homepage visit at its hero, instead of a previously restored section.
+   Explicit #anchors remain deep-linkable and navigation stays untouched. */
+(()=>{
+  if(!/^\/(?:index\.html)?$/.test(location.pathname) || location.hash)return;
+  try{history.scrollRestoration='manual';}catch(_){}
+  let interacted=false;
+  for(const name of ['pointerdown','touchstart','wheel','keydown']){
+    addEventListener(name,()=>{interacted=true;},{capture:true,passive:true,once:true});
+  }
+  function restoreTop(){
+    if(interacted||location.hash)return;
+    const root=document.documentElement;
+    const prev=root.style.scrollBehavior;
+    root.style.scrollBehavior='auto';
+    scrollTo({left:0,top:0,behavior:'instant'});
+    root.style.scrollBehavior=prev;
+  }
+  document.addEventListener('DOMContentLoaded',restoreTop,{once:true});
+  addEventListener('pageshow',()=>{
+    restoreTop();
+    requestAnimationFrame(()=>requestAnimationFrame(restoreTop));
+  });
+})();
+</script>
+
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#08080d">
 <meta name="description" content="Gustavo, editor de vídeo especializado em CS2, cinematics, motion design e vídeos para YouTube. Explore meus trabalhos e solicite seu orçamento.">
