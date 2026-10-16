@@ -48,4 +48,4 @@ O monitor de disponibilidade verifica respostas HTTP e marcadores no HTML/JS; n�
 
 ## Implantação segura sem Redis
 
-A página pública consulta `/api/sentinel-config` antes de enviar eventos. Quando Redis ou Blob não estão disponíveis, essa rota retorna apenas `{\"enabled\":false}`, e o navegador interrompe a telemetria sem enviar POSTs adicionais. A central exibe dados indisponíveis em vez de contagens inventadas.
+A página pública consulta `GET /api/sentinel-event` antes de enviar eventos. Quando Redis ou Blob não estão disponíveis, essa rota retorna apenas `{\"enabled\":false}`, e o navegador interrompe a telemetria sem enviar POSTs adicionais. A central exibe dados indisponíveis em vez de contagens inventadas.
