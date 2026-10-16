@@ -27,7 +27,7 @@
 <meta name="twitter:title" content="Gustavo | Editor de Vídeo">
 <meta name="twitter:description" content="Portfólio de edição de vídeo, cinematics e motion design.">
 <title>GUSTAVO | EDITOR DE VÍDEO</title>
-<link rel="stylesheet" href="/sales.css?v=2">
+<link rel="stylesheet" href="/sales.css?v=3">
 <link rel="stylesheet" href="/channels.css?v=1">
 <link rel="stylesheet" href="/quote-modal.css?v=2">
 <style>
@@ -734,10 +734,32 @@ document.getElementById('year').textContent = new Date().getFullYear();
     preview.setAttribute('aria-label', 'Reproduzir ' + title);
     if (poster) {
       const image = make('img', 'project-poster');
-      image.src = poster;
       image.alt = '';
-      image.loading = 'lazy';
+      // All 17 compressed local covers total ~401 KiB. Load them in advance
+      // so fast scrolling on mobile does not leave native-lazy image gaps.
+      // Managed/external project covers remain lazy to preserve bandwidth.
+      const bundledCover = /^\/?capas\/[a-z0-9-]+\.webp$/i.test(poster);
+      image.loading = bundledCover ? 'eager' : 'lazy';
+      image.fetchPriority = bundledCover && position < 2 ? 'high' : 'low';
       image.decoding = 'async';
+      let attemptedRetry = false;
+      image.addEventListener('error', () => {
+        if (!attemptedRetry) {
+          attemptedRetry = true;
+          // A temporary network/CDN/cache failure should not leave a black tile.
+          const fresh = new URL(poster, document.baseURI);
+          fresh.searchParams.set('_cover_retry', String(Date.now()));
+          image.src = fresh.href;
+          return;
+        }
+        // A permanent failure still leaves a meaningful, playable project card.
+        image.remove();
+        preview.classList.add('poster-unavailable');
+        const label = make('span', 'poster-error-label', 'Prévia indisponível');
+        label.setAttribute('aria-hidden', 'true');
+        preview.prepend(label);
+      });
+      image.src = poster;
       preview.append(image);
     }
     preview.append(make('span', 'project-play-icon', '▶'));
