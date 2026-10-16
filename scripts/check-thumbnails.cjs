@@ -33,7 +33,7 @@ async function checkSite(browser,base,label,width,mobile){
  page.on('requestfailed',r=>{if(r.url().includes('/capas/'))failures.push({url:r.url(),error:r.failure()?.errorText});});
  try{
   await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});
-  await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length>=expected.length,null,{timeout:18000});
+  await page.waitForFunction(count=>document.querySelectorAll('#project-grid .project-card').length>=count,expected.length,{timeout:18000});
   const cards=page.locator('#project-grid .project-card');
   for(let i=0;i<expected.length;i++){
    await cards.nth(i).scrollIntoViewIfNeeded({timeout:12000});
