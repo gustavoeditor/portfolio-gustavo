@@ -3,6 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+/* A clean visit to the homepage begins at the hero. Explicit #links are respected. */
+(()=>{
+ if(!/^\/(?:index\.html)?$/.test(location.pathname)||location.hash)return;
+ try{history.scrollRestoration='manual';}catch(_){}
+ let touched=false;
+ const stop=()=>{touched=true;};
+ for(const name of ['pointerdown','touchstart','wheel','keydown']){
+  addEventListener(name,stop,{capture:true,passive:true,once:true});
+ }
+ const toHero=()=>{
+  if(touched||location.hash)return;
+  const root=document.documentElement,previous=root.style.scrollBehavior;
+  root.style.scrollBehavior='auto';
+  scrollTo(0,0);
+  root.style.scrollBehavior=previous;
+ };
+ document.addEventListener('DOMContentLoaded',toHero,{once:true});
+ // No delayed frame that could undo a visitor's next scroll.
+ addEventListener('pageshow',toHero);
+})();
+</script>
+
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#08080d">
 <meta name="description" content="Gustavo, editor de vídeo especializado em CS2, cinematics, motion design e vídeos para YouTube. Explore meus trabalhos e solicite seu orçamento.">
