@@ -12,17 +12,23 @@
   const fxButton = document.getElementById('ambience-fx');
   const range = document.getElementById('ambience-volume');
   const volumeText = document.getElementById('ambience-volume-display');
+  const fxRange = document.getElementById('ambience-fx-volume');
+  const fxVolumeText = document.getElementById('ambience-fx-volume-display');
   const status = document.getElementById('ambience-status');
   const audioClass = window.AudioContext || window.webkitAudioContext;
   const KEY = 'gustavo-ambience-v1';
-  const defaults = {music:false, fx:false, volume:12};
+  const defaults = {music:false, fx:false, volume:12, fxVolume:32};
+  const MAX_MUSIC_VOLUME = 65;
+  const MAX_FX_VOLUME = 100;
+  const clamp = (number,maximum,fallback) => Number.isFinite(number) ? Math.max(0,Math.min(maximum,Math.round(number))) : fallback;
   let preferences = {...defaults};
   try {
     const stored = JSON.parse(localStorage.getItem(KEY) || 'null');
     if (stored && typeof stored === 'object') {
       preferences.music = stored.music === true;
       preferences.fx = stored.fx === true;
-      if (Number.isFinite(stored.volume)) preferences.volume = Math.max(0, Math.min(35, Math.round(stored.volume)));
+      preferences.volume = clamp(stored.volume,MAX_MUSIC_VOLUME,defaults.volume);
+      preferences.fxVolume = clamp(stored.fxVolume,MAX_FX_VOLUME,defaults.fxVolume);
     }
   } catch (_) { /* Private browsing / disabled storage: safe defaults. */ }
   const save = () => {try {localStorage.setItem(KEY, JSON.stringify(preferences));} catch (_) {}};
@@ -53,6 +59,8 @@
     fxButton.textContent = preferences.fx ? 'Ligados' : 'Desligados';
     range.value=String(preferences.volume);
     volumeText.textContent=preferences.volume+'%';
+    fxRange.value=String(preferences.fxVolume);
+    fxVolumeText.textContent=preferences.fxVolume+'%';
     root.dataset.playing=String(shouldSound());
     trigger.setAttribute('aria-label','Abrir controles de som. '+(preferences.music?'Música ativada':'Música desligada'));
   }
@@ -71,7 +79,8 @@
       master=context.createDynamicsCompressor();master.threshold.value=-18;master.knee.value=21;master.ratio.value=3;
       master.attack.value=.02;master.release.value=.4;master.connect(context.destination);
       musicBus=context.createGain();musicBus.gain.value=0;musicBus.connect(master);
-      fxBus=context.createGain();fxBus.gain.value=.045;fxBus.connect(master);
+      fxBus=context.createGain();fxBus.gain.value=0;fxBus.connect(master);
+      updateFxGain();
       ambienceNoise=context.createBufferSource();ambienceNoise.buffer=noiseBuffer();ambienceNoise.loop=true;
       const tapeFilter=context.createBiquadFilter();tapeFilter.type='lowpass';tapeFilter.frequency.value=1550;
       const tapeGain=context.createGain();tapeGain.gain.value=.02;
@@ -134,6 +143,13 @@
       beatStep=(beatStep+1)%64;
     }
   }
+  // Independent, conservatively capped effects loudness; 100% is still subtle.
+  function updateFxGain() {
+    if(!context || !fxBus)return;
+    const normalized=preferences.fxVolume/MAX_FX_VOLUME;
+    const ceiling=.09;
+    fxBus.gain.setTargetAtTime(ceiling*normalized*normalized,context.currentTime,.035);
+  }
   const adjustGain=() => {
     if(!context||!musicBus)return;
     const target=shouldSound() ? preferences.volume/100*.55 : 0;
@@ -183,10 +199,30 @@
     preferences.fx=!preferences.fx;save();render();
     if(preferences.fx){if(await engage())beep();else{preferences.fx=false;save();render();}}
   });
-  range.addEventListener('input',()=>{preferences.volume=Math.max(0,Math.min(35,Math.round(Number(range.value)||0)));save();adjustGain();render();});
+  range.addEventListener('input',()=>{
+    preferences.volume=clamp(Number(range.value),MAX_MUSIC_VOLUME,defaults.volume);
+    save();adjustGain();render();
+  });
+  fxRange.addEventListener('input',()=>{
+    preferences.fxVolume=clamp(Number(fxRange.value),MAX_FX_VOLUME,defaults.fxVolume);
+    save();updateFxGain();render();
+  });
+  // Keep preferences synchronized if another tab of the same site edits them.
+  window.addEventListener('storage',(event)=>{
+    if(event.key!==KEY || !event.newValue)return;
+    try {
+      const stored=JSON.parse(event.newValue);
+      if(!stored || typeof stored!=='object')return;
+      preferences.music=stored.music===true;
+      preferences.fx=stored.fx===true;
+      preferences.volume=clamp(stored.volume,MAX_MUSIC_VOLUME,defaults.volume);
+      preferences.fxVolume=clamp(stored.fxVolume,MAX_FX_VOLUME,defaults.fxVolume);
+      updateFxGain();synchronize();render();
+    } catch (_) {}
+  });
   // Only high-intent clicks, never form typing or video-player controls.
   document.addEventListener('click',event=>{
-    if(!preferences.fx||root.contains(event.target)||videoActive())return;
+    if(!preferences.fx||root.contains(event.target)||videoActive()||event.target.closest('form,#quick-quote-dialog'))return;
     const target=event.target.closest('.nav-pack,.nav-btn,.btn-primary,.filter,[data-filter],[data-open-quote]');
     if(target && !target.closest('.vip-player'))beep();
   });
@@ -211,5 +247,5 @@
   document.addEventListener('keydown',restoreWithGesture,true);
   if(!audioClass){musicButton.disabled=true;fxButton.disabled=true;shortStatus('Seu navegador não suporta áudio interativo.');}
   render();
-  window.GustavoAmbience={pause:synchronize,getState:()=>({music:preferences.music,fx:preferences.fx,volume:preferences.volume,active:shouldSound()})};
+  window.GustavoAmbience={pause:synchronize,getState:()=>({music:preferences.music,fx:preferences.fx,volume:preferences.volume,fxVolume:preferences.fxVolume,active:shouldSound()})};
 })();
