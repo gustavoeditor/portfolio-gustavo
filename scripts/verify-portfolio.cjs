@@ -35,7 +35,7 @@ assert.equal((html.match(/id="quote-floating-trigger"/g)||[]).length,1,'Botão d
 
 assert.ok(!html.includes('href="/gerenciar-projetos.html"'),'Painel admin não deve aparecer publicamente');
 for(const file of ['player.js','player.css','api/admin-upload.js','api/managed-projects.js','lib/managed-projects.js','api/social-image.js','admin-login.html','vercel.json'])assert.ok(fs.existsSync(path.join(root,file)),'Arquivo de produção ausente: '+file);
-for(const m of html.matchAll(/<script(?:\s+[^>]*)?>([\s\S]*?)<\/script>/g))if(!m[0].includes('src='))new Function(m[1]);
+for(const m of html.matchAll(/<script(?:\s+[^>]*)?>([\s\S]*?)<\/script>/g))if(!m[0].includes('src=')&&!m[0].includes('application/ld+json'))new Function(m[1]);
 const original=projects.map(x=>x.src.split('/').pop().replace(/\.mp4$/, ''));
 for(const slug of original)assert.ok(html.includes("'"+slug+"'"),'Projeto ausente do frontend: '+slug);
 const config=JSON.parse(read('vercel.json'));
