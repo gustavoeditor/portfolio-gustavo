@@ -19,7 +19,7 @@ const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(new Set(ids).size,ids.length,'IDs duplicados');
 for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(ids.includes(id),'Link interno quebrado: '+id);
 for(const name of ['inicio','trabalhos','portfolio-grid','galeria','especialidades','metodo','sobre','contato','brief-form','pack-button','video-modal'])assert.ok(ids.includes(name),'Seção da V4 ausente: '+name);
-for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/player.js?v=3','/player.css?v=1','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
+for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/player.js?v=4','/player.css?v=1','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
  assert.ok(html.includes(snippet),'Integração obrigatória ausente: '+snippet);
 }
 
@@ -87,5 +87,17 @@ assert.ok(ambienceScript.includes('document.hidden'),'Pause on background tabs')
 assert.ok(ambienceScript.includes('prefers-reduced-motion')===false,'Sound must be optional, not tied to animation preferences');
 assert.ok(read('ambience.css').includes('body.modal-open .ambience-dock'),'Audio widget must not overlay video player');
 assert.ok(read('ambience.css').includes('max-height:calc(100dvh - 95px)'),'Audio panel must fit on short screens');
+
+
+/* Playback controls must not remain visible just because the pointer is hovering. */
+assert.ok(html.includes('/player.css?v=2'),'Player auto-hide stylesheet reference missing');
+const playerCSS=read('player.css');
+const playerJS=read('player.js');
+for(const token of ['CONTROL_IDLE_MS=3200',"on(root,'pointermove'", "on(root,'pointerleave'",'hideUI();',"on(root,'focusin'", "on(video,'play',onPlaybackState)",'touchRevealOnly','clearHideTimer();']){
+ assert.ok(playerJS.includes(token),'Player auto-hide behavior absent: '+token);
+}
+assert.ok(playerCSS.includes('[data-playing="true"][data-ui-visible="false"] .vip-controls'),'Player controls are not visually hidden when idle');
+assert.ok(playerCSS.includes('opacity:0!important;pointer-events:none'),'Idle controls must not capture clicks');
+assert.ok(playerCSS.includes('[data-ui-visible="false"][data-pointer-inside="true"]'),'Mouse cursor should be hidden over idle playback');
 
 console.log('Portfolio V4 validado: '+projects.length+' vídeos, admin, SEO e interface.');
