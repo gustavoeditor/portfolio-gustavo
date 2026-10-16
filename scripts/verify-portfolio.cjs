@@ -40,4 +40,26 @@ const original=projects.map(x=>x.src.split('/').pop().replace(/\.mp4$/, ''));
 for(const slug of original)assert.ok(html.includes("'"+slug+"'"),'Projeto ausente do frontend: '+slug);
 const config=JSON.parse(read('vercel.json'));
 assert.ok(config.headers.find(x=>x.source==='/(.*)')?.headers?.some(x=>x.key==='X-Content-Type-Options'&&x.value==='nosniff'));
+
+// Prevent regression of the homepage's featured mini-cover.
+const tileCover=html.match(/<div class="tile" aria-hidden="true"><img src="data:image\/webp;base64,([^"]+)" data-cover-id="butterfly-gamma-dark"/);
+assert.ok(tileCover,'A capa real do destaque Butterfly deve estar incorporada ao HTML');
+assert.deepEqual(Buffer.from(tileCover[1],'base64'),fs.readFileSync(path.join(root,'capas/butterfly-gamma-dark.webp')),'Capa incorporada não corresponde ao arquivo oficial');
+assert.ok(html.includes('.hero-side .tile img[data-cover-source]{position:relative;z-index:1;'),'A capa real precisa aparecer acima da arte de reserva');
+assert.ok(html.includes('.hero-side .tile .offline-art{z-index:0}'),'Arte de reserva deve ficar atrás da capa');
+// Read and decode every bundled WebP, not just verify that the filenames exist.
+async function validateCoverDecoding(){
+ const sharp=require('sharp');
+ for(const p of projects){
+  if(!p.poster.endsWith('.webp'))continue;
+  const pathname=path.join(root,p.poster);
+  const meta=await sharp(pathname,{failOn:'error'}).metadata();
+  assert.equal(meta.format,'webp','Formato inesperado: '+p.poster);
+  assert.ok(meta.width>=480&&meta.height>=270,'Resolução inválida: '+p.poster);
+  await sharp(pathname,{failOn:'error'}).resize(16,9,{fit:'cover'}).raw().toBuffer();
+ }
+ console.log('Validação de todas as '+projects.length+' capas WebP concluída.');
+}
+void validateCoverDecoding().catch(e=>{console.error(e);process.exitCode=1;});
+
 console.log('Portfolio V4 validado: '+projects.length+' vídeos, admin, SEO e interface.');
