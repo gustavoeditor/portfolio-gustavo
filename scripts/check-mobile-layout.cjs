@@ -180,6 +180,29 @@ async function run(){
    await context.close();
    console.log('Protected admin header: clean layout at '+width+'px');
   }
+
+  // Launch: fresh homepage visits and reloads must start at the presentation.
+  // Explicit #contato deep links remain usable for conversion campaigns.
+  for(const width of [390,1440]){
+   const ctx=await browser.newContext({viewport:{width,height:844},isMobile:width===390,hasTouch:width===390});
+   const page=await ctx.newPage();
+   await page.goto(base+'?utm_source=launch',{waitUntil:'domcontentloaded'});
+   await page.locator('#contato').waitFor({timeout:6000});
+   await page.evaluate(()=>{
+    document.documentElement.style.scrollBehavior='auto';
+    scrollTo(0,document.querySelector('#contato').offsetTop);
+   });
+   await page.waitForFunction(()=>scrollY>500,null,{timeout:3000});
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.waitForTimeout(300);
+   assert.ok(await page.evaluate(()=>scrollY)<8,'Fresh homepage reload must be at top '+width+'px');
+   assert.equal(await page.evaluate(()=>history.scrollRestoration),'manual');
+   await page.goto(base+'#contato',{waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>scrollY>500,null,{timeout:5000});
+   assert.equal(await page.evaluate(()=>location.hash),'#contato');
+   await ctx.close();
+   console.log('Launch homepage entry and #contato deep links OK at '+width+'px');
+  }
  }finally{await browser.close();await close();}
 }
 run().catch(error=>{console.error(error?.stack||error);server.close();process.exitCode=1;});
