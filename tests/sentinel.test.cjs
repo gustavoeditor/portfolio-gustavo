@@ -30,6 +30,15 @@ test('Same-origin only and no anonymous access to administrative reports',async(
  assert.equal(page.statusCode,302);
  assert.equal(page.headers.Location,'/admin');
 });
+test('Telemetry capability endpoint never exposes infrastructure secrets',()=>{
+ const handler=require('../api/sentinel-config');
+ const response=res();
+ handler(req('GET'),response);
+ assert.equal(response.statusCode,200);
+ assert.deepEqual(Object.keys(response.data),['enabled']);
+ assert.equal(typeof response.data.enabled,'boolean');
+ assert.equal(response.headers['X-Robots-Tag'],'noindex');
+});
 test('No remote writes without Redis-backed shared rate limiting',async()=>{
  const prior={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN};
  try{
@@ -53,6 +62,8 @@ test('Anonymous counts and interactions must use a strict whitelist',()=>{
  assert.match(dashboard,/Sem histórico de visitas/);
  const collector=readFileSync(path.join(root,'sentinel-client.js'),'utf8');
  assert.match(collector,/sessionStorage.getItem/);
+ assert.match(collector,/api\/sentinel-config/);
+ assert.match(collector,/pending.length<8/);
  assert.match(collector,/globalPrivacyControl/);
  assert.match(collector,/doNotTrack/);
  assert.match(collector,/click','pack/);
