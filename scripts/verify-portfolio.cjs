@@ -112,4 +112,19 @@ assert.ok(sentinelConfig.rewrites.find(x=>x.source==='/sentinel'&&x.destination=
 for(const f of ['lib/sentinel.js','lib/sentinel-dashboard.js','api/sentinel-event.js','api/sentinel-status.js','api/sentinel-panel.js'])
  assert.ok(fs.existsSync(path.join(root,f)),'Sentinel missing: '+f);
 
+
+/* Launch gate: Google-visible public metadata and a consistent sitemap. */
+const metadata=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+assert.ok(metadata,'Homepage needs JSON-LD structured data');
+const graph=JSON.parse(metadata[1]);
+assert.equal(graph['@context'],'https://schema.org');
+assert.deepEqual(graph['@graph'].map(x=>x['@type']),['WebSite','Person','WebPage']);
+assert.ok(graph['@graph'].every(x=>x.url==='https://portfolio-gustavo-chi.vercel.app/'));
+assert.ok(!html.includes('<meta name="robots" content="noindex"'),'Homepage must not have noindex');
+assert.ok(html.includes('history.scrollRestoration'),'Top-entry mobile fix must survive updates');
+const sitemap=read('sitemap.xml');
+assert.match(sitemap,/<loc>https:\/\/portfolio-gustavo-chi\.vercel\.app\/<\/loc>/);
+assert.match(sitemap,/<lastmod>2026-10-16<\/lastmod>/);
+assert.match(read('robots.txt'),/Sitemap: https:\/\/portfolio-gustavo-chi\.vercel\.app\/sitemap\.xml/);
+
 console.log('Portfolio V4 validado: '+projects.length+' vídeos, admin, SEO e interface.');
