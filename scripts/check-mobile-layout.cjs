@@ -133,6 +133,53 @@ async function run(){
    await context.close();
    console.log('SENTINEL dashboard '+mode+' mobile render OK');
   }
+
+  // Private admin header: verify the exact HTML served by the protected endpoint.
+  // Strip scripts so the static UI test never attempts login, upload or network writes.
+  const adminSource=fs.readFileSync(path.join(root,'api/admin-panel.js'),'utf8');
+  const encodedAdmin=/^const PANEL_HTML = (".*");$/m.exec(adminSource);
+  assert.ok(encodedAdmin,'Admin panel template not found');
+  const adminHTML=JSON.parse(encodedAdmin[1]).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+  assert.match(adminHTML,/href="\/sentinel"/);
+  assert.match(adminHTML,/id="logout-button"/);
+  for(const width of [320,360,390,430,600,768,1024,1440]){
+   const context=await browser.newContext({viewport:{width,height:844},deviceScaleFactor:1,isMobile:width<=768,hasTouch:width<=768});
+   const page=await context.newPage();
+   await page.goto(base,{waitUntil:'domcontentloaded'});
+   await page.setContent(adminHTML,{waitUntil:'load'});
+   const positions=await page.evaluate(()=>{
+    function rect(selector){
+     const el=document.querySelector(selector),r=el?.getBoundingClientRect();
+     return r?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}:null;
+    }
+    return {
+     viewport:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,
+     header:rect('.admin-header'),brand:rect('.admin-brand'),sentinel:rect('.admin-nav-sentinel'),
+     logout:rect('#logout-button'),back:rect('.admin-nav-return'),
+     labels:[...document.querySelectorAll('.admin-header a,.admin-header button')].map(e=>({
+      text:e.textContent.trim(),width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height
+     }))
+    };
+   });
+   assert.ok(positions.scroll<=width+3,'Admin horizontal overflow '+width+'px '+JSON.stringify(positions));
+   for(const key of ['brand','sentinel','logout','back']){
+    const r=positions[key];
+    assert.ok(r&&r.width>55&&r.height>30,'Missing or tiny admin control '+key+' at '+width+'px');
+    assert.ok(r.left>=-3&&r.right<=width+3,'Admin control out of viewport '+key+' '+width+'px '+JSON.stringify(r));
+   }
+   const overlap=(a,b)=>a.left<b.right-2&&a.right>b.left+2&&a.top<b.bottom-2&&a.bottom>b.top+2;
+   const {brand,sentinel,logout,back}=positions;
+   for(const [key,a,b] of [['brand/sentinel',brand,sentinel],['brand/logout',brand,logout],['brand/back',brand,back],['sentinel/logout',sentinel,logout],['sentinel/back',sentinel,back],['logout/back',logout,back]])
+    assert.ok(!overlap(a,b),'Overlapping admin controls '+key+' at '+width+'px');
+   if(width<=768){
+    assert.ok(sentinel.top>=brand.bottom+8,'Sentinel needs separate mobile row '+width+'px');
+    assert.ok(logout.top>=sentinel.bottom+6,'Mobile action buttons need separate row '+width+'px');
+    assert.ok(Math.abs(logout.top-back.top)<5,'Mobile actions should share a row '+width+'px');
+   }
+   assert.ok(positions.labels.every(x=>x.width>=75&&x.height>=30),'Illegible admin action '+width+'px');
+   await context.close();
+   console.log('Protected admin header: clean layout at '+width+'px');
+  }
  }finally{await browser.close();await close();}
 }
 run().catch(error=>{console.error(error?.stack||error);server.close();process.exitCode=1;});
