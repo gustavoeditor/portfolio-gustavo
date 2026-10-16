@@ -31,7 +31,7 @@ test('Same-origin only and no anonymous access to administrative reports',async(
  assert.equal(page.headers.Location,'/admin');
 });
 test('Telemetry capability endpoint never exposes infrastructure secrets',()=>{
- const handler=require('../api/sentinel-config');
+ const handler=require('../api/sentinel-event');
  const response=res();
  handler(req('GET'),response);
  assert.equal(response.statusCode,200);
@@ -62,7 +62,7 @@ test('Anonymous counts and interactions must use a strict whitelist',()=>{
  assert.match(dashboard,/Sem histórico de visitas/);
  const collector=readFileSync(path.join(root,'sentinel-client.js'),'utf8');
  assert.match(collector,/sessionStorage.getItem/);
- assert.match(collector,/api\/sentinel-config/);
+ assert.match(collector,/fetch\(endpoint/);
  assert.match(collector,/pending.length<8/);
  assert.match(collector,/globalPrivacyControl/);
  assert.match(collector,/doNotTrack/);
