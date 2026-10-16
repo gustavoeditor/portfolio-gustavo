@@ -37,3 +37,21 @@ jobs:
         run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1 axe-core@4.10.3
       - name: Validate widths, centered sections and quote layout
         run: node scripts/check-mobile-layout.cjs
+
+  thumbnails:
+    name: Decode and verify all 17 project covers
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test driver
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
+      - name: Check local and production thumbnails in Chrome
+        env:
+          CHECK_PRODUCTION_THUMBS: '1'
+        run: node scripts/check-thumbnails.cjs
