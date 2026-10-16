@@ -16,11 +16,13 @@ Na página pública e na tela de login, soltar um arquivo não abre mais o víde
 
 Após uma falha de publicação, use novamente o botão Publicar mantendo a aba aberta: os arquivos já enviados são reaproveitados e um identificador impede duplicação do projeto. Recarregar a aba perde esse estado temporário; vídeos incompletos podem ficar no armazenamento e ser removidos pelo proprietário depois de conferir o catálogo.
 
-## Conectar o armazenamento — etapa ainda necessária em produção
+## Armazenamento conectado em produção
 
-O último teste público, antes destas melhorias, retornou `enabled: false`. Isso confirma que o armazenamento não estava ativo. O acesso da integração ao time `gustavo-editor` também retornou HTTP 403. O código não ativa a conta nem cria o armazenamento sozinho.
+Em 16/10/2026, o Blob público `gustavo-portfolio-media` foi criado em São Paulo (GRU1) e conectado somente ao ambiente Production do projeto `portfolio-gustavo`. A conexão usa OIDC e provisiona `BLOB_STORE_ID` e `BLOB_WEBHOOK_PUBLIC_KEY`, sem adicionar um token permanente ao projeto. A implantação foi atualizada e a API pública confirmou `enabled: true`.
 
-Abra o projeto **portfolio-gustavo** no time **gustavo-editor** da Vercel, entre em **Storage**, crie ou selecione um **Blob público** e conecte-o ao ambiente **Production**. Mantenha o armazenamento na conta proprietária e confira os limites de armazenamento e transferência do plano.
+O acesso da integração ao time `gustavo-editor` retornou HTTP 403; a criação e a conexão foram concluídas pelo navegador, com autorização do proprietário. O SDK obtém o token OIDC do contexto da requisição em produção; não é obrigatório existir um `VERCEL_OIDC_TOKEN` em `process.env`.
+
+Para reconectar no futuro, abra o projeto **portfolio-gustavo** no time **gustavo-editor** da Vercel, entre em **Storage**, crie ou selecione um **Blob público** e conecte-o ao ambiente **Production**. Mantenha o armazenamento na conta proprietária e confira os limites de armazenamento e transferência do plano.
 
 O painel aceita dois tipos de conexão:
 
@@ -29,7 +31,7 @@ O painel aceita dois tipos de conexão:
 
 Após conectar, faça **Redeploy** de produção e recarregue o painel. Não publique o valor de nenhum token no repositório ou no chat.
 
-O código dos dois modos foi testado com serviços simulados. O upload real em produção só pode ser confirmado depois que o armazenamento da conta estiver conectado.
+O fluxo completo passou em navegador com um vídeo real e armazenamento simulado. A conexão real do Blob foi confirmada pela API do site. A tentativa de login no painel de vídeos foi recusada por senha incorreta, portanto o envio e a publicação de um vídeo pelo painel em produção ainda aguardam o acesso administrativo correto.
 
 ## Análise visual
 
@@ -37,6 +39,8 @@ A prioridade de autenticação é:
 
 1. `OPENAI_API_KEY` já configurada, com modelo `OPENAI_VISION_MODEL` ou `gpt-4.1-mini`.
 2. Vercel AI Gateway, usando `AI_GATEWAY_API_KEY` ou OIDC da implantação, com `AI_GATEWAY_MODEL` ou `openai/gpt-4.1-mini`.
+
+Na verificação do painel da Vercel em 16/10/2026, o AI Gateway mostrava crédito zerado e solicitava verificação de cartão para liberar o crédito gratuito. Essa etapa não foi concluída.
 
 A disponibilidade de credenciais não garante saldo ou acesso do provedor. A conta da Vercel pode exigir verificação ou créditos para utilizar o Gateway. Se o serviço recusar a análise, o painel continua permitindo escolher os dados manualmente e informa a origem da sugestão. Não é obrigatório contratar outro serviço para publicar manualmente.
 
