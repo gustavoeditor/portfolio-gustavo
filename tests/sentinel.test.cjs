@@ -71,6 +71,72 @@ test('Anonymous counts and interactions must use a strict whitelist',()=>{
  assert.doesNotMatch(collector,/localStorage\.setItem/);
  assert.match(readFileSync(path.join(root,'index.html'),'utf8'),/href="\/privacidade.html"/);
 });
+
+test('Redis summaries decode counter fields and never return identifiers',()=>{
+ const stats=sentinel.normalizeStats(['visit:page','4','click:quote','9','email:private','3','click:video','garbage','video_error:player','2']);
+ assert.equal(stats['visit:page'],4);
+ assert.equal(stats['click:quote'],9);
+ assert.equal(stats['video_error:player'],2);
+ assert.equal(stats['email:private'],undefined);
+ assert.equal(stats['click:video'],undefined);
+ assert.deepEqual(Object.keys(sentinel.normalizeStats(null)),[]);
+ assert.equal(sentinel.normalizeStats({'click:pack':7})['click:pack'],7);
+});
+test('An event uses exactly one atomic Redis command with no text fields',async()=>{
+ const prior={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ADMIN_SESSION_SECRET};
+ const oldFetch=global.fetch;
+ const calls=[];
+ try{
+  process.env.UPSTASH_REDIS_REST_URL='https://example.upstash.io';
+  process.env.UPSTASH_REDIS_REST_TOKEN='test-token';
+  process.env.ADMIN_SESSION_SECRET='unit-test-only-secret';
+  global.fetch=async(url,options)=>{
+   calls.push({url,options});
+   return {ok:true,json:async()=>({result:calls.length===1?1:0})};
+  };
+  assert.equal(sentinel.enabled(),true);
+  assert.equal(await sentinel.record(req('POST',{ 'x-forwarded-for':'192.0.2.7'}),{type:'click',component:'quote',name:'never stored'}),true);
+  assert.equal(await sentinel.record(req('POST'),{type:'click',component:'pack'}),false);
+  assert.equal(calls.length,2);
+  const body=JSON.parse(calls[0].options.body);
+  assert.equal(body[0],'EVAL');
+  assert.equal(body[2],3);
+  assert.equal(body[6],'click:quote');
+  assert.ok(body[3].startsWith('gustavo:sentinel:visitor:'));
+  assert.ok(!JSON.stringify(body).includes('192.0.2.7'));
+  assert.ok(!JSON.stringify(body).includes('never stored'));
+  assert.equal(calls[0].options.headers.Authorization,'Bearer test-token');
+  assert.equal(body[7],18);
+  assert.equal(body[8],1500);
+  assert.equal(body[9],9*86400);
+ }finally{
+  global.fetch=oldFetch;
+  for(const [key,value] of Object.entries({UPSTASH_REDIS_REST_URL:prior.url,UPSTASH_REDIS_REST_TOKEN:prior.token,ADMIN_SESSION_SECRET:prior.secret})){
+   if(value===undefined)delete process.env[key];else process.env[key]=value;
+  }
+ }
+});
+test('Seven-day chart summaries use only aggregated counters from Redis',async()=>{
+ const original=global.fetch,prevURL=process.env.UPSTASH_REDIS_REST_URL,prevToken=process.env.UPSTASH_REDIS_REST_TOKEN;
+ const calls=[];
+ try{
+  process.env.UPSTASH_REDIS_REST_URL='https://example.upstash.io';
+  process.env.UPSTASH_REDIS_REST_TOKEN='test-token';
+  global.fetch=async(url,options)=>{
+   calls.push(JSON.parse(options.body));
+   return {ok:true,json:async()=>({result:['visit:page','3','click:pack','2','click:quote','1']})};
+  };
+  const data=await sentinel.summary(2);
+  assert.equal(data.length,2);assert.equal(data[0].stats['visit:page'],3);
+  assert.equal(data[0].stats['click:quote'],1);assert.equal(data[0].total,6);
+  assert.ok(calls.every(x=>x[0]==='HGETALL'&&x[1].startsWith('gustavo:sentinel:stats:')));
+ }finally{
+  global.fetch=original;
+  if(prevURL===undefined)delete process.env.UPSTASH_REDIS_REST_URL;else process.env.UPSTASH_REDIS_REST_URL=prevURL;
+  if(prevToken===undefined)delete process.env.UPSTASH_REDIS_REST_TOKEN;else process.env.UPSTASH_REDIS_REST_TOKEN=prevToken;
+ }
+});
+
 test('Private route, important UI and automatic monitor stay present',()=>{
  const html=readFileSync(path.join(root,'index.html'),'utf8');
  assert.match(html,/src="\/sentinel-client\.js\?v=2"/);
