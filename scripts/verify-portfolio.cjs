@@ -19,7 +19,7 @@ const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(new Set(ids).size,ids.length,'IDs duplicados');
 for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(ids.includes(id),'Link interno quebrado: '+id);
 for(const name of ['inicio','trabalhos','portfolio-grid','galeria','especialidades','metodo','sobre','contato','brief-form','pack-button','video-modal'])assert.ok(ids.includes(name),'Seção da V4 ausente: '+name);
-for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/player.js?v=4','/player.css?v=1','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
+for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/player.js?v=4','/player.css?v=2','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
  assert.ok(html.includes(snippet),'Integração obrigatória ausente: '+snippet);
 }
 
@@ -99,5 +99,17 @@ for(const token of ['CONTROL_IDLE_MS=3200',"on(root,'pointermove'", "on(root,'po
 assert.ok(playerCSS.includes('[data-playing="true"][data-ui-visible="false"] .vip-controls'),'Player controls are not visually hidden when idle');
 assert.ok(playerCSS.includes('opacity:0!important;pointer-events:none'),'Idle controls must not capture clicks');
 assert.ok(playerCSS.includes('[data-ui-visible="false"][data-pointer-inside="true"]'),'Mouse cursor should be hidden over idle playback');
+
+
+/* SENTINEL: avoid accidental removal of monitoring or its access controls. */
+for(const item of ['/sentinel-client.js?v=1','/api/managed-projects','id="quote-floating-trigger"'])
+ assert.ok(html.includes(item),'Site regression: '+item);
+const sentinelClient=read('sentinel-client.js');
+new Function(sentinelClient);
+assert.ok(sentinelClient.includes('No URLs')===false,'Never send diagnostic URLs or payloads');
+const sentinelConfig=JSON.parse(read('vercel.json'));
+assert.ok(sentinelConfig.rewrites.find(x=>x.source==='/sentinel'&&x.destination==='/api/sentinel-panel'));
+for(const f of ['lib/sentinel.js','lib/sentinel-dashboard.js','api/sentinel-event.js','api/sentinel-status.js','api/sentinel-panel.js'])
+ assert.ok(fs.existsSync(path.join(root,f)),'Sentinel missing: '+f);
 
 console.log('Portfolio V4 validado: '+projects.length+' vídeos, admin, SEO e interface.');
