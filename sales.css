@@ -72,3 +72,20 @@
 .project-share-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .project-card:target .project-media{outline:2px solid #c5aaff;outline-offset:5px}
 @media(max-width:600px){.project-share{min-height:36px;align-items:center;margin-top:5px;font-size:12px}}
+
+/* Guaranteed readable poster state if a thumbnail CDN request fails twice. */
+.project-play.poster-unavailable{
+  background:
+    radial-gradient(ellipse at 24% 25%,rgba(169,118,246,.28),transparent 64%),
+    radial-gradient(ellipse at 83% 80%,rgba(96,65,165,.2),transparent 66%),
+    linear-gradient(140deg,#23192f,#100e16);
+}
+.project-play .poster-error-label{
+  position:absolute;left:18px;right:18px;bottom:49px;
+  z-index:2;color:#d7c9e9;text-align:center;
+  font-size:12px;font-weight:600;letter-spacing:.02em;
+  pointer-events:none;
+}
+@media(max-width:600px){
+  .project-play .poster-error-label{font-size:11px;bottom:43px}
+}
