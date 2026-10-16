@@ -88,6 +88,38 @@ async function run(){
    await context.close();
    console.log('GUSTAVO V4 browser smoke '+width+'px OK');
   }
+
+  // Regression: reopening the clean homepage must NEVER start at the contact form,
+  // even when Chrome would normally restore the previous scroll on reload.
+  for(const width of [390,1440]){
+   const ctx=await browser.newContext({viewport:{width,height:844},isMobile:width===390,hasTouch:width===390});
+   const page=await ctx.newPage();
+   await page.goto(base+'?utm_source=sentinel-smoke',{waitUntil:'domcontentloaded'});
+   await page.locator('#contato').waitFor();
+   await page.evaluate(()=>{
+    document.documentElement.style.scrollBehavior='auto';
+    window.scrollTo(0,document.getElementById('contato').offsetTop);
+   });
+   await page.waitForFunction(()=>window.scrollY>500,null,{timeout:3000});
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.waitForTimeout(350);
+   const initial=await page.evaluate(()=>({
+    scrollY:window.scrollY,hash:location.hash,
+    restoration:history.scrollRestoration
+   }));
+   assert.ok(initial.scrollY<6,width+'px plain homepage reloaded at wrong section: '+JSON.stringify(initial));
+   assert.equal(initial.restoration,'manual',width+'px scroll restoration must be controlled for homepage');
+
+   // Deep links and menu anchor navigation must still navigate to the selected section.
+   await page.goto(base+'#contato',{waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>window.scrollY>500,null,{timeout:6000});
+   assert.equal(await page.evaluate(()=>location.hash),'#contato');
+   await page.goto(base,{waitUntil:'domcontentloaded'});
+   await page.waitForTimeout(250);
+   assert.ok(await page.evaluate(()=>scrollY)<6,width+'px normal homepage visit must start at top');
+   await ctx.close();
+   console.log('Homepage entry & deep-link navigation '+width+'px OK');
+  }
  }finally{await browser.close();await close();}
 }
 run().catch(error=>{console.error(error?.stack||error);server.close();process.exitCode=1;});
