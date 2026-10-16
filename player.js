@@ -49,6 +49,7 @@ function mount(video,options={}){
  video.controls=false;
  video.classList.add('vip-native-video');
  const root=document.createElement('div');root.className='vip-player';root.dataset.playing='false';
+ root.dataset.uiVisible='true';root.dataset.pointerInside='false';
  const controls=document.createElement('div');controls.className='vip-controls';
  const playButton=document.createElement('button');playButton.type='button';playButton.className='vip-control vip-toggle';
  const center=document.createElement('button');center.type='button';center.className='vip-center';center.setAttribute('aria-label','Reproduzir '+title);center.innerHTML=icon('play');
@@ -76,7 +77,34 @@ function mount(video,options={}){
  controls.append(timeline,bottom);
  const caption=document.createElement('span');caption.className='vip-player-caption';caption.textContent=title;
  root.append(video,caption,center,controls);
- let disposed=false,dragging=false,frame=0;
+ let disposed=false,dragging=false,frame=0,hideTimer=0,touchRevealOnly=false;
+ const CONTROL_IDLE_MS=3200;
+ // The player must not stay visible just because the mouse is motionless over it.
+ // Keyboard focus, quality selection and active scrubbing take priority over hiding.
+ const focusedFromKeyboard=()=>Boolean(root.querySelector(':focus-visible'));
+ function clearHideTimer(){if(hideTimer){clearTimeout(hideTimer);hideTimer=0;}}
+ function scheduleHide(){
+   clearHideTimer();
+   if(disposed||video.paused||video.ended||document.hidden)return;
+   hideTimer=setTimeout(hideUI,CONTROL_IDLE_MS);
+ }
+ function showUI(){
+   if(disposed)return;
+   root.dataset.uiVisible='true';
+   scheduleHide();
+ }
+ function hideUI(){
+   clearHideTimer();
+   if(disposed||video.paused||video.ended||document.hidden)return;
+   if(dragging||!qualityMenu.hidden||focusedFromKeyboard()){scheduleHide();return;}
+   root.dataset.uiVisible='false';
+ }
+ function onPlaybackState(){
+   if(video.paused||video.ended){
+     clearHideTimer();root.dataset.uiVisible='true';
+   }else showUI();
+ }
+
  const subscriptions=[];
  const on=(el,event,handler,opts)=>{el.addEventListener(event,handler,opts);subscriptions.push(()=>el.removeEventListener(event,handler,opts));};
  function effectiveQuality(){
@@ -177,8 +205,10 @@ function mount(video,options={}){
  }
  function closeQualityMenu(){
    qualityMenu.hidden=true;qualitySelect.setAttribute('aria-expanded','false');
+   scheduleHide();
  }
  on(qualitySelect,'click',(event)=>{
+   showUI();
    event.stopPropagation();
    if(qualityMenu.hidden){qualityMenu.hidden=false;qualitySelect.setAttribute('aria-expanded','true');}
    else closeQualityMenu();
@@ -235,12 +265,49 @@ function mount(video,options={}){
      const started=video.play();if(started&&typeof started.catch==='function')started.catch(()=>{draw();});
    }else video.pause();
  }
+ // Mouse movement reveals the full controls; leaving the video hides them instantly.
+ // Stationary hovering never prevents the idle timeout.
+ on(root,'pointerenter',event=>{
+   if(event.pointerType==='mouse'||event.pointerType==='pen'){
+     root.dataset.pointerInside='true';showUI();
+   }
+ });
+ on(root,'pointermove',event=>{
+   if(event.pointerType==='mouse'||event.pointerType==='pen'){
+     root.dataset.pointerInside='true';showUI();
+   }
+ });
+ on(root,'pointerleave',event=>{
+   if(event.pointerType==='mouse'||event.pointerType==='pen'){
+     root.dataset.pointerInside='false';hideUI();
+   }
+ });
+ on(root,'pointerdown',event=>{
+   if(event.pointerType==='touch'){
+     // First tap on a playing, hidden video displays controls, not an accidental pause.
+     touchRevealOnly=event.target===video&&!video.paused&&root.dataset.uiVisible==='false';
+     showUI();
+   }
+ });
+ on(root,'focusin',showUI);
+ on(root,'focusout',scheduleHide);
+ on(root,'keydown',showUI);
+ on(video,'play',onPlaybackState);
+ on(video,'pause',onPlaybackState);
+ on(video,'ended',onPlaybackState);
+ on(document,'visibilitychange',()=>{
+   if(document.hidden){clearHideTimer();root.dataset.uiVisible='false';}
+   else onPlaybackState();
+ });
  on(playButton,'click',toggle);
  on(center,'click',toggle);
- on(video,'click',toggle);
+ on(video,'click',event=>{
+   if(touchRevealOnly){touchRevealOnly=false;event.stopPropagation();return;}
+   toggle(event);
+ });
  on(video,'dblclick',(event)=>{event.preventDefault();event.stopPropagation();toggleFullscreen();});
  on(video,'contextmenu',(event)=>event.stopPropagation());
- on(seek,'pointerdown',()=>{dragging=true;});
+ on(seek,'pointerdown',()=>{dragging=true;showUI();});
  on(seek,'input',()=>{
    const duration=video.duration;
    if(Number.isFinite(duration)&&duration>0){
@@ -249,7 +316,7 @@ function mount(video,options={}){
      clock.textContent=time(value*duration)+' / '+time(duration);
    }
  });
- const seekTo=()=>{dragging=false;if(Number.isFinite(video.duration)&&video.duration>0)video.currentTime=Number(seek.value)/1000*video.duration;draw();};
+ const seekTo=()=>{dragging=false;if(Number.isFinite(video.duration)&&video.duration>0)video.currentTime=Number(seek.value)/1000*video.duration;draw();showUI();};
  on(seek,'change',seekTo);
  on(seek,'pointerup',seekTo);
  function savePlaybackVolume(){
@@ -288,10 +355,10 @@ function mount(video,options={}){
    if(event.key==='f'){event.preventDefault();toggleFullscreen();}
    if(event.key==='m'){event.preventDefault();volumeToggle.click();}
  });
- // Small branding and controls are always visible on touch devices.
- draw();
+ // Paused/ended controls remain visible. During playback the idle timer owns the UI.
+ draw();onPlaybackState();
  return {element:root,destroy(){
-   disposed=true;
+   disposed=true;clearHideTimer();
    if(frame)cancelAnimationFrame(frame);
    for(const unsubscribe of subscriptions)unsubscribe();
    if(document.fullscreenElement===root&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
