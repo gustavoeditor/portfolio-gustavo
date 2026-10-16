@@ -291,10 +291,53 @@ body{
 }
 
 
-/* Produção: player premium preserva as opções de qualidade 480p/720p/1080p. */
-.modal-panel .vip-player{width:100%;aspect-ratio:16/9;border:0;border-radius:0;background:#05050a;overflow:hidden}
-.modal-panel .vip-player video{width:100%;height:100%;object-fit:contain}
-@media(max-width:700px){.modal-panel .vip-player{min-height:190px}}
+/* G / PLAYER V4.1: o player anterior usava position:absolute para um palco
+   embutido. Neste modal ele precisa ser parte do fluxo do layout. */
+.modal{overscroll-behavior:contain}
+.modal-panel{
+  position:relative;display:flex;flex-direction:column;
+  max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);
+  min-width:0;isolation:isolate;
+}
+.modal-panel .modal-top,.modal-panel .modal-foot{flex:none;position:relative;z-index:2}
+.modal-panel .vip-player{
+  position:relative;inset:auto;display:block;flex:none;z-index:0;
+  width:100%;height:auto;aspect-ratio:16/9;
+  max-height:calc(100vh - 153px);max-height:calc(100dvh - 153px);
+  border:0;border-radius:0;margin:0;
+  background:#05050a;overflow:hidden;isolation:isolate;
+}
+.modal-panel .vip-player .vip-native-video{
+  position:absolute;inset:0;width:100%;height:100%;max-height:none;
+  aspect-ratio:auto;object-fit:contain;background:#05050a;
+}
+.modal-panel .vip-controls{bottom:0;left:0;right:0}
+.modal-panel .vip-quality-menu{z-index:12}
+.modal-panel .vip-controlbar button{touch-action:manipulation}
+.modal-panel .vip-center{touch-action:manipulation}
+.modal-panel .vip-player:fullscreen{
+  position:fixed;inset:0;width:100%;height:100%;max-height:none;
+  aspect-ratio:auto;display:grid;place-items:center;
+}
+@media(max-width:700px){
+  .modal{padding:10px}
+  .modal-panel{max-height:calc(100dvh - 20px)}
+  .modal-panel .vip-player{max-height:calc(100dvh - 130px)}
+  .modal-panel .modal-foot{padding:11px 13px;flex-wrap:wrap}
+  .modal-panel .vip-controlbar{gap:4px}
+  .modal-panel .vip-quality-menu{right:-10px}
+}
+@media(max-width:400px){
+ .modal-panel .vip-player-caption{display:none}
+ .modal-panel .vip-controls{padding:8px 8px 7px}
+ .modal-panel .vip-timeline-wrap{height:18px}
+ .modal-panel .vip-controlbar{min-height:31px}
+ .modal-panel .vip-control{width:30px;height:30px;flex-basis:30px}
+ .modal-panel .vip-clock{font-size:9px}
+ .modal-panel .vip-volume{width:36px}
+ .modal-panel .vip-quality{min-width:56px;padding:6px}
+}
+
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -392,7 +435,7 @@ body{
 <section class="trust" id="sobre" aria-labelledby="trust-title"><div class="container"><div class="section-kicker mono reveal"><span>05 / HISTÓRICO REAL</span><small>CRIAÇÃO EM COLABORAÇÃO</small></div><div class="trust-head"><h2 class="reveal" id="trust-title">CONEXÕES QUE<br><span style="color:#a98ae8">VIRAM PROJETO.</span></h2><p class="reveal delay1">Experiências de colaboração publicadas no meu portfólio. Sem números inventados ou promessas vazias.</p></div><div class="trust-grid"><a class="trust-card reveal" href="https://www.youtube.com/@skinsmonkey_com" target="_blank" rel="noopener noreferrer" aria-label="Abrir canal SkinsMonkey no YouTube"><span class="tag">COLABORAÇÃO ATUAL</span><strong>SkinsMonkey</strong><span class="up" aria-hidden="true">↗</span></a><a class="trust-card reveal delay1" href="https://www.youtube.com/@oalexcs" target="_blank" rel="noopener noreferrer" aria-label="Abrir canal O Alex CS no YouTube"><span class="tag">COLABORAÇÃO ANTERIOR</span><strong>O Alex CS</strong><span class="up" aria-hidden="true">↗</span></a></div></div></section>
 <section class="contact" id="contato" aria-labelledby="contact-title"><div class="container"><div class="contact-inner"><div class="contact-grid"><div><span class="eyebrow mono reveal">PRÓXIMO FRAME / SEU PROJETO</span><h2 class="reveal" id="contact-title">SUA IDEIA.<br><span class="accent">MEU PRÓXIMO</span><br>DESAFIO.</h2><p class="contact-copy reveal">Tem um projeto em mente? Me conte a ideia. O primeiro passo é uma boa conversa, o resto a gente transforma em imagem.</p><a class="link-line reveal" href="https://www.instagram.com/gustaeditor0812/" target="_blank" rel="noopener noreferrer" style="margin-top:19px">Ou encontre-me no Instagram <span class="arrow" aria-hidden="true">↗</span></a></div><form class="mini-form reveal delay1" id="brief-form"><h3>Comece por aqui ↗</h3><p>Um briefing rápido para iniciar nossa conversa no WhatsApp.</p><div class="field"><label for="brief-name">COMO POSSO TE CHAMAR? (OPCIONAL)</label><input id="brief-name" name="name" maxlength="60" autocomplete="name" placeholder="Seu nome"></div><div class="field"><label for="brief-type">QUAL É O PROJETO?</label><select id="brief-type" name="type" required><option value="" selected disabled>Selecione uma especialidade</option><option>Edição para YouTube</option><option>Cinematics / Gaming</option><option>Motion Design / VFX</option><option>Outro projeto</option></select></div><div class="field"><label for="brief-detail">CONTE UM POUCO DA IDEIA</label><textarea id="brief-detail" name="detail" rows="3" minlength="10" maxlength="1100" required placeholder="O que você imagina? (mínimo de 10 caracteres)"></textarea></div><button type="submit" class="btn-primary">Criar mensagem no WhatsApp <span aria-hidden="true">↗</span></button><span class="form-note">O texto é montado no navegador. Nada é armazenado por este protótipo. Você confirma o envio no WhatsApp.</span></form></div></div></div></section>
 </main>
-<footer class="footer"><div class="container"><div class="footer-row"><a class="logo" href="#inicio"><span class="logo-text">GUSTAVO<small>VISUAL STUDIO®</small></span></a><span class="footer-center">DESIGN É INTENÇÃO. MOVIMENTO É LINGUAGEM.</span><div class="socials"><a href="https://www.instagram.com/gustaeditor0812/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="https://github.com/gustavoeditor/portfolio-gustavo" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="#inicio">Voltar ao topo ↑</a></div></div><div class="footnote"><span>© 2026 GUSTAVO · PORTFÓLIO CRIATIVO</span><span>EXPERIENCE LAB 04 / CONCEITO DE TESTE · NÃO PUBLICADO</span></div></div></footer>
+<footer class="footer"><div class="container"><div class="footer-row"><a class="logo" href="#inicio"><span class="logo-text">GUSTAVO<small>VISUAL STUDIO®</small></span></a><span class="footer-center">DESIGN É INTENÇÃO. MOVIMENTO É LINGUAGEM.</span><div class="socials"><a href="https://www.instagram.com/gustaeditor0812/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="https://github.com/gustavoeditor/portfolio-gustavo" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="#inicio">Voltar ao topo ↑</a></div></div><div class="footnote"><span>© 2026 GUSTAVO · PORTFÓLIO CRIATIVO</span><span>EXPERIENCE LAB 04 / VERSÃO OFICIAL</span></div></div></footer>
 </div>
 <div class="modal" id="video-modal" role="dialog" aria-modal="true" aria-hidden="true" inert aria-label="Reprodutor de projeto"><div class="modal-panel"><div class="modal-top"><div class="titles"><b id="modal-title">Projeto</b><small id="modal-category">CINEMATIC</small></div><button class="modal-close" type="button" id="modal-close" aria-label="Fechar vídeo">×</button></div><video id="modal-player" controls playsinline preload="none"></video><div class="modal-foot"><span id="modal-desc">Projeto do portfólio.</span><a id="modal-source" target="_blank" rel="noopener noreferrer" href="https://portfolio-gustavo-chi.vercel.app/">Abrir original ↗</a></div></div></div>
 <div class="pack-toast" id="pack-toast" role="status" aria-live="polite" hidden>O Pack de edição ainda não está disponível para compra. O botão já está reservado para o futuro lançamento.</div>
@@ -521,12 +564,33 @@ function openProject(index){const data=projects[index];if(!data)return;stopPrevi
  if(window.GustavoPlayer){try{
   playerUI=GustavoPlayer.mount(player,{title:data[0],source:local?'/videos/'+file:videoSrc,lowSource:local?'/videos-480/'+file:'',fullSource:local?'/videos-1080/'+file:'',verifiedLocalVariants:local});
   document.querySelector('.modal-panel').insertBefore(playerUI.element,document.querySelector('.modal-foot'));
+  player.controls=false;
  }catch(error){console.warn('Player visual indisponível, usando HTML5.',error);player.controls=true;}}
  modal.inert=false;modal.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');close.focus({preventScroll:true});const play=player.play();if(play&&play.catch)play.catch(()=>{});
 }
 player.addEventListener('error',()=>{if(modal.getAttribute('aria-hidden')!=='false'||player.dataset.fallback==='1')return;const last=player.currentSrc||player.src;if(last.startsWith(ROOT+'videos/')){player.dataset.fallback='1';player.src=FALLBACK+last.slice(ROOT.length);player.play().catch(()=>{})}});
-function closeProject(){if(modal.getAttribute('aria-hidden')==='true')return;modal.setAttribute('aria-hidden','true');modal.inert=true;document.body.classList.remove('modal-open');player.pause();player.removeAttribute('src');player.load();if(playerUI){playerUI.destroy();playerUI.element.replaceWith(player);playerUI=null;player.controls=true;}if(restoreFocus&&restoreFocus.isConnected)restoreFocus.focus({preventScroll:true})}
-document.addEventListener('click',e=>{const button=e.target.closest('[data-open]');if(button){openProject(Number(button.dataset.open));return}if(e.target===modal)closeProject()});close.addEventListener('click',closeProject);document.addEventListener('keydown',e=>{if(modal.getAttribute('aria-hidden')!=='false')return;if(e.key==='Escape'){e.preventDefault();closeProject()}if(e.key==='Tab'){const focusables=[close,player,document.getElementById('modal-source')];const n=focusables.indexOf(document.activeElement);if(e.shiftKey&&n===0){e.preventDefault();focusables[focusables.length-1].focus()}else if(!e.shiftKey&&n===focusables.length-1){e.preventDefault();focusables[0].focus()}}});
+function closeProject(){
+ if(modal.getAttribute('aria-hidden')==='true')return;
+ modal.setAttribute('aria-hidden','true');modal.inert=true;
+ document.body.classList.remove('modal-open');
+ player.pause();player.removeAttribute('src');player.load();
+ if(playerUI){
+   playerUI.destroy();
+   // Remover o vídeo do wrapper antes de desmontá-lo evita manter controles
+   // antigos na próxima reprodução ou perder o nó <video> no fechamento.
+   const stage=playerUI.element;
+   stage.parentNode?.insertBefore(player,stage);
+   stage.remove();playerUI=null;player.controls=true;
+ }
+ if(restoreFocus&&restoreFocus.isConnected)restoreFocus.focus({preventScroll:true});
+}
+document.addEventListener('click',e=>{const button=e.target.closest('[data-open]');if(button){openProject(Number(button.dataset.open));return}if(e.target===modal)closeProject()});close.addEventListener('click',closeProject);document.addEventListener('keydown',e=>{if(modal.getAttribute('aria-hidden')!=='false')return;if(e.key==='Escape'){e.preventDefault();closeProject()}if(e.key==='Tab'){
+ const focusables=[...modal.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),video[controls]')].filter(el=>el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden');
+ if(!focusables.length)return;
+ const first=focusables[0],last=focusables[focusables.length-1];
+ if(e.shiftKey&&(document.activeElement===first||!modal.contains(document.activeElement))){e.preventDefault();last.focus()}
+ else if(!e.shiftKey&&(document.activeElement===last||!modal.contains(document.activeElement))){e.preventDefault();first.focus()}
+}});
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),canPreview=matchMedia('(hover:hover) and (pointer:fine)');const dataSaver=Boolean(navigator.connection?.saveData);
 if(canPreview.matches&&!dataSaver&&!reduced.matches){grid.addEventListener('pointerover',e=>{const btn=e.target.closest('[data-preview]');if(!btn||btn===previewTarget)return;stopPreview();previewTarget=btn;previewTimer=setTimeout(()=>{if(previewTarget!==btn||!btn.isConnected)return;const idx=Number(btn.dataset.preview),vid=document.createElement('video');vid.muted=true;vid.loop=true;vid.playsInline=true;vid.autoplay=true;vid.preload='none';vid.setAttribute('aria-hidden','true');vid.src=projectVideo(projects[idx]);btn.insertBefore(vid,btn.querySelector('.preview-label'));vid.play().catch(()=>{vid.remove()})},650)});grid.addEventListener('pointerout',e=>{if(!previewTarget)return;const next=e.relatedTarget;if(next&&previewTarget.contains(next))return;if(e.target===previewTarget||previewTarget.contains(e.target))stopPreview()});grid.addEventListener('focusin',()=>stopPreview())}
 const menu=document.getElementById('menu-btn'),nav=document.getElementById('nav-links');menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Fechar menu':'Abrir menu');menu.textContent=open?'×':'☰'});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Abrir menu');menu.textContent='☰'}));
