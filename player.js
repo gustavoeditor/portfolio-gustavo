@@ -25,6 +25,7 @@ function mount(video,options={}){
  // Avoid two HEAD requests and a second video download on each new player.
  const verifiedVariants=options.verifiedLocalVariants===true && /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(primarySource);
  const qualityPreferenceKey='gustavo-video-quality-v1';
+ const audioPreferenceKey='gustavo-video-audio-v1';
  const validQualities=['auto','low','high','full'];
  let qualityChoice='auto';
  try{
@@ -37,6 +38,14 @@ function mount(video,options={}){
  let switching=false;
  const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
  const slowNetwork=()=>Boolean(connection&&(connection.saveData||/^(slow-2g|2g|3g)$/.test(connection.effectiveType||'')));
+ // Restore volume and mute from this browser without changing first-visit defaults.
+ try {
+   const stored=JSON.parse(localStorage.getItem(audioPreferenceKey)||'null');
+   if(stored&&typeof stored==='object'){
+     if(Number.isFinite(stored.volume))video.volume=Math.max(0,Math.min(1,stored.volume));
+     if(typeof stored.muted==='boolean')video.muted=stored.muted;
+   }
+ }catch(_){}
  video.controls=false;
  video.classList.add('vip-native-video');
  const root=document.createElement('div');root.className='vip-player';root.dataset.playing='false';
@@ -243,10 +252,14 @@ function mount(video,options={}){
  const seekTo=()=>{dragging=false;if(Number.isFinite(video.duration)&&video.duration>0)video.currentTime=Number(seek.value)/1000*video.duration;draw();};
  on(seek,'change',seekTo);
  on(seek,'pointerup',seekTo);
+ function savePlaybackVolume(){
+   try{localStorage.setItem(audioPreferenceKey,JSON.stringify({volume:video.volume,muted:video.muted}));}catch(_){}
+ }
  on(volume,'input',()=>{
    const val=Number(volume.value);
    video.volume=val;
    video.muted=val===0;
+   savePlaybackVolume();
    draw();
  });
  let previousVolume=video.volume>0?video.volume:0.5;
@@ -255,6 +268,7 @@ function mount(video,options={}){
      video.muted=false;
      if(video.volume===0)video.volume=previousVolume;
    }else{previousVolume=video.volume;video.muted=true;}
+   savePlaybackVolume();
    draw();
  });
  function toggleFullscreen(){
