@@ -12,7 +12,7 @@
 1. Conectar um armazenamento Redis/Upstash compatível ao projeto Vercel, usando variáveis **somente no servidor**: UPSTASH_REDIS_REST_URL e UPSTASH_REDIS_REST_TOKEN. Não inserir esses valores no HTML ou GitHub.
 2. Confirmar que o Vercel Blob está conectado (BLOB_STORE_ID / BLOB_WEBHOOK_PUBLIC_KEY via OIDC ou BLOB_READ_WRITE_TOKEN).
 3. Implantar as alterações de variáveis e verificar o painel /sentinel. Se o endpoint /api/sentinel-status informar telemetryEnabled=true, a coleta fica habilitada.
-4. Limites: até 6 eventos por origem de rede/hora e 400 eventos/dia globais. O cliente também deduplica categorias por 15 minutos e envia até 5 sinais por carregamento.
+4. Limites: até 18 eventos por origem de rede/hora e 1500 eventos/dia globais. O cliente limita a 12 sinais por carregamento, com intervalos mínimos por categoria.
 5. Somente categorias e componentes predefinidos são aceitos. Dados livres (incluindo textos, links, endereço IP, formulários e pilhas de erros) nunca são enviados ao armazenamento. Os agregados diários podem ser consultados apenas via sessão administrativa, apesar do acesso público aos blobs exigido pelo SDK utilizado.
 6. Eventos são *sinais*, não confirmação de defeito. Verificar antes de modificar o código.
 
@@ -37,3 +37,11 @@
 A área /sentinel usa a autenticação existente. Não gravar dados de clientes e nem abrir logs com dados pessoais. O sistema não inclui gravador de sessão, captura de tela, rastreamento de cliques individuais, endereço IP, query strings, cookies ou conteúdo do WhatsApp.
 
 O monitor de disponibilidade verifica respostas HTTP e marcadores no HTML/JS; não garante a inexistência de erros visuais. O checklist de manutenção deve complementar com testes manuais de desktop, mobile, vídeo, upload e orçamento.
+
+## Gráficos de visitas, cliques e interações
+
+- A central exibe contagem agregada dos últimos 7 dias: sessões, cliques em Pack de edição/Orçamento/Vídeos/Trabalhos/Áudio/Navegação, e reproduções iniciadas.
+- Uma sessão é estimada por aba via sessionStorage. **Não é número de pessoas únicas.** Exibição dos gráficos depende de Redis e Blob; os cartões mostram indisponibilidade em vez de valores simulados quando desabilitado.
+- Respeita Global Privacy Control e Do Not Track. Os campos digitados nunca são medidos e o formulário não registra o conteúdo do briefing.
+- A página pública /privacidade.html explica a coleta e pode ser acessada no rodapé.
+- Vercel Web Analytics não está habilitado no projeto atualmente; o SENTINEL coleta suas próprias métricas agregadas quando a infraestrutura de limitação estiver disponível.
