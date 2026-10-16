@@ -8,15 +8,19 @@ const targets=[
  {name:'Robots',path:'/robots.txt',marker:'Sitemap:'},
  {name:'G / PLAYER',path:'/player.js?v=4',marker:'GustavoPlayer'},
  {name:'G / AMBIENCE',path:'/ambience.js?v=2',marker:'GustavoAmbience'},
- {name:'Orçamento',path:'/quote-modal.js?v=1',marker:'quote'}
+ {name:'Orçamento',path:'/quote-modal.js?v=1',marker:'quote'},
+ {name:'Sentinel / configuração',path:'/api/sentinel-event',marker:'"enabled":'},
+ {name:'Sentinel / privacidade',path:'/privacidade.html',marker:'Privacidade'},
+ {name:'Sentinel / painel protegido',path:'/api/sentinel-status',expectedStatus:401}
 ];
 const wait=t=>new Promise(resolve=>setTimeout(resolve,t));
-async function inspect({name,path,marker}){
+async function inspect({name,path,marker,expectedStatus=200}){
  let reason='';
  for(let attempt=0;attempt<3;attempt++){
   try{
-   const response=await fetch(BASE+path,{signal:AbortSignal.timeout(12000),redirect:'error',cache:'no-store',headers:{'User-Agent':'GustavoSentinelHealth/1.0','Cache-Control':'no-cache'}});
-   if(response.status!==200){reason='HTTP '+response.status;}
+   const response=await fetch(BASE+path,{signal:AbortSignal.timeout(12000),redirect:'manual',cache:'no-store',headers:{'User-Agent':'GustavoSentinelHealth/1.0','Cache-Control':'no-cache'}});
+   if(response.status!==expectedStatus){reason='HTTP '+response.status+' (esperado '+expectedStatus+')';}
+   else if(expectedStatus!==200)return{name,path,ok:true};
    else {
     const type=String(response.headers.get('content-type')||'');
     if(!/text|javascript|xml|application\/json/.test(type))reason='Unexpected content-type '+type.slice(0,40);

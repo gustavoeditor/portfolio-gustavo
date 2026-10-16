@@ -5,7 +5,7 @@ module.exports=async function handler(req,res){
  privateHeaders(res);
  if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).end();}
  if(!isAdmin(req))return res.status(401).json({error:'Acesso privado.'});
- if(!sentinel.enabled())return res.status(200).json({telemetryEnabled:false,reason:'redis_or_storage_not_configured',daily:[]});
+ if(!sentinel.enabled())return res.status(200).json({telemetryEnabled:false,reason:'redis_not_configured',daily:[]});
  try{
   const daily=await sentinel.summary(7);
   return res.status(200).json({telemetryEnabled:true,daily});

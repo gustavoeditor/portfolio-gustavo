@@ -88,6 +88,51 @@ async function run(){
    await context.close();
    console.log('GUSTAVO V4 browser smoke '+width+'px OK');
   }
+
+  // SENTINEL graphs: test live metric aggregation and disabled-data states
+  // in a real Chrome renderer without opening the private production panel.
+  const dashboardHTML=require('../lib/sentinel-dashboard').HTML;
+  const fixtures=[
+   {date:'2026-10-10',total:12,stats:{'visit:page':3,'click:pack':2,'click:quote':1,'interaction:player':1,'video_error:player':1}},
+   {date:'2026-10-11',total:16,stats:{'visit:page':5,'click:video':4,'interaction:player':2,'video_stall:player':1}}
+  ];
+  const daily=[...fixtures,...Array.from({length:5},(_,i)=>({date:'2026-10-'+String(i+12).padStart(2,'0'),total:0,stats:{}}))];
+  for(const mode of ['enabled','disabled','failed']){
+   const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true});
+   const page=await context.newPage();
+   const errors=[];
+   page.on('pageerror',e=>errors.push(String(e)));
+   await page.route('**/api/sentinel-status',route=>{
+    if(mode==='failed')return route.fulfill({status:503,contentType:'application/json',body:'{"error":"service unavailable"}'});
+    return route.fulfill({status:200,contentType:'application/json',
+     body:JSON.stringify(mode==='enabled'?{telemetryEnabled:true,daily}:{telemetryEnabled:false,daily:[]})});
+   });
+   await page.goto(base,{waitUntil:'domcontentloaded'});
+   await page.setContent(dashboardHTML,{waitUntil:'domcontentloaded'});
+   if(mode==='enabled'){
+    await page.waitForFunction(()=>document.querySelector('#metric-visits')?.textContent==='8',{timeout:3500});
+    assert.equal(await page.locator('#metric-clicks').textContent(),'7');
+    assert.equal(await page.locator('#metric-interactions').textContent(),'3');
+    assert.equal(await page.locator('#count').textContent(),'28');
+    assert.equal(await page.locator('#visits-chart .trend-day').count(),7);
+    assert.equal(await page.locator('#clicks-chart .click-line').count(),6);
+    const errorLabels=await page.locator('#events').textContent();
+    assert.match(errorLabels,/video_error:player/);
+    assert.doesNotMatch(errorLabels,/visit:page|click:pack|interaction:player/);
+   }else if(mode==='disabled'){
+    await page.waitForFunction(()=>document.querySelector('#count')?.textContent==='OFF',{timeout:3500});
+    assert.equal(await page.locator('#metric-visits').textContent(),'—');
+    assert.match(await page.locator('#visits-chart').textContent(),/Sem histórico de visitas/);
+    assert.match(await page.locator('#clicks-chart').textContent(),/Sem histórico de cliques/);
+   }else{
+    await page.waitForFunction(()=>document.querySelector('#telemetry')?.textContent.includes('Não foi possível obter o diagnóstico'),{timeout:3500});
+   }
+   assert.equal(errors.length,0,'SENTINEL '+mode+' JS errors: '+errors.join('; '));
+   const view=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:innerWidth}));
+   assert.ok(view.scroll<=view.width+3,'SENTINEL mobile horizontal overflow '+JSON.stringify(view));
+   await context.close();
+   console.log('SENTINEL dashboard '+mode+' mobile render OK');
+  }
  }finally{await browser.close();await close();}
 }
 run().catch(error=>{console.error(error?.stack||error);server.close();process.exitCode=1;});
