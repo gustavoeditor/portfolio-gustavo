@@ -388,7 +388,7 @@ body{
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
-<link rel="stylesheet" href="/ambience.css?v=1">
+<link rel="stylesheet" href="/ambience.css?v=2">
 </head>
 <body>
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -693,8 +693,10 @@ document.getElementById('brief-form').addEventListener('submit',e=>{e.preventDef
   <div class="ambience-row"><span class="ambience-row-label"><b>Música ambiente</b><small>Original · piano, synth e batidas suaves</small></span><button type="button" class="ambience-switch" id="ambience-music" aria-pressed="false">Desligado</button></div>
   <div class="ambience-row"><span class="ambience-row-label"><b>Microefeitos</b><small>Cliques discretos em ações principais</small></span><button type="button" class="ambience-switch" id="ambience-fx" aria-pressed="false">Desligados</button></div>
   <label class="ambience-slider-row" for="ambience-volume"><span>Volume da trilha</span><output id="ambience-volume-display" for="ambience-volume">12%</output></label>
-  <input type="range" class="ambience-volume" id="ambience-volume" min="0" max="35" value="12" step="1" aria-label="Volume da música ambiente">
-  <p class="ambience-panel-foot">Sem reprodução automática na primeira visita. A trilha silencia ao assistir aos vídeos. Preferências salvas neste navegador.</p>
+  <input type="range" class="ambience-volume" id="ambience-volume" min="0" max="65" value="12" step="1" aria-label="Volume da música ambiente">
+  <label class="ambience-slider-row" for="ambience-fx-volume"><span>Volume dos efeitos</span><output id="ambience-fx-volume-display" for="ambience-fx-volume">32%</output></label>
+  <input type="range" class="ambience-volume" id="ambience-fx-volume" min="0" max="100" value="32" step="1" aria-label="Volume dos microefeitos">
+  <p class="ambience-panel-foot">Som desligado na primeira visita. Seus volumes e escolhas ficam salvos neste navegador. Ao assistir um vídeo, a trilha silencia.</p>
   <p class="ambience-panel-status" id="ambience-status" role="status" aria-live="polite"></p>
  </div>
  <button class="ambience-trigger" type="button" id="ambience-trigger" aria-expanded="false" aria-controls="ambience-popover" aria-label="Abrir controles de som">
@@ -702,6 +704,6 @@ document.getElementById('brief-form').addEventListener('submit',e=>{e.preventDef
   <span class="ambience-trigger-label">G / AMBIENCE</span><i class="ambience-state-dot" aria-hidden="true"></i>
  </button>
 </aside>
-<script defer src="/ambience.js?v=1"></script>
+<script defer src="/ambience.js?v=2"></script>
 </body>
 </html>
