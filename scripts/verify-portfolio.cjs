@@ -102,7 +102,7 @@ assert.ok(playerCSS.includes('[data-ui-visible="false"][data-pointer-inside="tru
 
 
 /* SENTINEL: avoid accidental removal of monitoring or its access controls. */
-for(const item of ['/sentinel-client.js?v=1','/api/managed-projects','id="quote-floating-trigger"'])
+for(const item of ['/sentinel-client.js?v=2','/api/managed-projects','id="quote-floating-trigger"'])
  assert.ok(html.includes(item),'Site regression: '+item);
 const sentinelClient=read('sentinel-client.js');
 new Function(sentinelClient);
