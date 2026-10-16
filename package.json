@@ -7,10 +7,15 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@vercel/blob": "^2.5.0",
+    "@vercel/blob": "2.8.2",
+    "@vercel/oidc": "^4.0.1",
     "sharp": "^0.34.4"
   },
   "scripts": {
-    "test": "node scripts/verify-portfolio.cjs"
+    "test": "node scripts/verify-portfolio.cjs && node scripts/check-channel-avatar.cjs && node --test tests/admin-upload.test.cjs",
+    "build": "esbuild scripts/blob-client-entry.mjs --bundle --format=esm --platform=browser --minify --legal-comments=eof --outfile=vendor/blob-client.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }

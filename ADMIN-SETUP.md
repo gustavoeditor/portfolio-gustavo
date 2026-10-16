@@ -1,63 +1,69 @@
-# GUSTAVO | Painel privado e publicação inteligente
+# Painel privado e publicação de vídeos
 
-O portfólio continua público em **https://portfolio-gustavo-chi.vercel.app/**. Não é necessário comprar nem conectar domínio próprio para publicar vídeos automaticamente.
+Site: https://portfolio-gustavo-chi.vercel.app/
 
-## 1. Entrar no painel
+Painel: https://portfolio-gustavo-chi.vercel.app/admin
 
-Abra **https://portfolio-gustavo-chi.vercel.app/admin** e entre usando a senha administrativa.
+## Uso
 
-A senha `ADMIN_PASSWORD` já foi cadastrada no ambiente **Production** do projeto na Vercel. A chave `ADMIN_SESSION_SECRET` também está cadastrada. **Não coloque esses valores no GitHub nem os envie por mensagem.**
+1. Entre com sua senha administrativa. Se a autenticação em duas etapas estiver configurada, informe também o código do seu autenticador.
+2. Arraste um MP4 ou WebM, de até 250 MB, para o painel. Soltar um arquivo fora da caixa de envio dentro do painel também seleciona o vídeo.
+3. O navegador captura oito quadros distribuídos pelo vídeo e cria uma capa. Se o formato não puder ser decodificado, selecione uma capa manualmente.
+4. Confira título, categoria, descrição e posição. A análise visual usa imagens, não o áudio nem o vídeo completo. Quando a IA não está disponível, a interface informa que a sugestão usa o nome do arquivo.
+5. Clique em **Publicar no site**. Aguarde a confirmação de publicação.
 
-O painel é servido por uma Function protegida no servidor. A sessão usa cookie `HttpOnly`, `Secure`, `SameSite=Strict` e expira após 12 horas. O login antigo permanece funcionando.
+Na página pública e na tela de login, soltar um arquivo não abre mais o vídeo no navegador: aparece uma orientação para usar o painel privado. Nenhum visitante pode publicar sem autenticação.
 
-## 2. Ativar envio automático de arquivos
+Após uma falha de publicação, use novamente o botão Publicar mantendo a aba aberta: os arquivos já enviados são reaproveitados e um identificador impede duplicação do projeto. Recarregar a aba perde esse estado temporário; vídeos incompletos podem ficar no armazenamento e ser removidos pelo proprietário depois de conferir o catálogo.
 
-Acesse o projeto `portfolio-gustavo` na Vercel → **Storage** → **Create Database** → **Blob**.
+## Conectar o armazenamento — etapa ainda necessária em produção
 
-- Escolha um nome, por exemplo `gustavo-portfolio-media`.
-- Use **Public**, já que os vídeos do portfólio precisam ser acessíveis pelos visitantes.
-- **Conecte o Blob ao projeto `portfolio-gustavo`**.
-- Ative a conexão para **Production**. A Vercel deve criar a variável privada `BLOB_READ_WRITE_TOKEN` automaticamente.
-- Faça **Redeploy** da produção após conectar o armazenamento. Confirme que a variável está presente em **Settings → Environment Variables**, sem revelar seu valor.
+O último teste público, antes destas melhorias, retornou `enabled: false`. Isso confirma que o armazenamento não estava ativo. O acesso da integração ao time `gustavo-editor` também retornou HTTP 403. O código não ativa a conta nem cria o armazenamento sozinho.
 
-*O assistente tentou criar o Blob automaticamente em 15/10/2026, mas a integração da Vercel recusou a ação com HTTP 403. Esta etapa precisa ser concluída pela conta proprietária do projeto ou após reconectar a integração com acesso ao time `gustavo-editor`.*
+Abra o projeto **portfolio-gustavo** no time **gustavo-editor** da Vercel, entre em **Storage**, crie ou selecione um **Blob público** e conecte-o ao ambiente **Production**. Mantenha o armazenamento na conta proprietária e confira os limites de armazenamento e transferência do plano.
 
-Após o deploy, o painel deve exibir **Armazenamento conectado**. Sem esse token, o botão de publicar permanece desativado. Os 17 vídeos atuais continuam exibidos normalmente.
+O painel aceita dois tipos de conexão:
 
-### Publicar um vídeo
+- **Conexão por token:** variável privada `BLOB_READ_WRITE_TOKEN`.
+- **Conexão por OIDC:** `BLOB_STORE_ID`, `BLOB_WEBHOOK_PUBLIC_KEY` e o `VERCEL_OIDC_TOKEN` disponibilizado pela Vercel. O upload usa URLs assinadas com limite de caminho, tipo e tamanho. Conecte pelo painel da Vercel para que as variáveis sejam provisionadas corretamente.
 
-1. Entre no painel e arraste um MP4 ou WebM (até 250 MB).
-2. O navegador captura quadros e gera uma capa pequena. Opcionalmente, substitua a capa por JPG/PNG/WebP de até 8 MB.
-3. O painel sugere título, categoria e posição. Confira essas sugestões, especialmente se o vídeo tiver um nome genérico.
-4. Clique em **Publicar no site** e aguarde a barra chegar a 100%.
-5. Recarregue o portfólio. Novos vídeos aparecem integrados aos 17 já publicados, sem um novo commit.
+Após conectar, faça **Redeploy** de produção e recarregue o painel. Não publique o valor de nenhum token no repositório ou no chat.
 
-Arquivos são enviados diretamente do navegador para o Blob usando um token temporário emitido **somente após autenticação**. Os dados do catálogo são mantidos na Vercel Blob. A publicação não exige abrir o GitHub Desktop.
+O código dos dois modos foi testado com serviços simulados. O upload real em produção só pode ser confirmado depois que o armazenamento da conta estiver conectado.
 
-## 3. Ativar IA visual de classificação (opcional)
+## Análise visual
 
-Sem uma chave de IA, o painel já faz uma **sugestão básica pelo nome do arquivo**, mas isso **não é análise visual por IA**.
+A prioridade de autenticação é:
 
-Para analisar até três quadros do vídeo, adicione na Vercel → Settings → Environment Variables:
+1. `OPENAI_API_KEY` já configurada, com modelo `OPENAI_VISION_MODEL` ou `gpt-4.1-mini`.
+2. Vercel AI Gateway, usando `AI_GATEWAY_API_KEY` ou OIDC da implantação, com `AI_GATEWAY_MODEL` ou `openai/gpt-4.1-mini`.
 
-- `OPENAI_API_KEY`: uma chave privada da API da OpenAI, **apenas em Production**, criada pelo proprietário e armazenada como Sensitive.
-- Opcional: `OPENAI_VISION_MODEL`, padrão `gpt-4.1-mini`.
+A disponibilidade de credenciais não garante saldo ou acesso do provedor. A conta da Vercel pode exigir verificação ou créditos para utilizar o Gateway. Se o serviço recusar a análise, o painel continua permitindo escolher os dados manualmente e informa a origem da sugestão. Não é obrigatório contratar outro serviço para publicar manualmente.
 
-Faça redeploy após salvar. O painel indicará **IA visual disponível**. O serviço usa a API de visão e pode gerar custos conforme o uso da API. As sugestões podem errar: sempre confira antes de publicar. A IA analisa **quadros capturados**, não toda a edição, o movimento ou o áudio.
+Nenhuma chave deve ir para o front-end. O código do cliente de upload é empacotado no próprio site em `vendor/blob-client.js`, sem importar scripts de um CDN externo no painel.
 
-## 4. Segurança e manutenção
+## Segurança
 
-- Nunca grave senhas ou tokens no front-end.
-- Não publique o conteúdo de `.env` no GitHub.
-- A API de upload rejeita solicitações de visitantes não autenticados.
-- A API de publicação valida se vídeo e capa estão no armazenamento Blob do projeto.
-- O catálogo público antigo `projetos.json` não é apagado. Se Blob falhar, os vídeos já existentes permanecem visíveis.
-- Retirar um projeto pelo painel remove apenas a referência pública do catálogo. O arquivo original permanece no armazenamento para eventual recuperação; remova arquivos órfãos pelo dashboard do Blob se necessário.
-- O antigo modo manual/exportação JSON permanece no painel.
-- O acesso a um domínio `.vercel.app` é suficiente, porém o site precisará estar publicamente acessível para os visitantes.
+- `ADMIN_PASSWORD` e `ADMIN_SESSION_SECRET` são obrigatórios e privados.
+- Cookies `HttpOnly`, `Secure`, `SameSite=Strict`, validade de 12 horas. Alterar senha ou segredo do autenticador invalida as sessões anteriores.
+- As operações administrativas verificam a sessão e a origem. A publicação e análise exigem também um cabeçalho exclusivo do painel.
+- O login limita a dez tentativas por 15 minutos, por endereço de origem e instância. Esse limite em memória é suplementar e não representa proteção global entre todas as instâncias.
+- Para tornar o limite compartilhado, conecte Upstash Redis e configure `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN`. Se Redis estiver configurado mas indisponível, novos logins são recusados temporariamente.
+- Para ativar autenticação em duas etapas, cadastre um segredo Base32 do autenticador na variável privada `ADMIN_TOTP_SECRET` e no seu app de autenticação, usando TOTP/SHA-1, seis dígitos, período de 30 segundos. Guarde uma cópia segura fora do site antes de ativar. A simples publicação do código não ativa essa opção.
+- Arquivos publicados precisam pertencer ao Blob deste portfólio, ter tipo/tamanho permitidos e assinatura binária compatível com vídeo ou imagem. Essa validação não é um antivírus.
+- O catálogo usa gravação condicional por ETag para evitar sobrescrever alterações feitas em outra aba. Se houver conflito, a publicação pede uma nova tentativa.
+- Antes de alterar um catálogo existente, uma cópia imutável da versão anterior é salva em `gustavo-admin/history/`. Os snapshots contêm apenas os mesmos dados públicos do catálogo. Para recuperar, o proprietário pode consultar essas cópias no Blob e restaurar os registros desejados. Ainda não há um botão de restauração no painel.
+- Retirar um projeto do site preserva o arquivo original. Os 17 vídeos estáticos permanecem no `projetos.json` e são mantidos caso o armazenamento esteja indisponível.
+- Cabeçalhos impedem incorporar o site em frames e restringem objetos, base de URLs e envio de formulários. O painel tem política de scripts e conexões mais restrita.
 
-## 5. Limites e custos
+Estas camadas reduzem o risco; não são uma garantia de impossibilidade de invasão. O gerenciamento de conta da Vercel e GitHub, suas permissões e autenticação em duas etapas também dependem do proprietário.
 
-Vercel Blob está disponível nos planos compatíveis e pode cobrar por armazenamento, transferência e operações conforme a assinatura. Confira **Storage → Usage** e os limites do plano antes de publicar arquivos muito grandes.
+## Desenvolvimento e validação
 
-Os vídeos MP4 existentes continuam hospedados via GitHub/Vercel. Somente os uploads novos usam Blob.
+```sh
+npm ci
+npm run build
+npm test
+```
+
+`npm test` valida o portfólio, a resolução de fotos dos canais e cenários de autenticação, limitação de tentativas, TOTP, autorização de upload, validação de mídia, conflitos do catálogo, publicação idempotente e fallback da análise visual. Os testes de serviços usam simulações, sem credenciais reais.

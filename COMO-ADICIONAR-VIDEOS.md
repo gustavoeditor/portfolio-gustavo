@@ -1,28 +1,19 @@
-# Como adicionar vídeos ao portfólio
+# Como adicionar vídeos
 
-## Caminho mais simples
+Abra https://portfolio-gustavo-chi.vercel.app/admin e entre no painel privado.
 
-1. Abra o [painel de projetos](https://portfolio-gustavo-chi.vercel.app/admin).
-2. Informe o título, categoria, vídeo e, se quiser, uma capa e descrição.
-3. Clique em **Adicionar à lista**. Use as setas para ordenar os projetos.
-4. Clique em **Baixar projetos.json**.
-5. No [repositório do portfólio](https://github.com/gustavoeditor/portfolio-gustavo), substitua o arquivo `projetos.json` pelo arquivo baixado e faça commit.
-6. Para arquivos próprios, envie o MP4 para `videos/` e as capas para `capas/` usando **Add file → Upload files** no GitHub. Faça isso antes de publicar o JSON que aponta para esses arquivos.
+1. Arraste seu MP4 ou WebM (até 250 MB) para o painel.
+2. Confira a capa, título e categoria sugeridos. Você pode ajustar os dados e trocar a capa.
+3. Clique em **Publicar no site** e aguarde a confirmação.
 
-## Formatos aceitos
+Este caminho depende de conectar o Vercel Blob à produção. Se o painel informar que o armazenamento ainda não está conectado, a seleção e a preparação podem ser testadas, mas o botão Publicar fica desativado. Consulte `ADMIN-SETUP.md` para ativar a conexão.
 
-- Vídeo próprio: `videos/nome-do-video.mp4`
-- Capa opcional: `capas/nome-da-capa.jpg`
-- Link público direto de vídeo MP4/WebM
-- Link de vídeo do YouTube ou Vimeo, que será exibido incorporado
+A IA analisa até oito imagens distribuídas pelo vídeo. Ela não avalia o áudio nem assiste ao vídeo completo. Quando indisponível, a sugestão usa o nome do arquivo e pode ser corrigida manualmente.
 
-## Recomendações
+Soltar o arquivo na página pública exibe uma orientação para abrir o painel; isso não envia o vídeo.
 
-- Use nomes curtos, sem acentos nem espaços.
-- Prefira MP4/H.264 com áudio AAC para compatibilidade. Exporte com **Web Optimized / Fast Start** quando disponível.
-- Comprima os vídeos antes de publicar; para MP4 de 1080p, teste CRF 23–26 no H.264 sem perder qualidade visual importante.
-- Prefira capas **WebP** ou JPG 16:9 com largura de cerca de 960 px e, idealmente, menos de 150 KB.
-- Se o arquivo de vídeo for muito grande, prefira hospedagem externa (YouTube ou Vimeo) em vez de deixar um MP4 pesado no repositório.
-- Para poupar dados no celular, o site só carrega o player quando o visitante clica em reproduzir. Até lá, mostra a capa.
-- A grade tem três colunas no desktop, duas em telas médias e uma no celular.
-- O painel salva um rascunho neste navegador, mas não publica sozinho. O site é estático: para as mudanças aparecerem para visitantes, envie os arquivos ao GitHub.
+## Caminho manual de reserva
+
+O formulário manual do painel permite preparar uma lista e baixar `projetos.json`. Nesse modo, envie vídeo e capa ao repositório e substitua o JSON por um commit. Esse caminho não publica automaticamente.
+
+Para mídia própria, prefira MP4/H.264 com AAC e Fast Start. WebM também é aceito. Capas manuais: WebP, JPG ou PNG de até 8 MB; prefira cerca de 960 px e tamanho reduzido. Links do YouTube e Vimeo continuam disponíveis no cadastro manual de projetos.

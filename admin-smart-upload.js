@@ -22,8 +22,10 @@
   let storageReady = false;
   let analyzing = false;
   let uploading = false;
+  let uploadMode = 'token';
+  let pending = null;
   let totalProjects = 17;
-  const validVideo = (f) => f && (f.type === 'video/mp4' || f.type === 'video/webm' || /\.(mp4|webm)$/i.test(f.name));
+  const validVideo = (f) => f && /\.(mp4|webm)$/i.test(f.name) && (!f.type || ['video/mp4','video/webm'].includes(f.type));
   const slug = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .toLowerCase().replace(/\.[^.]+$/,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,56) || 'video';
   const headers = {'Content-Type':'application/json','X-Gustavo-Admin':'1'};
@@ -52,6 +54,8 @@
     releasePreview();
     if (poster.src.startsWith('blob:')) URL.revokeObjectURL(poster.src);
     file = null;
+    pending = null;
+    analyzing = false;
     posterFile = null;
     frames = [];
     editor.hidden = true;
@@ -89,16 +93,17 @@
       const meta = waitFor('loadedmetadata',10000);
       element.src = source;
       await meta;
-      if (!element.videoWidth || !element.videoHeight || !Number.isFinite(element.duration)) {
+      if (!element.videoWidth || !element.videoHeight || !Number.isFinite(element.duration) || element.duration<=0) {
         throw new Error('Não foi possível identificar o vídeo.');
       }
       const canvas = document.createElement('canvas');
-      canvas.width = 560;
-      canvas.height = Math.max(180,Math.round(560*element.videoHeight/element.videoWidth));
+      const scale=Math.min(560/element.videoWidth,560/element.videoHeight,1);
+      canvas.width = Math.max(1,Math.round(element.videoWidth*scale));
+      canvas.height = Math.max(1,Math.round(element.videoHeight*scale));
       const ctx = canvas.getContext('2d',{alpha:false});
       if (!ctx) throw new Error('Canvas indisponível.');
-      for (const percentage of [0.14,0.50,0.78]) {
-        const target = Math.min(Math.max(.01,element.duration*percentage),Math.max(.01,element.duration-.03));
+      for (const percentage of [.05,.16,.29,.43,.57,.71,.84,.95]) {
+        const target = Math.min(element.duration*percentage,Math.max(0,element.duration-.001));
         if (Math.abs(element.currentTime-target)>.015) {
           const seeked = waitFor('seeked',6500);
           element.currentTime = target;
@@ -127,6 +132,7 @@
     if (chosen.size > 250*1024*1024) { tell('O tamanho máximo por vídeo é 250 MB.',true); return; }
     clearSelection();
     file = chosen;
+    pending = {id:crypto.randomUUID(),base:slug(chosen.name)+'-'+Date.now().toString(36),video:null,cover:null};
     previewUrl = URL.createObjectURL(file);
     preview.src = previewUrl;
     preview.muted = true;
@@ -140,22 +146,26 @@
     tell('Preparando a capa e a sugestão de classificação...');
     analyzing = true;
     syncPublish();
+    let selectedFrames=[];
     try {
       const samples = await takeFrames(chosen);
       if (file !== chosen) return;
       frames = samples.frames;
+      selectedFrames=samples.frames;
       posterFile = samples.thumbnail;
       if (posterFile) {
         poster.src = URL.createObjectURL(posterFile);
         poster.hidden = false;
       }
     } catch (_) {
+      if (file !== chosen) return;
       tell('Não foi possível gerar a capa automaticamente. Escolha uma capa usando “Trocar capa”.',true);
     }
+    if (file !== chosen) return;
     try {
       const result = await safeJson(await fetch('/api/admin-analyze',{
         method:'POST',credentials:'same-origin',headers,
-        body:JSON.stringify({name:chosen.name,frames,total:totalProjects})
+        body:JSON.stringify({name:chosen.name,frames:selectedFrames,total:totalProjects})
       }));
       if (file !== chosen) return;
       $('auto-title-input').value = result.title || $('auto-title-input').value;
@@ -166,11 +176,11 @@
       $('auto-reason').textContent = (result.source === 'ai' ? 'IA visual: ' : 'Sugestão pelo nome: ') + (result.explanation || 'Revise antes de publicar.');
       if (posterFile) tell(storageReady ? 'Pronto. Revise os dados e clique em Publicar.' : 'Capa criada. Configure o armazenamento para ativar a publicação.');
     } catch (error) {
+      if (file !== chosen) return;
       $('auto-reason').textContent = 'Não foi possível analisar agora. Preencha os campos manualmente.';
       tell(error.message,true);
     } finally {
-      analyzing = false;
-      syncPublish();
+      if (file === chosen) {analyzing = false;syncPublish();}
     }
   }
 
@@ -189,25 +199,30 @@
     const selected = file;
     try {
       tell('Conectando ao armazenamento protegido...');
-      const {upload} = await import('https://esm.sh/@vercel/blob@2.5.0/client?bundle');
-      const base = slug(selected.name) + '-' + Date.now().toString(36);
+      const client = await import('/vendor/blob-client.js?v=2.8.2');
+      const upload = uploadMode === 'oidc' ? client.uploadPresigned : client.upload;
+      const base = pending.base;
       const ext = /\.webm$/i.test(selected.name) ? 'webm' : 'mp4';
-      const uploadedVideo = await upload('gustavo/videos/'+base+'.'+ext,selected,{
+      const uploadedVideo = pending.video || await upload('gustavo/videos/'+base+'.'+ext,selected,{
         access:'public',handleUploadUrl:'/api/admin-upload',
+        contentType:ext==='webm'?'video/webm':'video/mp4',
         multipart:selected.size > 90*1024*1024,
         onUploadProgress:({percentage}) => {progress.value = Math.round(percentage*.90);}
       });
+      pending.video=uploadedVideo;
       tell('Vídeo enviado. Publicando a capa...');
       const coverExt = posterFile.type === 'image/webp' ? 'webp' : posterFile.type === 'image/png' ? 'png' : 'jpg';
-      const uploadedCover = await upload('gustavo/capas/'+base+'.'+coverExt,posterFile,{
+      const uploadedCover = pending.cover || await upload('gustavo/capas/'+base+'.'+coverExt,posterFile,{
         access:'public',handleUploadUrl:'/api/admin-upload',
+        contentType:posterFile.type,
         onUploadProgress:({percentage}) => {progress.value = 90+Math.round(percentage*.1);}
       });
+      pending.cover=uploadedCover;
       tell('Salvando o projeto na galeria...');
       await safeJson(await fetch('/api/admin-publish',{
         method:'POST',credentials:'same-origin',headers,
         body:JSON.stringify({
-          title,category,position,src:uploadedVideo.url,poster:uploadedCover.url,
+          uploadId:pending.id,title,category,position,src:uploadedVideo.url,poster:uploadedCover.url,
           description:$('auto-description').value.trim()
         })
       }));
@@ -215,7 +230,7 @@
       totalProjects++;
       uploading = false;
       clearSelection();
-      await reloadManaged();
+      try {await reloadManaged();} catch (_) { /* Publication succeeded; list refresh can be retried independently. */ }
       tell('Publicado! O vídeo foi adicionado à galeria. Atualize o portfólio para conferir.');
     } catch(error) {
       tell(error.message || 'Não foi possível publicar. Confira sua sessão e tente novamente.',true);
@@ -283,12 +298,13 @@
       try { extraCount = await reloadManaged(); } catch (_) {}
       totalProjects = staticCount + extraCount;
       storageReady = Boolean(config.storageReady);
+      uploadMode = config.uploadMode || 'token';
       if (storageReady) {
         setup.textContent = config.visualAIReady
-          ? 'Armazenamento conectado. IA visual disponível: analisará alguns quadros antes de sugerir a categoria.'
-          : 'Armazenamento conectado. A classificação pelo nome está disponível; a IA visual depende de configurar OPENAI_API_KEY na Vercel.';
+          ? 'Armazenamento conectado. A análise visual tentará classificar quadros ao longo do vídeo; revise a sugestão antes de publicar.'
+          : 'Armazenamento conectado. A sugestão usa o nome do arquivo; você pode escolher a categoria manualmente.';
       } else {
-        setup.textContent = 'Publicação automática aguardando configuração: abra o projeto portfolio-gustavo na Vercel → Storage → Create → Blob (Public) e conecte à produção. Não é necessário comprar um domínio. A seleção e a análise básica já podem ser testadas abaixo.';
+        setup.textContent = 'A publicação ainda está desativada: falta conectar o armazenamento do portfólio. Você pode testar a seleção, capa e categoria, mas o vídeo só será enviado quando esta conexão estiver pronta.';
       }
     } catch(e) {
       storageReady=false;
@@ -312,8 +328,18 @@
     if (chosen) chooseFile(chosen);
   });
   input.addEventListener('change',()=>{if(input.files && input.files[0])chooseFile(input.files[0]);});
+  const hasFiles=event=>Array.from(event.dataTransfer?.types || []).includes('Files');
+  document.addEventListener('dragover',event=>{if(hasFiles(event))event.preventDefault();});
+  document.addEventListener('drop',event=>{
+    if (!hasFiles(event) || event.defaultPrevented) return;
+    event.preventDefault();
+    const chosen=event.dataTransfer?.files?.[0];
+    if(chosen){chooseFile(chosen);drop.scrollIntoView({behavior:'smooth',block:'center'});}
+  });
+  window.addEventListener('beforeunload',event=>{if(uploading){event.preventDefault();event.returnValue='';}});
   $('auto-change-cover').addEventListener('click',()=>coverInput.click());
   coverInput.addEventListener('change',()=>{
+    if(uploading)return;
     const picked=coverInput.files && coverInput.files[0];
     if(!picked)return;
     if(!['image/webp','image/jpeg','image/png'].includes(picked.type)||picked.size>8*1024*1024){
@@ -321,6 +347,7 @@
     }
     if (poster.src.startsWith('blob:')) URL.revokeObjectURL(poster.src);
     posterFile=picked;
+    if(pending)pending.cover=null;
     poster.src=URL.createObjectURL(picked);
     poster.hidden=false;
     syncPublish();

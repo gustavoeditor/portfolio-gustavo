@@ -1,0 +1,4 @@
+.file-drop-notice{position:fixed;bottom:24px;right:24px;z-index:10000;width:min(390px,calc(100% - 48px));padding:22px;border:1px solid #9273c9;border-radius:14px;background:#17111f;color:#f4f3f0;box-shadow:0 20px 70px #0008;font:14px/1.6 system-ui,sans-serif}
+.file-drop-notice p{margin:0 0 14px}.file-drop-notice a,.file-drop-notice button{display:inline-block;margin-right:12px;padding:8px 12px;border:1px solid #6a527f;border-radius:6px;font:inherit;cursor:pointer;text-decoration:none;color:inherit;background:#2a2036}.file-drop-notice a{background:#c4adff;color:#160e23}
+.file-drop-notice :focus-visible{outline:2px solid #dccaff;outline-offset:3px}
+.upload-preview-info{color:#b8a9cc;font-size:12px;line-height:1.6;margin-top:10px}
