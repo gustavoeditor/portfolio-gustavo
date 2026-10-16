@@ -19,7 +19,7 @@ const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(new Set(ids).size,ids.length,'IDs duplicados');
 for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(ids.includes(id),'Link interno quebrado: '+id);
 for(const name of ['inicio','trabalhos','portfolio-grid','galeria','especialidades','metodo','sobre','contato','brief-form','pack-button','video-modal'])assert.ok(ids.includes(name),'Seção da V4 ausente: '+name);
-for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/player.js?v=2','/player.css?v=1','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
+for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/player.js?v=3','/player.css?v=1','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
  assert.ok(html.includes(snippet),'Integração obrigatória ausente: '+snippet);
 }
 
@@ -64,7 +64,7 @@ void validateCoverDecoding().catch(e=>{console.error(e);process.exitCode=1;});
 
 
 /* Sound is opt-in; the audio panel may never remove the booking CTA or video player. */
-for(const selector of ['id="ambience-dock"','id="ambience-trigger"','id="ambience-popover"','id="ambience-music"','id="ambience-fx"','id="ambience-volume"','/ambience.css?v=1','/ambience.js?v=1']){
+for(const selector of ['id="ambience-dock"','id="ambience-trigger"','id="ambience-popover"','id="ambience-music"','id="ambience-fx"','id="ambience-volume"','id="ambience-fx-volume"','id="ambience-fx-volume-display"','/ambience.css?v=2','/ambience.js?v=2']){
  assert.ok(html.includes(selector),'Ambience preview missing: '+selector);
 }
 assert.equal((html.match(/id="ambience-dock"/g)||[]).length,1,'Ambience dock must not duplicate');
@@ -72,10 +72,20 @@ assert.ok(fs.existsSync(path.join(root,'ambience.js'))&&fs.existsSync(path.join(
 const ambienceScript=read('ambience.js');
 new Function(ambienceScript);
 assert.ok(ambienceScript.includes("preferences.music = stored.music === true"),'Saved music preference not restored');
-assert.ok(ambienceScript.includes("music:false, fx:false, volume:12"),'Initial audio must be off');
+assert.ok(ambienceScript.includes("music:false, fx:false, volume:12, fxVolume:32"),'Initial music and effects must be off');
+assert.ok(ambienceScript.includes("const KEY = 'gustavo-ambience-v1'"),'Existing audio settings must migrate');
+assert.ok(ambienceScript.includes('MAX_MUSIC_VOLUME = 65')&&html.includes('id="ambience-volume" min="0" max="65"'),'Music ceiling must be increased');
+assert.ok(ambienceScript.includes('MAX_FX_VOLUME = 100')&&html.includes('id="ambience-fx-volume" min="0" max="100"'),'Independent effects volume missing');
+assert.ok(ambienceScript.includes("fxRange.addEventListener('input'")&&ambienceScript.includes("preferences.fxVolume"),'Effect volume must persist');
+assert.ok(ambienceScript.includes("localStorage.setItem(KEY, JSON.stringify(preferences))"),'Audio settings must survive a reload');
+assert.ok(ambienceScript.includes('window.addEventListener(\'storage\''),'Other tabs should reload changed preferences');
+const playerScript=read('player.js');
+assert.ok(playerScript.includes("gustavo-video-quality-v1"),'Video quality preference missing');
+assert.ok(playerScript.includes("gustavo-video-audio-v1")&&playerScript.includes("savePlaybackVolume();"),'Video audio volume and mute should persist');
 assert.ok(ambienceScript.includes("document.addEventListener('play',synchronize,true)"),'Pause/duck when video plays');
 assert.ok(ambienceScript.includes('document.hidden'),'Pause on background tabs');
 assert.ok(ambienceScript.includes('prefers-reduced-motion')===false,'Sound must be optional, not tied to animation preferences');
 assert.ok(read('ambience.css').includes('body.modal-open .ambience-dock'),'Audio widget must not overlay video player');
+assert.ok(read('ambience.css').includes('max-height:calc(100dvh - 95px)'),'Audio panel must fit on short screens');
 
 console.log('Portfolio V4 validado: '+projects.length+' vídeos, admin, SEO e interface.');
