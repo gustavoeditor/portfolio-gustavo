@@ -5,7 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const {createRequire} = require('node:module');
 const root = path.resolve(__dirname,'..');
-const keys=['ADMIN_PASSWORD','ADMIN_SESSION_SECRET','ADMIN_TOTP_SECRET','UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN','BLOB_READ_WRITE_TOKEN','BLOB_STORE_ID','BLOB_WEBHOOK_PUBLIC_KEY','VERCEL_OIDC_TOKEN','OPENAI_API_KEY','AI_GATEWAY_API_KEY'];
+const keys=['ADMIN_PASSWORD','ADMIN_SESSION_SECRET','ADMIN_TOTP_SECRET','UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN','BLOB_READ_WRITE_TOKEN','BLOB_STORE_ID','BLOB_WEBHOOK_PUBLIC_KEY','VERCEL_OIDC_TOKEN','VERCEL','OPENAI_API_KEY','AI_GATEWAY_API_KEY'];
 const originalEnv=Object.fromEntries(keys.map(k=>[k,process.env[k]]));
 const originalFetch=global.fetch;
 function env(){for(const key of keys)delete process.env[key];process.env.ADMIN_PASSWORD='test-fixture-password';process.env.ADMIN_SESSION_SECRET='test-fixture-session-secret';}
@@ -137,4 +137,12 @@ test('presigned upload helper and browser client agree on scoped token payload',
  const payload=res.body.presignedUrlPayload;assert.ok(payload.signature);
  assert.equal(require('@vercel/blob').parseStoreIdFromPresignedUrl(payload),'fixture');
  const decoded=JSON.parse(Buffer.from(payload.delegationToken.split('.')[0],'base64url').toString());assert.equal(decoded.pathname,'gustavo/videos/fixture.webm');assert.deepEqual(decoded.operations,['put']);
+});
+
+
+test('configured OIDC bindings work without an env token because runtime credentials are request-scoped',()=>{
+ env();process.env.BLOB_STORE_ID='fixture';process.env.BLOB_WEBHOOK_PUBLIC_KEY='fixture';
+ assert.equal(require('../lib/storage-config').storageMode(),'oidc');
+ assert.equal(process.env.VERCEL_OIDC_TOKEN,undefined);
+ process.env.VERCEL='1';assert.equal(require('../lib/visual-ai').visualAIConfig().provider,'gateway');
 });
