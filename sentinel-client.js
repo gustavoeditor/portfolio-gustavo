@@ -44,7 +44,7 @@
   }catch(_){}
   send('visit','page');
  }
- fetch('/api/sentinel-config',{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(5000)})
+ fetch(endpoint,{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(5000)})
   .then(response=>response.ok?response.json():{enabled:false})
   .then(config=>{
    initializing=false;enabled=config?.enabled===true;
