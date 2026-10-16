@@ -110,6 +110,49 @@ async function makeContactSheet(browser,base,label){
   console.log('CONTACT_SHEET_FILE '+target);
  }finally{await context.close();}
 }
+async function testBrokenCoverRecovery(browser,base){
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});
+ const page=await context.newPage();
+ const transient=new Map();
+ const retryFiles=new Set(['butterfly-gamma-dark.webp','purple-gloves-studio.webp']);
+ const permanent='neon-gloves-reveal.webp';
+ await page.route('**/capas/*.webp*',async route=>{
+  const name=new URL(route.request().url()).pathname.split('/').pop();
+  const attempt=(transient.get(name)||0)+1;
+  transient.set(name,attempt);
+  if(name===permanent || (retryFiles.has(name)&&attempt===1)){
+   await route.fulfill({status:503,contentType:'text/plain',body:'Simulated transient image failure'});
+  }else await route.continue();
+ });
+ try{
+  await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});
+  await page.waitForFunction(()=>document.querySelectorAll('#project-grid .project-card').length>=17,null,{timeout:18000});
+  await page.waitForFunction(()=>{
+    const cards=[...document.querySelectorAll('#project-grid .project-card')];
+    const affected=cards.filter(x=>x.dataset.source.includes('butterfly-gamma-dark')||x.dataset.source.includes('purple-gloves-studio'));
+    const permanently=cards.find(x=>x.dataset.source.includes('neon-gloves-reveal'));
+    return affected.length===2 && affected.every(x=>{
+      const img=x.querySelector('img.project-poster');
+      return img?.complete&&img.naturalWidth>0&&img.src.includes('_cover_retry=');
+    }) && permanently?.querySelector('.poster-error-label');
+  },null,{timeout:20000});
+  const result=await page.evaluate(()=>{
+    const cards=[...document.querySelectorAll('#project-grid .project-card')];
+    return {loaded:cards.filter(x=>x.querySelector('img.project-poster')?.naturalWidth>0).length,
+      eager:cards.filter(x=>x.querySelector('img.project-poster')?.loading==='eager').length,
+      recoveries:cards.filter(x=>x.querySelector('img.project-poster')?.src.includes('_cover_retry=')).length,
+      fallback:cards.find(x=>x.dataset.source.includes('neon-gloves-reveal'))?.querySelector('.poster-error-label')?.textContent,
+      playable:cards.find(x=>x.dataset.source.includes('neon-gloves-reveal'))?.querySelector('.project-play')?.disabled===false
+    };
+  });
+  if(result.eager!==16||result.recoveries!==2||!result.fallback||result.playable!==true){
+    throw Error('Failed thumbnail resilience test: '+JSON.stringify(result));
+  }
+  if([...retryFiles].some(name=>transient.get(name)!==2) || transient.get(permanent)!==2)
+    throw Error('Retry count incorrect: '+JSON.stringify(Object.fromEntries(transient)));
+  console.log('THUMBNAIL_RECOVERY_TWO_TRANSIENT_ONE_PERMANENT',JSON.stringify(result));
+ }finally{await context.close();}
+}
 async function run(){
  // Require that every static video has exactly one valid, decodable poster.
  for(const p of expected){
@@ -122,6 +165,7 @@ async function run(){
  try{
   const base='http://127.0.0.1:'+server.address().port+'/';
   for(const [width,mobile] of [[390,true],[1280,false]]) await checkSite(browser,base,'local',width,mobile);
+  await testBrokenCoverRecovery(browser,base);
   await makeContactSheet(browser,base,'local');
   if(process.env.CHECK_PRODUCTION_THUMBS==='1'){
    try{
