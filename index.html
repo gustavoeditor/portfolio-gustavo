@@ -111,29 +111,21 @@
 .ticker{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:22px 0;background:#0e0d15}.ticker-track{display:flex;width:max-content;white-space:nowrap;animation:marquee 27s linear infinite;gap:40px;align-items:center}.ticker-track .phrase{font:600 12px var(--font);letter-spacing:.2em;color:#a8a0bd}.ticker-track .asterisk{color:#a27fdf;font-size:19px}
 /* section core */
 .section{padding:148px 0}.section-kicker{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:19px;border-top:1px solid var(--line);color:#ad9ccf}.section-kicker small{color:#77718a}.section-title{font-weight:600;font-size:clamp(51px,6.5vw,109px);letter-spacing:-.081em;line-height:.99;max-width:1000px;margin:42px 0 52px}.section-title .dim{color:#777286}.section-title .gradient{background:linear-gradient(100deg,#f4eaff,#9570e2);background-clip:text;-webkit-background-clip:text;color:transparent}.reveal{opacity:0;transform:translateY(46px);transition:opacity 1s var(--ease),transform 1s var(--ease)}.reveal.visible{opacity:1;transform:none}.reveal.delay1{transition-delay:.14s}.reveal.delay2{transition-delay:.28s}
-
-/* Halftone lab: identical 2.3px dots in every version; only manifesto changes. */
-.manifesto{position:relative;isolation:isolate;overflow:hidden}
-.manifesto>.container{position:relative;z-index:1}
-.manifesto::before{
+/* Halftone Glass | versão 01 (invisível), aprovado em 2026-10-17.
+   Apenas nas seções de manifesto, especialidades e contato.
+   Bolinhas fixas de 2px, espaçamento de 35px, desfoque de 1.2px.
+   A abertura (hero), o efeito do mouse e os elementos interativos não mudam. */
+.manifesto,.services{position:relative;isolation:isolate}
+.manifesto>.container,.services>.container{position:relative;z-index:1}
+.manifesto::before,.services::before,.contact-inner::before{
   content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
-  background-image:radial-gradient(circle,rgba(178,154,247,.48) 0 1.15px,transparent 1.25px);
-  background-repeat:repeat;background-size:28px 28px;
-  opacity:.54;
-  -webkit-mask-image:radial-gradient(ellipse 75% 88% at 50% 45%,#000 23%,transparent 100%);
-  mask-image:radial-gradient(ellipse 75% 88% at 50% 45%,#000 23%,transparent 100%);
+  background-image:radial-gradient(circle,rgba(220,200,255,1) 0 1px,transparent 1.15px);
+  background-size:35px 35px;background-position:12px 13px;
+  opacity:.085;filter:blur(1.2px);
+  -webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px);
+  -webkit-mask-image:radial-gradient(ellipse 89% 85% at 52% 50%,#000 4%,transparent 100%);
+  mask-image:radial-gradient(ellipse 89% 85% at 52% 50%,#000 4%,transparent 100%);
 }
-.manifesto[data-halftone="v1"]::before{
-  background-size:32px 32px;opacity:.34;
-  -webkit-mask-image:radial-gradient(ellipse 57% 72% at 50% 50%,#000 17%,transparent 100%);
-  mask-image:radial-gradient(ellipse 57% 72% at 50% 50%,#000 17%,transparent 100%);
-}
-.manifesto[data-halftone="v3"]::before{
-  background-size:24px 24px;opacity:.66;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);
-  mask-image:linear-gradient(90deg,transparent 0%,#000 22%,#000 78%,transparent 100%);
-}
-.manifesto[data-halftone="off"]::before{display:none}
 
 /* manifesto */
 .manifesto{padding-bottom:100px}.manifesto-grid{display:grid;grid-template-columns:1.45fr .55fr;gap:12%;align-items:end}.manifesto h2{font:600 clamp(39px,5vw,77px)/1.13 var(--font);letter-spacing:-.067em;margin:20px 0 0}.manifesto h2 i{font-style:normal;color:#a588ef}.manifesto-aside{padding:0 0 6px}.manifesto-aside p{font-size:14px;line-height:1.95;color:#a7a4b3}.manifesto-aside .signature{display:flex;align-items:center;gap:13px;margin-top:26px;color:#cbc0e5;font:600 11px var(--font)}.signature:before{content:'';width:30px;height:1px;background:#ba9fec}.metrics{border-bottom:1px solid var(--line);display:flex;gap:70px;padding:58px 0 40px}.metric{min-width:140px}.metric strong{font:600 57px/1 var(--font);letter-spacing:-.07em}.metric .suf{color:#a78aea;font-size:27px}.metric p{color:#8e889e;font-size:11px;margin:13px 0 0;letter-spacing:.07em}
@@ -533,22 +525,13 @@ body{
  <div class="hero-scroll" aria-hidden="true"><span></span> ROLE PARA EXPLORAR</div>
 </section>
 <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker-track"><span class="phrase">CINEMATICS & VISUAL STORYTELLING</span><span class="asterisk">✳</span><span class="phrase">MOTION DESIGN & VFX</span><span class="asterisk">✳</span><span class="phrase">CS2 & CREATIVE EDITING</span><span class="asterisk">✳</span><span class="phrase">EVERY FRAME MATTERS</span><span class="asterisk">✳</span><span class="phrase">CINEMATICS & VISUAL STORYTELLING</span><span class="asterisk">✳</span><span class="phrase">MOTION DESIGN & VFX</span><span class="asterisk">✳</span><span class="phrase">CS2 & CREATIVE EDITING</span><span class="asterisk">✳</span><span class="phrase">EVERY FRAME MATTERS</span><span class="asterisk">✳</span></div></div>
-<section class="manifesto section" data-halftone="v2" aria-labelledby="manifesto-title">
+<section class="manifesto section" aria-labelledby="manifesto-title">
  <div class="container">
   <div class="section-kicker mono reveal"><span>01 / FILOSOFIA CRIATIVA</span><small>IDEIA → EMOÇÃO</small></div>
   <div class="manifesto-grid"><h2 class="reveal" id="manifesto-title">O segredo não é apenas <i>fazer bonito.</i> É fazer cada segundo <i>significar algo.</i></h2><div class="manifesto-aside reveal delay1"><p>Do primeiro corte ao último frame, tudo tem uma intenção. Combino linguagem cinematográfica, precisão técnica e experimentação para criar vídeos que não parecem apenas mais um.</p><span class="signature">GUSTAVO / EDITOR & MOTION DESIGNER</span></div></div>
   <div class="metrics reveal"><div class="metric"><strong id="catalog-total">16</strong><p>TRABALHOS NO CATÁLOGO</p></div><div class="metric"><strong>04</strong><p>UNIVERSOS CRIATIVOS</p></div><div class="metric"><strong>01</strong><p>ASSINATURA VISUAL</p></div></div>
  </div>
 </section>
-
-<script>
-/* Preview only: ?halftone=v1, v2, v3, or off. */
-(()=>{const choice=new URLSearchParams(location.search).get('halftone');
-  if(['v1','v2','v3','off'].includes(choice)){
-    document.querySelector('.manifesto')?.setAttribute('data-halftone',choice);
-  }
-})();
-</script>
 <section class="work section" id="trabalhos" aria-labelledby="work-title">
  <div class="container">
   <div class="section-kicker mono reveal"><span>02 / PORTFÓLIO SELECIONADO</span><small>CURATED WITH INTENTION</small></div>
