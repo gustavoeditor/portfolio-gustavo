@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/store/checkout",
+      "destination": "/api/managed-projects?store=checkout"
+    },
+    {
       "source": "/admin/sentinel",
       "destination": "/api/sentinel-panel"
     },

@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
-const handler=require('../api/store/checkout.js');
+const handler=require('../lib/store-checkout.js');
 function mock(method,headers={}){const res={code:0,headers:{},body:null,setHeader(k,v){this.headers[k]=v},status(c){this.code=c;return this},json(b){this.body=b;return this},end(){return this}};handler({method,headers},res);return res;}
 function reset(){for(const k of ['STORE_TRIO_SALES_ENABLED','STORE_TRIO_DELIVERY_READY','STORE_TRIO_CHECKOUT_URL','STORE_TRIO_PRICE_LABEL'])delete process.env[k];}
 test('checkout bloqueado por padrão',()=>{reset();assert.equal(mock('GET').body.available,false);assert.equal(mock('POST').code,503);});

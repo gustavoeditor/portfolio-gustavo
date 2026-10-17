@@ -18,7 +18,7 @@ Não publicar ZIP no GitHub público, pasta /public, Vercel estático ou arquivo
    - STORE_TRIO_PRICE_LABEL=R$ 79,00  (EXEMPLO; substituir pelo preço verdadeiro)
    - STORE_TRIO_DELIVERY_READY=true   (SOMENTE após entrega real comprovada)
    - STORE_TRIO_SALES_ENABLED=true   (ÚLTIMA variável a ativar)
-8. Reimplantar e conferir: GET /api/store/checkout deve retornar available:true somente após as quatro condições; POST deve devolver 303 para o Payment Link correto. Em qualquer outra condição, botão desativado e POST retorna 503.
+8. Reimplantar e conferir: GET /api/store/checkout (reescrito internamente para /api/managed-projects) deve retornar available:true somente após as quatro condições; POST deve devolver 303 para o Payment Link correto. Em qualquer outra condição, botão desativado e POST retorna 503.
 9. Testar todo o funil de ponta a ponta, direitos do consumidor, comprovantes, suporte, erros e analytics consentidos.
 
 ### Proteções
