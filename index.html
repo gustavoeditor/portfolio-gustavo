@@ -455,6 +455,17 @@ body{
 /* Hero card: real image stays above the offline placeholder. */
 .hero-side .tile img[data-cover-source]{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:cover}
 .hero-side .tile .offline-art{z-index:0}
+
+/* Interest CTA: no fictitious checkout or promises of immediate delivery. */
+.pack-toast strong{display:block;font:700 13px var(--font);margin-bottom:6px;color:#f4ebff}
+.pack-toast p{font-size:12px;line-height:1.55;color:#ccbadf;margin:0 0 13px}
+.pack-toast-actions{display:flex;flex-wrap:wrap;gap:8px}
+.pack-interest,.pack-dismiss{font:700 11px var(--font);padding:11px 13px;border-radius:7px;border:1px solid #7e5ab8}
+.pack-interest{background:#c6b0ff;color:#211530}
+.pack-interest:hover{background:#dfd0ff}
+.pack-dismiss{background:#261c33;color:#e0d2ef}
+.pack-interest:focus-visible,.pack-dismiss:focus-visible{outline:2px solid white;outline-offset:2px}
+@media(max-width:380px){.pack-toast-actions>*{flex:1;text-align:center}}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -475,7 +486,7 @@ body{
   <nav class="nav-links" id="nav-links" aria-label="Menu principal">
    <a href="#trabalhos">Trabalhos</a><a href="#especialidades">Especialidades</a><a href="#metodo">Método</a><a href="#sobre">Experiência</a>
   </nav>
-  <div class="nav-cta"><span class="status"><span class="live"></span> PORTFÓLIO / 2026</span><button type="button" class="nav-pack" id="pack-button" title="Pack de edição: novidades em breve">Pack de edição <span class="pack-icon" aria-hidden="true">✦</span></button><a class="nav-btn" href="#contato">Vamos criar algo <span aria-hidden="true">↗</span></a><button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Abrir menu">☰</button></div>
+  <div class="nav-cta"><span class="status"><span class="live"></span> PORTFÓLIO / 2026</span><button type="button" class="nav-pack" id="pack-button" title="Conheça o futuro Pack de edição" aria-expanded="false" aria-controls="pack-toast">Pack de edição <span class="pack-icon" aria-hidden="true">✦</span></button><a class="nav-btn" href="#contato">Vamos criar algo <span aria-hidden="true">↗</span></a><button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Abrir menu">☰</button></div>
  </div>
 </header>
 <main id="conteudo">
@@ -574,7 +585,7 @@ body{
       <form id="quote-form" class="quote-form" autocomplete="on">
         <div class="quote-row">
           <div class="quote-field"><label for="quote-name">Como posso te chamar? <span>Opcional</span></label><input id="quote-name" name="clientName" type="text" maxlength="60" autocomplete="name" placeholder="Seu nome"></div>
-          <div class="quote-field"><label for="quote-service">Que tipo de edição você precisa? *</label><select id="quote-service" name="service" required><option value="">Selecionar serviço</option><option value="youtube">Edição para YouTube</option><option value="cinematics">Cinematics / Gaming</option><option value="motion">Motion design / VFX</option><option value="outros">Outro tipo de projeto</option></select></div>
+          <div class="quote-field"><label for="quote-service">Que tipo de edição você precisa? *</label><select id="quote-service" name="service" required><option value="">Selecionar serviço</option><option value="youtube">Edição para YouTube</option><option value="cinematics">Cinematics / Gaming</option><option value="motion">Motion design / VFX</option><option value="outros">Outro tipo de projeto</option><option value="pack">Pack de edição · Quero novidades</option></select></div>
         </div>
         <div class="quote-row">
           <div class="quote-field"><label for="quote-duration">Duração aproximada <span>Opcional</span></label><select id="quote-duration" name="duration"><option value="">Ainda não sei</option><option>Até 30 segundos</option><option>30 segundos a 2 minutos</option><option>2 a 10 minutos</option><option>Mais de 10 minutos</option></select></div>
@@ -591,7 +602,14 @@ body{
   </div>
 </dialog>
 
-<div class="pack-toast" id="pack-toast" role="status" aria-live="polite" hidden>O Pack de edição ainda não está disponível para compra. O botão já está reservado para o futuro lançamento.</div>
+<div class="pack-toast" id="pack-toast" role="group" aria-label="Interesse no Pack de edição" hidden>
+ <strong>Pack de edição · Em preparação</strong>
+ <p>O produto ainda não está à venda. Quer receber novidades quando estiver pronto?</p>
+ <div class="pack-toast-actions">
+  <button type="button" class="pack-interest" id="pack-interest" data-open-quote aria-haspopup="dialog" aria-controls="quick-quote-dialog">Tenho interesse <span aria-hidden="true">↗</span></button>
+  <button type="button" class="pack-dismiss" id="pack-dismiss" aria-label="Fechar novidades do pack">Agora não</button>
+ </div>
+</div>
 <script src="/player.js?v=4"></script>
 <script>
 (()=>{'use strict';
@@ -669,7 +687,23 @@ function initializeCovers(root=document){
 }
 initializeCovers();
 const packButton=document.getElementById('pack-button'),packToast=document.getElementById('pack-toast');let packToastTimeout;
-packButton.addEventListener('click',()=>{packToast.hidden=false;clearTimeout(packToastTimeout);packToastTimeout=setTimeout(()=>packToast.hidden=true,4600);});
+const packInterest=document.getElementById('pack-interest');
+const packDismiss=document.getElementById('pack-dismiss');
+const closePack=()=>{packToast.hidden=true;packButton.setAttribute('aria-expanded','false');};
+packButton.addEventListener('click',()=>{
+ const opening=packToast.hidden;
+ packToast.hidden=!opening;packButton.setAttribute('aria-expanded',String(opening));
+ if(opening){packInterest.focus({preventScroll:true});}
+});
+packDismiss.addEventListener('click',()=>{closePack();packButton.focus({preventScroll:true});});
+packInterest.addEventListener('click',()=>{
+ document.getElementById('quote-service').value='pack';
+ const details=document.getElementById('quote-details');
+ if(!details.value.trim())details.value='Tenho interesse no futuro Pack de edição. Gostaria de receber novidades quando estiver disponível.';
+ closePack();
+});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!packToast.hidden)closePack();});
+document.addEventListener('click',event=>{if(!packToast.hidden&&!packToast.contains(event.target)&&!packButton.contains(event.target))closePack();});
 const projects=[
  ['AWP The Prince | Cinematic Edit','cs2','awp-the-prince','Montagem de AWP com trocas de cenário, ritmo e sound design.'],
  ['Butterfly Gamma Doppler | Dark Studio','cinematics','butterfly-gamma-dark','Cinematic de produto com iluminação dramática e detalhes macro.'],
@@ -754,7 +788,7 @@ document.querySelectorAll('[data-service]').forEach(link=>link.addEventListener(
 document.getElementById('brief-form').addEventListener('submit',e=>{e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return;const name=document.getElementById('brief-name').value.trim().slice(0,60),type=document.getElementById('brief-type').value,detail=document.getElementById('brief-detail').value.trim().slice(0,1100);if(detail.length<10){document.getElementById('brief-detail').setCustomValidity('Escreva pelo menos 10 caracteres.');form.reportValidity();document.getElementById('brief-detail').setCustomValidity('');return}const msg=['Olá, Gustavo! Vi seu portfólio e gostaria de conversar sobre um projeto.',name?'Nome: '+name:'','Tipo de projeto: '+type,'Minha ideia: '+detail,'Podemos conversar sobre um orçamento?'].filter(Boolean).join('\n');const url='https://wa.me/5537988445372?text='+encodeURIComponent(msg);const popup=window.open(url,'_blank');if(popup){try{popup.opener=null}catch(_){}}else{window.location.assign(url)}});
 })();
 </script>
-<script defer src="/sales.js?v=2"></script>
+<script defer src="/sales.js?v=3"></script>
 <script defer src="/quote-modal.js?v=1"></script>
 <!-- G / AMBIENCE: completamente opcional; música e efeitos desligados na primeira visita. -->
 <aside class="ambience-dock" id="ambience-dock" data-playing="false" aria-label="Controles de áudio ambiente">

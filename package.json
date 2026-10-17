@@ -9,7 +9,7 @@
   "dependencies": {
     "@vercel/blob": "2.8.2",
     "@vercel/oidc": "^4.0.1",
-    "sharp": "^0.34.4"
+    "sharp": "0.35.5"
   },
   "scripts": {
     "test": "node scripts/verify-portfolio.cjs && node scripts/check-channel-avatar.cjs && node --test tests/admin-upload.test.cjs && node --test tests/sentinel.test.cjs",

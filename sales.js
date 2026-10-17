@@ -53,25 +53,28 @@ if(quote){
    event.preventDefault();
    if(!quote.reportValidity())return;
    const values=new FormData(quote);
-   const serviceNames={youtube:'Edição para YouTube',cinematics:'Cinematics / Gaming',motion:'Motion design / VFX',outros:'Outro tipo de projeto'};
+   const serviceNames={youtube:'Edição para YouTube',cinematics:'Cinematics / Gaming',motion:'Motion design / VFX',outros:'Outro tipo de projeto',pack:'Pack de edição (lista de interesse)'};
    const service=String(values.get('service')||'');
    const description=String(values.get('details')||'').trim().slice(0,1100);
    if(!serviceNames[service] || description.length<10){
      byId('quote-status').textContent='Escolha o serviço e descreva sua ideia em pelo menos 10 caracteres.';
      return;
    }
-   const lines=['Olá, Gustavo! Vi seu portfólio e gostaria de solicitar um orçamento.'];
+   const isPack=service==='pack';
+   const lines=[isPack
+     ?'Olá, Gustavo! Vi seu portfólio e tenho interesse no futuro Pack de edição.'
+     :'Olá, Gustavo! Vi seu portfólio e gostaria de solicitar um orçamento.'];
    const name=String(values.get('clientName')||'').trim().slice(0,60);
    const duration=String(values.get('duration')||'').trim();
    const deadline=String(values.get('deadline')||'').trim();
    const reference=String(values.get('reference')||'').trim().slice(0,350);
    if(name)lines.push('Nome: '+name);
-   lines.push('Tipo de vídeo: '+serviceNames[service]);
+   lines.push((isPack?'Interesse: ':'Tipo de vídeo: ')+serviceNames[service]);
    if(duration)lines.push('Duração prevista: '+duration);
    if(deadline)lines.push('Prazo desejado: '+deadline);
-   lines.push('Ideia: '+description);
+   lines.push((isPack?'Mensagem: ':'Ideia: ')+description);
    if(reference && /^https?:\/\//i.test(reference))lines.push('Referência: '+reference);
-   lines.push('Podemos conversar sobre o projeto?');
+   lines.push(isPack?'Gostaria de saber quando o produto estiver disponível.':'Podemos conversar sobre o projeto?');
    const url='https://wa.me/5537988445372?text='+encodeURIComponent(lines.join('\n'));
    track('lead_briefing',service);
    const status=byId('quote-status');
