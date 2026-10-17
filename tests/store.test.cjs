@@ -8,3 +8,19 @@ test('não permite redirect perigoso',()=>{for(const x of ['https://evil.example
 test('checkout só abre com entrega pronta e comprovável',()=>{reset();configure();process.env.STORE_TRIO_SALES_ENABLED='true';assert.equal(mock('GET').body.available,false);process.env.STORE_TRIO_DELIVERY_READY='true';assert.equal(mock('GET').body.available,true);assert.match(mock('GET').body.priceLabel,/79,00/);assert.equal(mock('POST').code,303);assert.equal(mock('POST').headers.Location,'https://buy.stripe.com/abcdefghi');reset();});
 test('bloqueia origin estranho e métodos extras',()=>{reset();configure();process.env.STORE_TRIO_SALES_ENABLED='true';process.env.STORE_TRIO_DELIVERY_READY='true';assert.equal(mock('POST',{origin:'https://outro.example',host:'portfolio-gustavo-chi.vercel.app'}).code,403);assert.equal(mock('PUT').code,405);reset();});
 test('loja contém informações e bloqueio antes de configurar',()=>{const html=fs.readFileSync(path.join(__dirname,'../loja.html'),'utf8');assert.match(html,/id="checkout" type="submit" disabled/);assert.match(html,/id="recursos"/);assert.match(html,/id="duvidas"/);assert.doesNotMatch(html,/sk_live_|pk_live_|BLOB_READ_WRITE_TOKEN/);});
+
+
+test('transparência não inventa certificações nem ativa checkout',()=>{
+ const html=fs.readFileSync(path.join(__dirname,'../loja.html'),'utf8');
+ const info=fs.readFileSync(path.join(__dirname,'../informacoes-de-compra.html'),'utf8');
+ assert.match(html,/id="compra-segura"/);
+ assert.match(html,/href="\/informacoes-de-compra.html"/);
+ assert.match(html,/Nenhum selo de certificação independente é exibido sem autorização do emissor/);
+ assert.match(info,/Produto em pré-lançamento/);
+ assert.match(info,/O processo de entrega ainda está em testes/);
+ assert.match(info,/href="\/privacidade.html"/);
+ assert.match(info,/href="\/#contato"/);
+ assert.match(html,/id="checkout" type="submit" disabled/);
+ assert.doesNotMatch(html,/100% seguro|certificado oficial|verificado por terceiros/i);
+ assert.doesNotMatch(info,/100% seguro|certificado oficial|verificado por terceiros/i);
+});
