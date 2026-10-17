@@ -4,7 +4,7 @@
 set -euo pipefail
 site='https://portfolio-gustavo-chi.vercel.app'
 revision="$(git rev-parse --short=12 HEAD)"
-paths=(index.html sales.css ambient.css reveal.css reveal.js quote-modal.css player.js channels.js canais.json projetos.json)
+paths=(index.html loja.html loja.css receber.html sales.css ambient.css reveal.css reveal.js quote-modal.css player.js channels.js canais.json projetos.json)
 stale=0
 failed=0
 temp="$(mktemp)"
@@ -12,10 +12,20 @@ trap 'rm -f "$temp"' EXIT
 for file in "${paths[@]}"; do
   route="/$file"
   if [[ "$file" == 'index.html' ]]; then route='/'; fi
-  if ! curl -fsSL --retry 2 --retry-delay 2 --connect-timeout 7 --max-time 25 \
+  if ! status="$(curl -sSL --retry 2 --retry-delay 2 --connect-timeout 7 --max-time 25 \
     -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' \
-    "${site}${route}?build-check=${revision}" -o "$temp"; then
+    -w '%{http_code}' "${site}${route}?build-check=${revision}" -o "$temp")"; then
     echo "::warning::Could not retrieve production ${route}"
+    failed=$((failed+1))
+    continue
+  fi
+  if [[ "$status" == '404' || "$status" == '410' ]]; then
+    echo "STALE ${route} (not yet deployed: HTTP ${status})"
+    stale=$((stale+1))
+    continue
+  fi
+  if [[ ! "$status" =~ ^2[0-9][0-9]$ ]]; then
+    echo "::warning::Production responded HTTP ${status} for ${route}"
     failed=$((failed+1))
     continue
   fi
