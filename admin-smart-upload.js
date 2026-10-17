@@ -274,7 +274,22 @@
           tell('Projeto retirado da galeria. O arquivo continua no armazenamento.');
         } catch (e) { tell(e.message,true); remove.disabled = false; }
       });
-      row.append(text,remove);
+      const copy = document.createElement('button');
+      copy.className = 'btn';
+      copy.type = 'button';
+      copy.textContent = 'Copiar link do vídeo';
+      copy.addEventListener('click', async () => {
+        if (typeof item.src !== 'string' || !/^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//.test(item.src)) {
+          tell('Este vídeo não tem um link público válido.', true); return;
+        }
+        try {
+          await navigator.clipboard.writeText(item.src);
+          tell('Link de “' + (item.title || 'vídeo') + '” copiado.');
+        } catch (_) {
+          window.prompt('Copie o link do vídeo:', item.src);
+        }
+      });
+      row.append(text,copy,remove);
       managedList.append(row);
     }
   }
