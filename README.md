@@ -6,7 +6,7 @@ Portfólio profissional de edição de vídeo, cinematics de CS2, motion design 
 
 ## Conteúdo e experiência
 
-- 17 projetos autorais com capas otimizadas e três resoluções de vídeo (480p, 720p e 1080p).
+- 16 projetos no catálogo estático, com capas otimizadas e três resoluções de vídeo (480p, 720p e 1080p). Projetos enviados pelo painel privado aparecem adicionalmente no catálogo.
 - G / PLAYER: reprodução inline, qualidade/volume persistentes, timeline, tela cheia e atalhos.
 - Links individuais compartilháveis para projetos usando `/#projeto-nome-do-video`.
 - Seções de trabalhos, estudos de caso, colaborações reais, serviços, processo, FAQ e orçamento via WhatsApp.
