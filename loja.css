@@ -50,7 +50,7 @@ a{color:inherit}button{font:inherit}button,a{-webkit-tap-highlight-color:transpa
 .availability-note{display:flex;align-items:center;gap:9px;margin-top:25px;color:#a99fb3;font-size:12px}
 .availability-note::before{content:"";width:25px;height:1px;background:#9482a7}
 .hero-visual{position:relative;isolation:isolate;min-width:0;padding:34px 5px 33px 20px}
-.hero-visual::before{content:"";position:absolute;z-index:-1;inset:10% -6%;border-radius:50%;background:#9871d559;filter:blur(95px);opacity:.68}
+.hero-visual::before{content:"";position:absolute;z-index:-1;inset:10% 0;border-radius:50%;background:#9871d559;filter:blur(95px);opacity:.68}
 .visual-caption{position:absolute;left:2px;top:-10px;color:#897e97;font:10px ui-monospace,Consolas,monospace;letter-spacing:.15em}
 .visual-label{position:absolute;right:-3px;bottom:-6px;color:#a69ab3;font:10px ui-monospace,Consolas,monospace;letter-spacing:.12em}
 .art{position:relative;border:1px solid #735f8b;box-shadow:0 27px 95px #000b,0 0 0 5px #ffffff03;border-radius:17px;padding:16px;background:linear-gradient(145deg,#251c33,#110e1a 64%);transform:rotate(-2deg)}
