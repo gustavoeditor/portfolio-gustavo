@@ -17,6 +17,8 @@ create index if not exists customer_entitlements_user_purchased_idx
 alter table public.customer_entitlements enable row level security;
 revoke all on public.customer_entitlements from public, anon, authenticated;
 grant select on public.customer_entitlements to authenticated;
+-- Server-only writer: the service_role API key must never be available to browsers.
+grant select, insert, update on public.customer_entitlements to service_role;
 drop policy if exists "Read only own purchased products" on public.customer_entitlements;
 create policy "Read only own purchased products"
  on public.customer_entitlements for select to authenticated
