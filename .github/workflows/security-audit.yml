@@ -1,0 +1,28 @@
+name: GUSTAVO Security Audit
+on:
+  push:
+    branches:
+      - 'security/npm-audit-diagnostics-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-dependencies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Audit installed and production dependencies
+        shell: bash
+        run: |
+          npm audit --json > full-audit.json || true
+          npm audit --omit=dev --json > production-audit.json || true
+          echo '=== ALL DEPENDENCIES ==='
+          jq '{counts: .metadata.vulnerabilities, packages: (.vulnerabilities | with_entries(.value |= {severity, via, range, fixAvailable}))}' full-audit.json
+          echo '=== PRODUCTION DEPENDENCIES ONLY ==='
+          jq '{counts: .metadata.vulnerabilities, packages: (.vulnerabilities | with_entries(.value |= {severity, via, range, fixAvailable}))}' production-audit.json
