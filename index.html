@@ -519,11 +519,11 @@ body{
    <button type="button" class="feature feature-lg reveal" data-open="0" aria-label="Assistir AWP The Prince"><div class="feature-bg"></div><img loading="lazy" src="https://portfolio-gustavo-chi.vercel.app/capas/awp-the-prince.webp" alt="Capa de AWP The Prince"><span class="feature-num">01 / FEATURED</span><span class="feature-label">CS2 / EDIT</span><div class="feature-content"><div><small>THE ART OF PRECISION</small><h3>AWP THE PRINCE<br>CINEMATIC EDIT</h3></div><span class="go-icon" aria-hidden="true">↗</span></div></button>
    <div class="feature-col">
     <button type="button" class="feature feature-sm reveal delay1" data-open="1" aria-label="Assistir Butterfly Gamma Doppler"><div class="feature-bg"></div><img loading="lazy" src="https://portfolio-gustavo-chi.vercel.app/capas/butterfly-gamma-dark.webp" alt="Capa de Butterfly Gamma Doppler"><span class="feature-num">02 / FEATURED</span><span class="feature-label">3D / CINEMATIC</span><div class="feature-content"><div><small>SCULPTING THE DARK</small><h3>BUTTERFLY<br>GAMMA DOPPLER</h3></div><span class="go-icon" aria-hidden="true">↗</span></div></button>
-    <button type="button" class="feature feature-sm reveal delay2" data-open="2" aria-label="Assistir KeyDrop AWP Cinematic"><div class="feature-bg"></div><img loading="lazy" src="https://portfolio-gustavo-chi.vercel.app/capas/keydrop-awp-cinematic.webp" alt="Capa de KeyDrop AWP Cinematic"><span class="feature-num">03 / FEATURED</span><span class="feature-label">VISUAL / REVEAL</span><div class="feature-content"><div><small>IMPACT BY DESIGN</small><h3>KEYDROP<br>AWP CINEMATIC</h3></div><span class="go-icon" aria-hidden="true">↗</span></div></button>
+    <button type="button" class="feature feature-sm reveal delay2" id="keydrop-feature" data-open="2" aria-label="Assistir Flip Emerald Sound Design Cut"><div class="feature-bg"></div><img loading="lazy" src="https://portfolio-gustavo-chi.vercel.app/capas/flip-emerald-sfx.webp" alt="Capa de Flip Emerald"><span class="feature-num">03 / FEATURED</span><span class="feature-label">CS2 / EDIT</span><div class="feature-content"><div><small>IMPACT BY DESIGN</small><h3>FLIP EMERALD<br>SOUND DESIGN</h3></div><span class="go-icon" aria-hidden="true">↗</span></div></button>
    </div>
   </div>
-  <div id="galeria" class="work-index reveal"><h3>Arquivo criativo <span aria-hidden="true">↗</span></h3><span id="results-count" aria-live="polite">17 projetos no catálogo</span></div>
-  <div class="filters reveal" role="group" aria-label="Filtrar projetos"><button type="button" class="filter-btn" data-filter="all" aria-pressed="true">Todos <span>(17)</span></button><button type="button" class="filter-btn" data-filter="cinematics" aria-pressed="false">Cinematics</button><button type="button" class="filter-btn" data-filter="cs2" aria-pressed="false">CS2 / Edits</button><button type="button" class="filter-btn" data-filter="motion" aria-pressed="false">Motion Design</button><button type="button" class="filter-btn" data-filter="youtube" aria-pressed="false">YouTube</button></div>
+  <div id="galeria" class="work-index reveal"><h3>Arquivo criativo <span aria-hidden="true">↗</span></h3><span id="results-count" aria-live="polite">16 projetos no catálogo</span></div>
+  <div class="filters reveal" role="group" aria-label="Filtrar projetos"><button type="button" class="filter-btn" data-filter="all" aria-pressed="true">Todos <span>(16)</span></button><button type="button" class="filter-btn" data-filter="cinematics" aria-pressed="false">Cinematics</button><button type="button" class="filter-btn" data-filter="cs2" aria-pressed="false">CS2 / Edits</button><button type="button" class="filter-btn" data-filter="motion" aria-pressed="false">Motion Design</button><button type="button" class="filter-btn" data-filter="youtube" aria-pressed="false">YouTube</button></div>
   <div class="portfolio-grid" id="portfolio-grid" aria-live="off"></div><div class="more-row"><button type="button" class="btn-more" id="load-more" hidden>Explorar mais projetos ↓</button></div>
  </div>
 </section>
@@ -673,7 +673,6 @@ packButton.addEventListener('click',()=>{packToast.hidden=false;clearTimeout(pac
 const projects=[
  ['AWP The Prince | Cinematic Edit','cs2','awp-the-prince','Montagem de AWP com trocas de cenário, ritmo e sound design.'],
  ['Butterfly Gamma Doppler | Dark Studio','cinematics','butterfly-gamma-dark','Cinematic de produto com iluminação dramática e detalhes macro.'],
- ['KeyDrop | AWP Product Cinematic','cinematics','keydrop-awp-cinematic','Composição 3D em um ambiente escuro com direção de luz.'],
  ['Flip Emerald | Sound Design Cut','cs2','flip-emerald-sfx','Cortes dinâmicos, transições e efeitos sonoros.'],
  ['AWP | Studio Product Reveal','cinematics','awp-orange-studio','Reveal em estúdio e iluminação quente.'],
  ['CS2 | The Exchange','cinematics','cs2-the-exchange','Cena com personagens, atuação e detalhes das mãos.'],
@@ -705,6 +704,22 @@ function paint(){stopPreview();const matches=filtered();const shown=matches.slic
  const slug='upload-'+String(added+1).padStart(3,'0');
  projects.push([p.title.slice(0,90),p.category,slug,String(p.description||'').slice(0,220),p.src,p.poster]);existing.add(p.src);added++;
  } if(added)paint();
+ const featured=document.getElementById('keydrop-feature');
+ if(featured){
+   const chosen=list.find(p=>p&&typeof p.title==='string'&&p.title.trim().toLocaleLowerCase('pt-BR')==='abertura keydrop treino'&&goodMedia(p.src)&&goodMedia(p.poster));
+   if(chosen){
+     const index=projects.findIndex(p=>p[4]===chosen.src);
+     if(index>=0){
+       featured.dataset.open=String(index);
+       featured.setAttribute('aria-label','Assistir '+chosen.title);
+       const image=featured.querySelector('img');
+       image.src=chosen.poster;image.alt='Capa de '+chosen.title;
+       featured.querySelector('.feature-label').textContent='KEYDROP / EDIT';
+       featured.querySelector('h3').textContent=chosen.title.toUpperCase();
+     }
+   }
+ }
+
  }catch(err){console.warn('Catálogo adicional temporariamente indisponível.',err);}})();
 filters.forEach(btn=>btn.addEventListener('click',()=>{filter=btn.dataset.filter;limit=6;filters.forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));paint()}));more.addEventListener('click',()=>{limit+=6;paint()});paint();
 const modal=document.getElementById('video-modal'),player=document.getElementById('modal-player'),close=document.getElementById('modal-close');let playerUI=null;
