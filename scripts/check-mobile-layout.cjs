@@ -188,11 +188,13 @@ async function run(){
    const page=await ctx.newPage();
    await page.goto(base+'?utm_source=launch',{waitUntil:'domcontentloaded'});
    await page.locator('#contato').waitFor({timeout:6000});
+   // Let the initial pageshow restoration finish before simulating later scrolling.
+   await page.waitForTimeout(400);
    await page.evaluate(()=>{
     document.documentElement.style.scrollBehavior='auto';
-    scrollTo(0,document.querySelector('#contato').offsetTop);
+    scrollTo({top:document.body.scrollHeight,behavior:'instant'});
    });
-   await page.waitForFunction(()=>scrollY>500,null,{timeout:3000});
+   await page.waitForFunction(()=>scrollY>500,null,{timeout:5000});
    await page.reload({waitUntil:'domcontentloaded'});
    await page.waitForTimeout(300);
    assert.ok(await page.evaluate(()=>scrollY)<8,'Fresh homepage reload must be at top '+width+'px');
