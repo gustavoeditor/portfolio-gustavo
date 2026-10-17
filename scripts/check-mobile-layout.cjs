@@ -277,6 +277,53 @@ async function run(){
    console.log('Creative Tools v1.4.16 interactive store demo '+width+'px OK');
   }
 
+
+  // Customer portal: prelaunch must fail closed when Supabase/Stripe secrets
+  // are absent. On mobile, all account UI remains within the viewport.
+  for(const width of [320,390,768,1440]){
+   const ctx=await browser.newContext({viewport:{width,height:844},isMobile:width<=390,hasTouch:width<=390});
+   const page=await ctx.newPage(),errors=[];
+   page.on('pageerror',e=>errors.push(String(e).slice(0,220)));
+   await page.route('**/api/customer/settings',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+    enabled:false,auth:null,testCheckoutEnabled:false,testMode:false,
+    product:{priceLabel:'R$ 79,00'}
+   })}));
+   await page.goto(base+'/conta.html',{waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>document.querySelector('#availability').textContent.includes('está sendo preparado'),null,{timeout:7000});
+   assert.equal(await page.locator('#guest').isHidden(),true);
+   assert.equal(await page.locator('#member').isHidden(),true);
+   assert.equal(await page.locator('#test-buy').isDisabled(),true);
+   assert.equal(await page.locator('#account-price').innerText(),'R$ 79,00');
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),true,'Account page horizontal overflow '+width);
+   assert.deepEqual(errors,[],'Account portal errors '+width+'px');
+   await ctx.close();
+   console.log('Customer account prelaunch safety '+width+'px OK');
+  }
+  // The account library is driven only by a Supabase-authenticated identity.
+  // Mock services here; never create a real user or use live Stripe.
+  {
+   const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+   const page=await ctx.newPage();
+   await page.addInitScript(()=>sessionStorage.setItem('creative-tools-customer-session',JSON.stringify({
+    access_token:'a'.repeat(70),refresh_token:'b'.repeat(70),expires_at:Math.floor(Date.now()/1000)+3600
+   })));
+   await page.route('**/api/customer/settings',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+    enabled:true,auth:{url:'https://demo-auth.supabase.co',anonKey:'public-key-for-browser-tests'},
+    testCheckoutEnabled:false,product:{priceLabel:'R$ 79,00'}
+   })}));
+   await page.route('https://demo-auth.supabase.co/auth/v1/user',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+    id:'123e4567-e89b-42d3-a456-426614174000',email:'comprador@exemplo.test',
+    email_confirmed_at:'2026-10-17T19:00:00Z',user_metadata:{full_name:'Cliente Teste'}
+   })}));
+   await page.route('**/api/customer/library',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({products:[]})}));
+   await page.goto(base+'/conta.html',{waitUntil:'domcontentloaded'});
+   await page.locator('#member:not([hidden])').waitFor({timeout:8000});
+   assert.equal(await page.locator('#member-email').innerText(),'comprador@exemplo.test');
+   assert.equal(await page.locator('#test-buy').isDisabled(),true,'Payment still disabled until complete release is configured');
+   assert.ok((await page.locator('#library').innerText()).includes('Nenhuma compra'));
+   await ctx.close();
+   console.log('Customer account mock sign-in and library display OK');
+  }
  }finally{await browser.close();await close();}
 }
 run().catch(error=>{console.error(error?.stack||error);server.close();process.exitCode=1;});
