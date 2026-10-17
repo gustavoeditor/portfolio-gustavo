@@ -67,6 +67,22 @@ async function run(){
    }
    assert.equal(errors.length,0,width+'px page errors: '+errors.join('; '));
    if(width===390||width===1440){
+    // Pack is not sold yet; the interest button must open the existing WhatsApp briefing.
+    await page.locator('#pack-button').click();
+    await page.locator('#pack-interest').waitFor({state:'visible',timeout:3500});
+    assert.equal(await page.locator('#pack-button').getAttribute('aria-expanded'),'true');
+    await page.locator('#pack-interest').click();
+    await page.waitForFunction(()=>document.querySelector('#quick-quote-dialog')?.open===true,{timeout:3500});
+    const interest=await page.evaluate(()=>({
+      service:document.querySelector('#quote-service')?.value,
+      description:document.querySelector('#quote-details')?.value,
+      toastHidden:document.querySelector('#pack-toast')?.hidden
+    }));
+    assert.equal(interest.service,'pack');
+    assert.match(interest.description,/Pack de edição/);
+    assert.ok(interest.toastHidden,'Pack notice must close after choosing interest');
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(()=>document.querySelector('#quick-quote-dialog')?.open===false,{timeout:3500});
     await page.locator('#quote-floating-trigger').click();
     await page.waitForFunction(()=>document.querySelector('#quick-quote-dialog')?.open===true,{timeout:3000});
     const ready=await page.evaluate(()=>({
