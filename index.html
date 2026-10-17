@@ -592,7 +592,7 @@ body{
 </dialog>
 
 <div class="pack-toast" id="pack-toast" role="status" aria-live="polite" hidden>Conheça o próximo lançamento na loja.</div>
-<script src="/player.js?v=4"></script>
+<script src="/player.js?v=5"></script>
 <script>
 (()=>{'use strict';
 const ROOT=location.origin+'/';
@@ -710,6 +710,19 @@ function paint(){stopPreview();document.getElementById('catalog-total').textCont
   existing.add(p.src);added++;
  }
  if(treino){
+  // Only use lighter files produced for this exact uploaded source.
+  // A different upload with the same title must never receive stale renditions.
+  try{
+   const response=await fetch('/video-renditions/abertura-keydrop-treino.json',{cache:'no-store'});
+   if(response.ok){
+    const rendition=await response.json();
+    if(rendition.source===treino[4] &&
+       rendition.variants?.['360']?.url==='/videos-360/abertura-keydrop-treino.mp4' &&
+       rendition.variants?.['480']?.url==='/videos-480/abertura-keydrop-treino.mp4'){
+      treino[6]={mobile:rendition.variants['360'].url,low:rendition.variants['480'].url};
+    }
+   }
+  }catch(_){/* Keep original video when renditions are unavailable. */}
   projects.splice(2,0,treino);
   featuredTreino.dataset.open='2';
   featuredTreino.querySelector('img').src=treino[5];
@@ -730,7 +743,8 @@ function openProject(index){const data=projects[index];if(!data)return;stopPrevi
  document.getElementById('modal-desc').textContent=data[3];document.getElementById('modal-source').href=videoSrc;
  player.poster=data[5]||artURI(data[2]);player.dataset.fallback='0';player.src=videoSrc;
  if(window.GustavoPlayer){try{
-  playerUI=GustavoPlayer.mount(player,{title:data[0],source:local?'/videos/'+file:videoSrc,lowSource:local?'/videos-480/'+file:'',fullSource:local?'/videos-1080/'+file:'',verifiedLocalVariants:local});
+  const variant=(!local&&data[6]&&typeof data[6].mobile==='string'&&typeof data[6].low==='string')?data[6]:null;
+  playerUI=GustavoPlayer.mount(player,{title:data[0],source:local?'/videos/'+file:videoSrc,mobileSource:variant?variant.mobile:'',lowSource:local?'/videos-480/'+file:variant?variant.low:'',fullSource:local?'/videos-1080/'+file:'',verifiedLocalVariants:local,verifiedExternalVariants:Boolean(variant),highLabel:local?'720p':'Original'});
   document.querySelector('.modal-panel').insertBefore(playerUI.element,document.querySelector('.modal-foot'));
   player.controls=false;
  }catch(error){console.warn('Player visual indisponível, usando HTML5.',error);player.controls=true;}}
