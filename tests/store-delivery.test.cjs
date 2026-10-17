@@ -26,3 +26,13 @@ test('private blob pathname not accepted from client',async()=>{let asked;const 
 test('no non-GET',async()=>{assert.equal((await mock({method:'POST',query:{session_id:session.id}})).code,405);});
 
 test('requires allowed commercial hosting before any download',async()=>{const result=await mock({method:'GET',query:{session_id:session.id}},{env:{...env,STORE_TRIO_COMMERCIAL_HOSTING_APPROVED:'false'}});assert.equal(result.code,503);});
+
+test('Stripe test checkout allowed only on preview and never in production',()=>{
+ const testEnv={...env,VERCEL_ENV:'preview',STORE_TRIO_TEST_MODE:'true',STRIPE_SECRET_KEY:['sk','test','123456789012345678901234567890'].join('_')};
+ const cfg=settings(testEnv);assert.equal(cfg.valid,true);assert.equal(cfg.testMode,true);
+ const sandboxSession={...session,id:['cs','test','abcdefghijklmnopqrstuv'].join('_'),livemode:false};
+ assert.equal(sessionAccepted(sandboxSession,cfg,now),true);
+ assert.equal(sessionAccepted(session,cfg,now),false);
+ assert.equal(settings({...testEnv,VERCEL_ENV:'production'}).valid,false);
+ assert.equal(settings({...testEnv,STORE_TRIO_TEST_MODE:'false'}).valid,false);
+});
