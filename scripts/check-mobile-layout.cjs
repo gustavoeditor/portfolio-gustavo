@@ -243,6 +243,40 @@ async function run(){
    await context.close();
    console.log('Abertura Keydrop Treino: Auto 360p, 480p and Original available in mobile Chrome.');
   }
+
+  // Sales-page browser demo must reproduce the four v1.4.16 panel tabs safely.
+  // This is a web simulation only; checkout remains disabled without release flags.
+  for(const width of [320,390,768,1440]){
+   const ctx=await browser.newContext({viewport:{width,height:844},isMobile:width<=390,hasTouch:width<=390});
+   const page=await ctx.newPage(),errors=[];
+   page.on('pageerror',e=>errors.push(String(e).slice(0,240)));
+   await page.goto(base+'/loja.html',{waitUntil:'domcontentloaded'});
+   await page.locator('#ct-demo .ct-app').waitFor({timeout:9000});
+   assert.equal(await page.locator('.ct-footer').innerText().then(s=>s.includes('v1.4.16')),true);
+   await page.locator('#ct-demo [data-curve="100,100"]').click();
+   assert.match(await page.locator('#ct-values').innerText(),/ENTRADA 100%.*SAÍDA 100%/);
+   assert.ok(await page.locator('#ct-graph').evaluate(x=>x.getBoundingClientRect().width)>80);
+   await page.locator('#ct-demo [data-tab="bounce"]').click();
+   await page.locator('#ct-demo [data-mode="elastic"]').click();
+   assert.ok(await page.locator('#ct-bouncepath').getAttribute('d'));
+   await page.locator('#ct-bounceapply').click();
+   await page.locator('#ct-demo [data-tab="text"]').click();
+   await page.locator('#ct-demo [data-split="chars"]').click();
+   await page.locator('#ct-splitapply').click();
+   assert.equal(await page.locator('#ct-text-words > span').count(),6);
+   await page.locator('#ct-demo [data-tab="presets"]').click();
+   assert.equal(await page.locator('#ct-presetlist .ct-preset-item').count(),3);
+   await page.locator('#ct-search').fill('Impact');
+   assert.equal(await page.locator('#ct-presetlist .ct-preset-item').count(),1);
+   await page.locator('#ct-search').fill('');
+   await page.locator('#ct-next').click();
+   assert.match(await page.locator('#ct-presetname').innerText(),/Impact Motion/);
+   assert.equal(await page.locator('#checkout').isDisabled(),true);
+   assert.deepEqual(errors,[],'Creative Tools demo page errors '+width+'px');
+   await ctx.close();
+   console.log('Creative Tools v1.4.16 interactive store demo '+width+'px OK');
+  }
+
  }finally{await browser.close();await close();}
 }
 run().catch(error=>{console.error(error?.stack||error);server.close();process.exitCode=1;});
