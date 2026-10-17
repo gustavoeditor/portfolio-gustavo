@@ -82,6 +82,16 @@ async function run(){
     const modal=page.locator('#video-modal');
     await page.waitForFunction(()=>document.querySelector('#video-modal')?.getAttribute('aria-hidden')==='false',{timeout:3500});
     assert.ok(await modal.locator('.vip-player').count(),width+'px G / PLAYER missing');
+    const firstTitle=await page.locator('#modal-title').textContent();
+    await page.locator('#modal-next').click();
+    await page.waitForTimeout(120);
+    const secondTitle=await page.locator('#modal-title').textContent();
+    assert.notEqual(secondTitle,firstTitle,'Next button did not advance to another video');
+    assert.equal(await modal.locator('.vip-player').count(),1,'Next button damaged custom video player');
+    await page.locator('#modal-prev').click();
+    await page.waitForTimeout(120);
+    assert.equal(await page.locator('#modal-title').textContent(),firstTitle,'Previous button did not return to original video');
+    assert.equal(await modal.locator('.vip-player').count(),1,'Previous button damaged custom video player');
     await page.locator('#modal-close').click();
     await page.waitForFunction(()=>document.querySelector('#video-modal')?.getAttribute('aria-hidden')==='true',{timeout:3000});
    }
@@ -92,6 +102,8 @@ async function run(){
   // SENTINEL graphs: test live metric aggregation and disabled-data states
   // in a real Chrome renderer without opening the private production panel.
   const dashboardHTML=require('../lib/sentinel-dashboard').HTML;
+  assert.match(dashboardHTML,/class="panel-back" href="\/gerenciar-projetos\.html"/,'Sentinel is missing the return-to-video-dashboard button');
+  assert.match(dashboardHTML,/Voltar ao painel de vídeos/);
   const fixtures=[
    {date:'2026-10-10',total:12,stats:{'visit:page':3,'click:pack':2,'click:quote':1,'interaction:player':1,'video_error:player':1}},
    {date:'2026-10-11',total:16,stats:{'visit:page':5,'click:video':4,'interaction:player':2,'video_stall:player':1}}
