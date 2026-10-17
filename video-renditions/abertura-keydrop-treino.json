@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "title": "Abertura Keydrop Treino",
+  "source": "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/abertura-keydrop-treino-mvb5csle-AZAxdGtZjIZReauGlG0qO5L0yXJuuD.mp4",
+  "sourceBytes": 15093682,
+  "sourceSHA256": "dd787c35a58f52fe3460c81b33557310528c56a3925c5e70dd0b03f382d5cd21",
+  "generatedAt": "2026-10-17T10:47:55.583Z",
+  "variants": {
+    "360": {
+      "url": "/videos-360/abertura-keydrop-treino.mp4",
+      "bytes": 493392,
+      "width": 640,
+      "height": 360,
+      "sha256": "1bf20c44e03f8f93b461bc83425f12016401a66b23d8dd8b180dfebf07a2b8c3"
+    },
+    "480": {
+      "url": "/videos-480/abertura-keydrop-treino.mp4",
+      "bytes": 909032,
+      "width": 854,
+      "height": 480,
+      "sha256": "b4afae0c9d9bb271cf0a8182018b79106bd2c5626e846c2fcea0890831cca12b"
+    }
+  }
+}
