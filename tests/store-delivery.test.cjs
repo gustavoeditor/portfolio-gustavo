@@ -1,6 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),handler=require('../lib/store-delivery');
+const {createHash}=require('node:crypto');
 const {settings,sessionAccepted,chargeAccepted}=handler._test,now=1800000000;
-const env={STORE_TRIO_PRICE_CENTS:'7900',STORE_TRIO_STRIPE_PAYMENT_LINK_ID:'plink_1234567890123456',STRIPE_SECRET_KEY:['sk','live','123456789012345678901234567890'].join('_'),STORE_TRIO_PRIVATE_BLOB_TOKEN:['blob','fake','123456789012345678901234567890123456'].join('_'),STORE_TRIO_PRIVATE_BLOB_PATH:'products/gustavo-trio/release-1.3.zip',STORE_TRIO_DELIVERY_READY:'true',STORE_TRIO_SALES_ENABLED:'true',STORE_TRIO_COMMERCIAL_HOSTING_APPROVED:'true'};
+const env={STORE_TRIO_PRICE_CENTS:'7900',STORE_TRIO_STRIPE_PAYMENT_LINK_ID:'plink_1234567890123456',STRIPE_SECRET_KEY:['sk','live','123456789012345678901234567890'].join('_'),STORE_TRIO_PRIVATE_BLOB_TOKEN:['blob','fake','123456789012345678901234567890123456'].join('_'),STORE_TRIO_PRIVATE_BLOB_PATH:'products/gustavo-trio/release-1.3.zip',STORE_TRIO_RELEASE_SHA256:createHash('sha256').update('PK ZIP INTERNAL').digest('hex'),STORE_TRIO_DELIVERY_READY:'true',STORE_TRIO_SALES_ENABLED:'true',STORE_TRIO_COMMERCIAL_HOSTING_APPROVED:'true'};
 const session={object:'checkout.session',id:['cs','live','abcdefghijklmnopqrstuv'].join('_'),livemode:true,mode:'payment',status:'complete',payment_status:'paid',payment_link:env.STORE_TRIO_STRIPE_PAYMENT_LINK_ID,currency:'brl',amount_total:7900,amount_subtotal:7900,payment_intent:'pi_abcdefghijklmnopqrst',created:now-200};
 const intent={object:'payment_intent',id:session.payment_intent,livemode:true,status:'succeeded',currency:'brl',amount_received:7900,latest_charge:'ch_abcdefghijklmnopqrst'};
 const charge={object:'charge',id:intent.latest_charge,payment_intent:intent.id,paid:true,disputed:false,refunded:false,amount_refunded:0};
@@ -10,7 +11,7 @@ async function mock(input,overrides={}){
  return res;
 }
 test('requires private store, live Stripe, price and identity',()=>{assert.equal(settings({}).valid,false);assert.equal(settings(env).valid,true);
- for(const field of ['STORE_TRIO_PRIVATE_BLOB_TOKEN','STORE_TRIO_PRIVATE_BLOB_PATH','STRIPE_SECRET_KEY','STORE_TRIO_STRIPE_PAYMENT_LINK_ID','STORE_TRIO_PRICE_CENTS'])assert.equal(settings({...env,[field]:''}).valid,false,field);
+ for(const field of ['STORE_TRIO_PRIVATE_BLOB_TOKEN','STORE_TRIO_PRIVATE_BLOB_PATH','STRIPE_SECRET_KEY','STORE_TRIO_STRIPE_PAYMENT_LINK_ID','STORE_TRIO_PRICE_CENTS','STORE_TRIO_RELEASE_SHA256'])assert.equal(settings({...env,[field]:''}).valid,false,field);
  assert.equal(settings({...env,STORE_TRIO_PRIVATE_BLOB_PATH:'products/gustavo-trio/../evil.zip'}).valid,false);
 });
 test('only genuine paid live session for product, price and 48h',()=>{const cfg=settings(env);assert.equal(sessionAccepted(session,cfg,now),true);
@@ -55,4 +56,11 @@ test('valid paid session streams only the private product ZIP',async()=>{
  assert.equal(headers['Content-Type'],'application/zip');
  assert.match(headers['Content-Disposition'],/attachment/);
  assert.equal(Buffer.concat(bytes).toString(),'PK ZIP INTERNAL');
+});
+
+test('tampered ZIP is blocked even for a paid customer',async()=>{
+ const {Readable}=require('node:stream');
+ const r=await mock({method:'GET',query:{session_id:session.id}},{blobGet:async()=>({statusCode:200,stream:Readable.from([Buffer.from('PK TAMPERED')])})});
+ assert.equal(r.code,503);
+ assert.match(r.body.error,/Integridade/);
 });

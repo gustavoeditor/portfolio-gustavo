@@ -45,6 +45,7 @@ Validar pagamento de teste, cancelamento, pagamento incompleto, valor errado, ou
 - `STRIPE_SECRET_KEY` = segredo LIVE (nunca compartilhar no chat ou GitHub)
 - `STORE_TRIO_PRIVATE_BLOB_TOKEN` = token do Blob PRIVADO de produção
 - `STORE_TRIO_PRIVATE_BLOB_PATH` = caminho do ZIP assinado, sob `products/gustavo-trio/`
+- `STORE_TRIO_RELEASE_SHA256` = SHA-256 do ZIP comercial assinado, não do arquivo de testes
 - `STORE_TRIO_DELIVERY_READY=true` **após comprovar entrega no teste**
 - `STORE_TRIO_COMMERCIAL_HOSTING_APPROVED=true` **apenas após comprovar permissão de uso comercial**
 - `STORE_TRIO_SALES_ENABLED=true` **última variável a ativar**
@@ -58,6 +59,7 @@ NÃO enviar os tokens em arquivos HTML, mensagens, screenshots ou commits. Não 
 ## Proteções e limitações
 - A sessão Stripe funciona como um comprovante temporário; quem recebe o link poderá baixar até a expiração. A primeira edição não implementa conta de comprador ou controle antifraude avançado.
 - Reembolsos e disputas são consultados pelo estado atual do Charge antes de liberar o ZIP.
+- A entrega é bloqueada se o SHA-256 do ZIP recebido do Blob não corresponder ao hash da versão aprovada. Limite técnico: ZIP de até 50 MB.
 - Arquivos .ffx e efeitos de terceiros não fazem parte da licença do Gustavo Trio, e devem ficar fora do pacote.
 - Em caso de falha no provedor de pagamento ou no Blob, a entrega responde com erro; não libera conteúdo sem validação.
 - Ainda faltam auditoria jurídica, testes no After Effects real, assinatura ZXP e integração com a conta real antes da venda.
