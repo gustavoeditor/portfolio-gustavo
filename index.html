@@ -329,7 +329,7 @@ body{
 .nav-pack:hover,.nav-pack:focus-visible{border-color:#cbb5ff;background:linear-gradient(135deg,rgba(149,100,227,.36),rgba(76,50,119,.32));box-shadow:0 8px 29px rgba(130,75,221,.17);transform:translateY(-2px);}
 .nav-pack .pack-icon{font-size:14px;line-height:1;color:#cfb6ff;}
 .pack-toast{position:fixed;z-index:350;top:100px;right:clamp(12px,4vw,66px);max-width:min(350px,calc(100vw - 30px));padding:15px 20px;background:#21192f;border:1px solid #8c6ac0;border-radius:8px;box-shadow:0 22px 55px #0009;color:#e8ddfa;font-size:12px;line-height:1.55;}
-.pack-toast[hidden]{display:none;}
+.pack-toast[hidden]{display:none;}.feature[hidden]{display:none!important;}
 @media(max-width:1190px){.nav-inner{gap:17px}.nav-cta{gap:9px}.nav-pack{padding:11px 12px}.nav-links{gap:14px}}
 @media(max-width:700px){.nav-inner{gap:11px}.nav-cta{gap:8px}.nav-pack{padding:10px 11px;font-size:10px}.nav-pack .pack-icon{font-size:12px}.pack-toast{top:84px;right:12px}.nav-btn{display:none}}
 @media(max-width:380px){.nav-inner{padding-inline:10px;gap:6px}.logo{gap:6px}.logo svg{width:21px;height:21px}.logo-text{font-size:13px}.logo-text small{font-size:6px}.nav-cta{gap:6px}.nav-pack{font-size:9.5px;padding:9px 9px;gap:5px}.menu-btn{width:33px;height:34px;font-size:18px}}
@@ -507,7 +507,7 @@ body{
  <div class="container">
   <div class="section-kicker mono reveal"><span>01 / FILOSOFIA CRIATIVA</span><small>IDEIA → EMOÇÃO</small></div>
   <div class="manifesto-grid"><h2 class="reveal" id="manifesto-title">O segredo não é apenas <i>fazer bonito.</i> É fazer cada segundo <i>significar algo.</i></h2><div class="manifesto-aside reveal delay1"><p>Do primeiro corte ao último frame, tudo tem uma intenção. Combino linguagem cinematográfica, precisão técnica e experimentação para criar vídeos que não parecem apenas mais um.</p><span class="signature">GUSTAVO / EDITOR & MOTION DESIGNER</span></div></div>
-  <div class="metrics reveal"><div class="metric"><strong>17</strong><p>TRABALHOS NO CATÁLOGO</p></div><div class="metric"><strong>04</strong><p>UNIVERSOS CRIATIVOS</p></div><div class="metric"><strong>01</strong><p>ASSINATURA VISUAL</p></div></div>
+  <div class="metrics reveal"><div class="metric"><strong id="catalog-total">16</strong><p>TRABALHOS NO CATÁLOGO</p></div><div class="metric"><strong>04</strong><p>UNIVERSOS CRIATIVOS</p></div><div class="metric"><strong>01</strong><p>ASSINATURA VISUAL</p></div></div>
  </div>
 </section>
 <section class="work section" id="trabalhos" aria-labelledby="work-title">
@@ -519,11 +519,11 @@ body{
    <button type="button" class="feature feature-lg reveal" data-open="0" aria-label="Assistir AWP The Prince"><div class="feature-bg"></div><img loading="lazy" src="https://portfolio-gustavo-chi.vercel.app/capas/awp-the-prince.webp" alt="Capa de AWP The Prince"><span class="feature-num">01 / FEATURED</span><span class="feature-label">CS2 / EDIT</span><div class="feature-content"><div><small>THE ART OF PRECISION</small><h3>AWP THE PRINCE<br>CINEMATIC EDIT</h3></div><span class="go-icon" aria-hidden="true">↗</span></div></button>
    <div class="feature-col">
     <button type="button" class="feature feature-sm reveal delay1" data-open="1" aria-label="Assistir Butterfly Gamma Doppler"><div class="feature-bg"></div><img loading="lazy" src="https://portfolio-gustavo-chi.vercel.app/capas/butterfly-gamma-dark.webp" alt="Capa de Butterfly Gamma Doppler"><span class="feature-num">02 / FEATURED</span><span class="feature-label">3D / CINEMATIC</span><div class="feature-content"><div><small>SCULPTING THE DARK</small><h3>BUTTERFLY<br>GAMMA DOPPLER</h3></div><span class="go-icon" aria-hidden="true">↗</span></div></button>
-    <button type="button" class="feature feature-sm reveal delay2" data-open="2" aria-label="Assistir KeyDrop AWP Cinematic"><div class="feature-bg"></div><img loading="lazy" src="https://portfolio-gustavo-chi.vercel.app/capas/keydrop-awp-cinematic.webp" alt="Capa de KeyDrop AWP Cinematic"><span class="feature-num">03 / FEATURED</span><span class="feature-label">VISUAL / REVEAL</span><div class="feature-content"><div><small>IMPACT BY DESIGN</small><h3>KEYDROP<br>AWP CINEMATIC</h3></div><span class="go-icon" aria-hidden="true">↗</span></div></button>
+    <button type="button" id="featured-keydrop-treino" class="feature feature-sm reveal delay2" hidden aria-label="Assistir Abertura Keydrop Treino"><div class="feature-bg"></div><img loading="lazy" alt="Capa de Abertura Keydrop Treino"><span class="feature-num">03 / FEATURED</span><span class="feature-label">CS2 / EDIT</span><div class="feature-content"><div><small>OPENING / KEYDROP</small><h3>ABERTURA<br>KEYDROP TREINO</h3></div><span class="go-icon" aria-hidden="true">↗</span></div></button>
    </div>
   </div>
-  <div id="galeria" class="work-index reveal"><h3>Arquivo criativo <span aria-hidden="true">↗</span></h3><span id="results-count" aria-live="polite">17 projetos no catálogo</span></div>
-  <div class="filters reveal" role="group" aria-label="Filtrar projetos"><button type="button" class="filter-btn" data-filter="all" aria-pressed="true">Todos <span>(17)</span></button><button type="button" class="filter-btn" data-filter="cinematics" aria-pressed="false">Cinematics</button><button type="button" class="filter-btn" data-filter="cs2" aria-pressed="false">CS2 / Edits</button><button type="button" class="filter-btn" data-filter="motion" aria-pressed="false">Motion Design</button><button type="button" class="filter-btn" data-filter="youtube" aria-pressed="false">YouTube</button></div>
+  <div id="galeria" class="work-index reveal"><h3>Arquivo criativo <span aria-hidden="true">↗</span></h3><span id="results-count" aria-live="polite">16 projetos no catálogo</span></div>
+  <div class="filters reveal" role="group" aria-label="Filtrar projetos"><button type="button" class="filter-btn" data-filter="all" aria-pressed="true">Todos <span>(16)</span></button><button type="button" class="filter-btn" data-filter="cinematics" aria-pressed="false">Cinematics</button><button type="button" class="filter-btn" data-filter="cs2" aria-pressed="false">CS2 / Edits</button><button type="button" class="filter-btn" data-filter="motion" aria-pressed="false">Motion Design</button><button type="button" class="filter-btn" data-filter="youtube" aria-pressed="false">YouTube</button></div>
   <div class="portfolio-grid" id="portfolio-grid" aria-live="off"></div><div class="more-row"><button type="button" class="btn-more" id="load-more" hidden>Explorar mais projetos ↓</button></div>
  </div>
 </section>
@@ -605,7 +605,6 @@ const COVER_SOURCES=[ROOT,COVER_CDN,FALLBACK];
 const coverMeta={
  'awp-the-prince':['AWP','THE PRINCE','PRECISION STUDY','gold'],
  'butterfly-gamma-dark':['GAMMA','DOPPLER','BUTTERFLY / 3D','green'],
- 'keydrop-awp-cinematic':['KEYDROP','AWP CINEMATIC','PRODUCT / REVEAL','orange'],
  'flip-emerald-sfx':['FLIP','EMERALD','SOUND DESIGN CUT','green'],
  'awp-orange-studio':['AWP','STUDIO REVEAL','PRODUCT / LIGHT','orange'],
  'cs2-the-exchange':['THE','EXCHANGE','CHARACTER / FILM','blue'],
@@ -672,7 +671,6 @@ initializeCovers();
 const projects=[
  ['AWP The Prince | Cinematic Edit','cs2','awp-the-prince','Montagem de AWP com trocas de cenário, ritmo e sound design.'],
  ['Butterfly Gamma Doppler | Dark Studio','cinematics','butterfly-gamma-dark','Cinematic de produto com iluminação dramática e detalhes macro.'],
- ['KeyDrop | AWP Product Cinematic','cinematics','keydrop-awp-cinematic','Composição 3D em um ambiente escuro com direção de luz.'],
  ['Flip Emerald | Sound Design Cut','cs2','flip-emerald-sfx','Cortes dinâmicos, transições e efeitos sonoros.'],
  ['AWP | Studio Product Reveal','cinematics','awp-orange-studio','Reveal em estúdio e iluminação quente.'],
  ['CS2 | The Exchange','cinematics','cs2-the-exchange','Cena com personagens, atuação e detalhes das mãos.'],
@@ -690,20 +688,38 @@ const projects=[
 ];
 const labels={cs2:'CS2 / Edit',cinematics:'Cinematic / 3D',youtube:'YouTube',motion:'Motion Design',outros:'Projetos especiais'};const colors={cs2:'#59477e',cinematics:'#3e456f',youtube:'#516177',motion:'#996e7b',outros:'#5f667c'};
 const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const featuredTreino=document.getElementById('featured-keydrop-treino');
 const grid=document.getElementById('portfolio-grid'),more=document.getElementById('load-more'),filters=[...document.querySelectorAll('[data-filter]')];let filter='all',limit=6,restoreFocus=null,previewTimer=null,previewTarget=null;
 function filtered(){return projects.map((data,index)=>({data,index})).filter(({data})=>filter==='all'||data[1]===filter)}
 function stopPreview(){clearTimeout(previewTimer);if(!previewTarget)return;const vid=previewTarget.querySelector('video');if(vid){vid.pause();vid.removeAttribute('src');vid.load();vid.remove()}previewTarget=null}
-function paint(){stopPreview();const matches=filtered();const shown=matches.slice(0,limit);grid.innerHTML=shown.map(({data,index})=>{const [title,category,slug,desc]=data;return `<article class="project-card"><button type="button" class="thumb" data-open="${index}" data-preview="${index}" style="--card-accent:${colors[category]}" aria-label="Assistir ${escapeHTML(title)}"><div class="pattern" aria-hidden="true">G / ${String(index+1).padStart(2,'0')}</div><img loading="lazy" src="${escapeHTML(data[5]||ROOT+'capas/'+slug+'.webp')}" data-cover-id="${escapeHTML(slug)}" ${data[5]?'data-managed-poster="1"':''} alt="Capa do projeto ${escapeHTML(title)}"><span class="preview-label">${String(index+1).padStart(2,'0')} / ${escapeHTML(labels[category])}</span><span class="play-disc" aria-hidden="true">▶</span></button><div class="project-body"><div><span class="project-cat">${escapeHTML(labels[category])}</span><h4>${escapeHTML(title)}</h4><p>${escapeHTML(desc)}</p></div><span class="right-arrow" aria-hidden="true">↗</span></div></article>`}).join('');if(!matches.length){grid.innerHTML='<p class="empty-state">Nenhum projeto nesta categoria.</p>'}more.hidden=shown.length>=matches.length;document.getElementById('results-count').textContent=`${shown.length} de ${matches.length} projetos exibidos`;initializeCovers(grid);}
+function paint(){stopPreview();document.getElementById('catalog-total').textContent=String(projects.length);document.querySelector('[data-filter="all"] span').textContent='('+projects.length+')';const matches=filtered();const shown=matches.slice(0,limit);grid.innerHTML=shown.map(({data,index})=>{const [title,category,slug,desc]=data;return `<article class="project-card"><button type="button" class="thumb" data-open="${index}" data-preview="${index}" style="--card-accent:${colors[category]}" aria-label="Assistir ${escapeHTML(title)}"><div class="pattern" aria-hidden="true">G / ${String(index+1).padStart(2,'0')}</div><img loading="lazy" src="${escapeHTML(data[5]||ROOT+'capas/'+slug+'.webp')}" data-cover-id="${escapeHTML(slug)}" ${data[5]?'data-managed-poster="1"':''} alt="Capa do projeto ${escapeHTML(title)}"><span class="preview-label">${String(index+1).padStart(2,'0')} / ${escapeHTML(labels[category])}</span><span class="play-disc" aria-hidden="true">▶</span></button><div class="project-body"><div><span class="project-cat">${escapeHTML(labels[category])}</span><h4>${escapeHTML(title)}</h4><p>${escapeHTML(desc)}</p></div><span class="right-arrow" aria-hidden="true">↗</span></div></article>`}).join('');if(!matches.length){grid.innerHTML='<p class="empty-state">Nenhum projeto nesta categoria.</p>'}more.hidden=shown.length>=matches.length;document.getElementById('results-count').textContent=`${shown.length} de ${matches.length} projetos exibidos`;initializeCovers(grid);}
 // Only use public project metadata returned by our own endpoint. Never expose admin state or credentials.
 (async()=>{try{const response=await fetch('/api/managed-projects',{cache:'no-store'});if(!response.ok)return;
  const result=await response.json();if(!Array.isArray(result.projects))return;
  const existing=new Set(projects.map(p=>projectVideo(p)));
  const goodMedia=url=>{try{const u=new URL(url);return u.protocol==='https:'&&u.hostname.endsWith('.public.blob.vercel-storage.com')&&!u.username&&!u.password;}catch{return false}};
- const list=result.projects.slice(0,150).sort((a,b)=>(a.position||0)-(b.position||0));let added=0;
- for(const p of list){if(!p||typeof p.title!=='string'||!labels[p.category]||!goodMedia(p.src)||!goodMedia(p.poster)||existing.has(p.src))continue;
- const slug='upload-'+String(added+1).padStart(3,'0');
- projects.push([p.title.slice(0,90),p.category,slug,String(p.description||'').slice(0,220),p.src,p.poster]);existing.add(p.src);added++;
- } if(added)paint();
+ const list=result.projects.slice(0,150).sort((a,b)=>(a.position||0)-(b.position||0));let added=0,treino=null;
+ const normalizedTitle=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ for(const p of list){
+  if(!p||typeof p.title!=='string'||!labels[p.category]||!goodMedia(p.src)||!goodMedia(p.poster)||existing.has(p.src))continue;
+  if(normalizedTitle(p.title)==='keydrop awp product cinematic')continue; // Pedido: não exibir este vídeo.
+  const slug='upload-'+String(added+1).padStart(3,'0');
+  const entry=[p.title.slice(0,90),p.category,slug,String(p.description||'').slice(0,220),p.src,p.poster];
+  if(normalizedTitle(p.title)==='abertura keydrop treino'&&!treino)treino=entry;
+  else projects.push(entry);
+  existing.add(p.src);added++;
+ }
+ if(treino){
+  projects.splice(2,0,treino);
+  featuredTreino.dataset.open='2';
+  featuredTreino.querySelector('img').src=treino[5];
+  featuredTreino.querySelector('img').dataset.coverId=treino[2];
+  featuredTreino.querySelector('img').dataset.managedPoster='1';
+  featuredTreino.setAttribute('aria-label','Assistir '+treino[0]);
+  featuredTreino.hidden=false;
+  initializeCovers(featuredTreino);
+ }
+ if(added)paint();
  }catch(err){console.warn('Catálogo adicional temporariamente indisponível.',err);}})();
 filters.forEach(btn=>btn.addEventListener('click',()=>{filter=btn.dataset.filter;limit=6;filters.forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));paint()}));more.addEventListener('click',()=>{limit+=6;paint()});paint();
 const modal=document.getElementById('video-modal'),player=document.getElementById('modal-player'),close=document.getElementById('modal-close');let playerUI=null;
