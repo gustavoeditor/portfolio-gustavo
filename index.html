@@ -111,6 +111,22 @@
 .ticker{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:22px 0;background:#0e0d15}.ticker-track{display:flex;width:max-content;white-space:nowrap;animation:marquee 27s linear infinite;gap:40px;align-items:center}.ticker-track .phrase{font:600 12px var(--font);letter-spacing:.2em;color:#a8a0bd}.ticker-track .asterisk{color:#a27fdf;font-size:19px}
 /* section core */
 .section{padding:148px 0}.section-kicker{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:19px;border-top:1px solid var(--line);color:#ad9ccf}.section-kicker small{color:#77718a}.section-title{font-weight:600;font-size:clamp(51px,6.5vw,109px);letter-spacing:-.081em;line-height:.99;max-width:1000px;margin:42px 0 52px}.section-title .dim{color:#777286}.section-title .gradient{background:linear-gradient(100deg,#f4eaff,#9570e2);background-clip:text;-webkit-background-clip:text;color:transparent}.reveal{opacity:0;transform:translateY(46px);transition:opacity 1s var(--ease),transform 1s var(--ease)}.reveal.visible{opacity:1;transform:none}.reveal.delay1{transition-delay:.14s}.reveal.delay2{transition-delay:.28s}
+/* Halftone Glass | versão 01 (invisível), aprovado em 2026-10-17.
+   Apenas nas seções de manifesto, especialidades e contato.
+   Bolinhas fixas de 2px, espaçamento de 35px, desfoque de 1.2px.
+   A abertura (hero), o efeito do mouse e os elementos interativos não mudam. */
+.manifesto,.services{position:relative;isolation:isolate}
+.manifesto>.container,.services>.container{position:relative;z-index:1}
+.manifesto::before,.services::before,.contact-inner::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(220,200,255,1) 0 1px,transparent 1.15px);
+  background-size:35px 35px;background-position:12px 13px;
+  opacity:.085;filter:blur(1.2px);
+  -webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px);
+  -webkit-mask-image:radial-gradient(ellipse 89% 85% at 52% 50%,#000 4%,transparent 100%);
+  mask-image:radial-gradient(ellipse 89% 85% at 52% 50%,#000 4%,transparent 100%);
+}
+
 /* manifesto */
 .manifesto{padding-bottom:100px}.manifesto-grid{display:grid;grid-template-columns:1.45fr .55fr;gap:12%;align-items:end}.manifesto h2{font:600 clamp(39px,5vw,77px)/1.13 var(--font);letter-spacing:-.067em;margin:20px 0 0}.manifesto h2 i{font-style:normal;color:#a588ef}.manifesto-aside{padding:0 0 6px}.manifesto-aside p{font-size:14px;line-height:1.95;color:#a7a4b3}.manifesto-aside .signature{display:flex;align-items:center;gap:13px;margin-top:26px;color:#cbc0e5;font:600 11px var(--font)}.signature:before{content:'';width:30px;height:1px;background:#ba9fec}.metrics{border-bottom:1px solid var(--line);display:flex;gap:70px;padding:58px 0 40px}.metric{min-width:140px}.metric strong{font:600 57px/1 var(--font);letter-spacing:-.07em}.metric .suf{color:#a78aea;font-size:27px}.metric p{color:#8e889e;font-size:11px;margin:13px 0 0;letter-spacing:.07em}
 /* Work */

@@ -200,6 +200,10 @@ async function run(){
    const page=await ctx.newPage();
    await page.goto(base+'?utm_source=launch',{waitUntil:'domcontentloaded'});
    await page.locator('#contato').waitFor({timeout:6000});
+   // Let the homepage pageshow/DOMContentLoaded scroll-restoration callbacks finish
+   // before intentionally testing scroll/reload, avoiding a race on desktop Chrome.
+   await page.waitForLoadState('load');
+   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
    await page.evaluate(()=>{
     document.documentElement.style.scrollBehavior='auto';
     scrollTo(0,document.querySelector('#contato').offsetTop);
