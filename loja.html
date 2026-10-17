@@ -9,6 +9,8 @@
 <link rel="canonical" href="https://portfolio-gustavo-chi.vercel.app/loja.html">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/loja.css?v=3">
+<link rel="stylesheet" href="/creative-tools-demo.css?v=1416">
+<script src="/creative-tools-demo.js?v=1416" defer></script>
 <meta property="og:type" content="product">
 <meta property="og:title" content="Creative Tools | Ferramentas para After Effects">
 <meta property="og:description" content="Menos interface. Mais criação. Curvas, Bounce, Texto, Presets e mais em um painel.">
@@ -51,28 +53,10 @@
     </div>
     <div class="device-wrap">
      <span class="device-shadow" aria-hidden="true"></span>
-     <div class="art" role="group" aria-label="Simulação interativa do painel de curvas do Creative Tools">
-      <div class="app-head"><span class="app-monogram">C<span>T</span></span><span>CREATIVE TOOLS</span><span class="app-head-dot" aria-hidden="true"></span></div>
-      <div class="app-tabs" aria-label="Ferramentas ilustradas"><span class="active">⌁ &nbsp; CURVAS</span><span>BOUNCE</span><span>TEXTO</span><span>PRESETS</span></div>
-      <div class="app-label"><span>Velocity Designer</span><small>CURVA DE VELOCIDADE</small></div>
-      <div class="graph-frame">
-       <svg class="graph" viewBox="0 0 520 270" aria-hidden="true">
-        <defs><linearGradient id="velocityStroke" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#93dfff"/><stop offset=".5" stop-color="#d7bdff"/><stop offset="1" stop-color="#acfff0"/></linearGradient><linearGradient id="velocityArea" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#a8bdfc" stop-opacity=".28"/><stop offset="1" stop-color="#a8bdfc" stop-opacity="0"/></linearGradient></defs>
-        <g stroke="#56627a" stroke-width=".7" opacity=".35"><path d="M22 36H500M22 82H500M22 128H500M22 174H500M22 220H500M22 36V220M102 36V220M182 36V220M262 36V220M342 36V220M422 36V220M500 36V220"/></g>
-        <path id="velocity-fill" fill="url(#velocityArea)" d="M22 220 Q160 220 200 128 T260 34 T320 128 T500 220 L500 220 Z"/>
-        <path id="velocity-path" stroke="url(#velocityStroke)" fill="none" stroke-width="4" stroke-linecap="round" d="M22 220 Q160 220 200 128 T260 34 T320 128 T500 220"/>
-        <circle id="velocity-point" cx="261" cy="40" r="5" fill="#f6eeff" stroke="#a4dfff" stroke-width="2"/>
-        <text x="22" y="255" fill="#8792a8" font-size="11" font-family="monospace">START</text><text x="461" y="255" fill="#8792a8" font-size="11" font-family="monospace">END</text>
-       </svg>
-      </div>
-      <div class="input-grid">
-       <label class="value-box" for="curve-out"><span>SAÍDA <output id="out-value" for="curve-out">65%</output></span><input id="curve-out" type="range" min="5" max="95" step="5" value="65" aria-label="Influência de saída na ilustração"></label>
-       <label class="value-box" for="curve-in"><span>ENTRADA <output id="in-value" for="curve-in">65%</output></span><input id="curve-in" type="range" min="5" max="95" step="5" value="65" aria-label="Influência de entrada na ilustração"></label>
-      </div>
-      <div class="preview-note">DEMONSTRAÇÃO VISUAL INTERATIVA · NÃO É O PLUGIN EXECUTÁVEL</div>
+     <div class="art ct-plugin" role="group" aria-label="Demonstração do painel Creative Tools versão 1.4.16">
+      <div id="ct-demo"><p style="padding:22px;color:#aac7df">Carregando demonstração Creative Tools v1.4.16...</p></div>
      </div>
-     <div class="floating-chip chip-curve"><span>⌁</span><div><b>Velocity Graph</b><small>Curvas sob controle</small></div></div>
-     <div class="floating-chip chip-presets"><span>✦</span><div><b>Your presets.</b><small>Seu fluxo, suas regras.</small></div></div>
+     <p class="ct-showcase-caption">INTERFACE E CONTROLES BASEADOS NA V1.4.16 · AÇÕES NO AFTER EFFECTS SIMULADAS NESTA PRÉVIA</p>
     </div>
    </div>
    <div class="showcase-bottom"><span>DESIGN PARA FAZER FLUIR.</span><span>G / TRIO — CREATIVE SPACE 001</span></div>
@@ -124,21 +108,6 @@
 <footer class="foot"><div class="wrap foot-content"><a href="/" class="foot-brand">GUSTAVO<span>®</span></a><p>Ferramentas para dar movimento às suas ideias.</p><div class="foot-links"><a href="/">Portfólio</a><a href="/privacidade.html">Privacidade</a><a href="#conteudo">Voltar ao topo ↑</a></div><small>© 2026 GUSTAVO® CREATIVE TOOLS.</small></div></footer>
 <script>
 (()=>{'use strict';
- const out=document.getElementById('curve-out'),inn=document.getElementById('curve-in');
- const stroke=document.getElementById('velocity-path'),fill=document.getElementById('velocity-fill'),point=document.getElementById('velocity-point');
- function drawDemo(){
-  const a=Number(out.value),b=Number(inn.value);
-  document.getElementById('out-value').textContent=a+'%';
-  document.getElementById('in-value').textContent=b+'%';
-  const peak=22+478*(b/(a+b));
-  const apex=218-(a+b)/190*170;
-  const left=peak-(16+(100-a)*.7),right=peak+(16+(100-b)*.7);
-  const d='M22 220 C'+Math.max(22,left-110).toFixed(1)+' 220 '+(peak-65).toFixed(1)+' '+(apex+19).toFixed(1)+' '+peak.toFixed(1)+' '+apex.toFixed(1)+' C'+(peak+65).toFixed(1)+' '+(apex+19).toFixed(1)+' '+Math.min(500,right+110).toFixed(1)+' 220 500 220';
-  stroke.setAttribute('d',d);
-  fill.setAttribute('d',d+' L500 220 L22 220 Z');
-  point.setAttribute('cx',String(peak));point.setAttribute('cy',String(apex));
- }
- out.addEventListener('input',drawDemo);inn.addEventListener('input',drawDemo);drawDemo();
  const button=document.getElementById('checkout'),status=document.getElementById('status'),price=document.getElementById('price'),badge=document.getElementById('sale-badge');
  fetch('/api/store/checkout',{credentials:'same-origin',cache:'no-store'})
  .then(r=>r.ok?r.json():Promise.reject(new Error('API indisponível')))
