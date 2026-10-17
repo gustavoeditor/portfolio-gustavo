@@ -23,7 +23,7 @@ main{width:min(540px,100%);border:1px solid #5a426c;border-radius:19px;backgroun
 (()=>{'use strict';
 const id=new URLSearchParams(location.search).get('session_id')||'';
 const btn=document.getElementById('download'),status=document.getElementById('status');
-if(!/^cs_live_[A-Za-z0-9_]{15,200}$/.test(id)){status.textContent='Link de compra ausente ou inválido. Se você pagou, consulte o suporte para recuperar o acesso.';return;}
+if(!/^cs_(?:live|test)_[A-Za-z0-9_]{15,200}$/.test(id)){status.textContent='Link de compra ausente ou inválido. Se você pagou, consulte o suporte para recuperar o acesso.';return;}
 btn.disabled=false;status.textContent='Clique para validar o pagamento e iniciar o download.';
 btn.addEventListener('click',async()=>{
   btn.disabled=true;status.textContent='Validando pagamento…';
