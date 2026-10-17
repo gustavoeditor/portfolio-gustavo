@@ -87,5 +87,5 @@ test('sales page does not enable live checkout and account page links exist',()=
  a.match(html,/href="\/conta.html"/);
  a.match(client,/PREÇO PLANEJADO PARA TESTES/);
  a.doesNotMatch(client,/sk_live_|service_role|BLOB_READ_WRITE_TOKEN/);
- for(const file of ['customer-portal.js','lib/customer-store.js','api/customer/checkout.js','api/customer/claim.js','api/customer/library.js','api/customer/download.js','api/customer/webhook.js'])new Function(fs.readFileSync(path.join(root,file),'utf8'));
+ for(const file of ['customer-portal.js','lib/customer-store.js','lib/customer-routes/checkout.js','lib/customer-routes/claim.js','lib/customer-routes/library.js','lib/customer-routes/download.js','lib/customer-routes/webhook.js'])new Function(fs.readFileSync(path.join(root,file),'utf8'));
 });
