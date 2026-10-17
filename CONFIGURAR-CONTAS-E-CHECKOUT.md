@@ -28,6 +28,8 @@ As configurações abaixo **não devem ser adicionadas à produção nesta etapa
 | `SUPABASE_URL` | URL HTTPS do projeto `*.supabase.co` |
 | `SUPABASE_ANON_KEY` | Chave pública/publishable de autenticação |
 | `SUPABASE_SERVICE_ROLE_KEY` | Chave **secreta**, só servidor |
+| `STORE_CUSTOMER_GOOGLE_ENABLED` | `true` somente após Google OAuth efetivamente configurado |
+| `STORE_CUSTOMER_DISCORD_ENABLED` | `true` somente após Discord OAuth efetivamente configurado |
 | `STORE_CUSTOMER_TEST_ENABLED` | `true` apenas no Preview após validações |
 | `STORE_CUSTOMER_PRICE_CENTS` | `7900` para R$79,00 de teste |
 | `STRIPE_TEST_SECRET_KEY` | Credencial **`sk_test_...`**, nunca `sk_live_...` |
