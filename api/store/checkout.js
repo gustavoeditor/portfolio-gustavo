@@ -12,7 +12,7 @@ function paymentLink(raw){
 function sale(){
   const link=paymentLink(process.env.STORE_TRIO_CHECKOUT_URL);
   const price=String(process.env.STORE_TRIO_PRICE_LABEL||'').trim();
-  const validPrice=/^R\\$\\s*[1-9]\\d{0,3}(?:\\.\\d{3})*,\\d{2}$/.test(price);
+  const validPrice=/^R\$\s*[1-9]\d{0,3}(?:\.\d{3})*,\d{2}$/.test(price);
   return {available:process.env.STORE_TRIO_SALES_ENABLED==='true'&&process.env.STORE_TRIO_DELIVERY_READY==='true'&&!!link&&validPrice,link,price};
 }
 module.exports=function handler(req,res){
