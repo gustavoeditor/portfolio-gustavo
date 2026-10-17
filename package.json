@@ -4,7 +4,7 @@
   "private": true,
   "description": "Video editor portfolio with private Vercel Blob upload",
   "engines": {
-    "node": ">=20"
+    "node": "24.x"
   },
   "dependencies": {
     "@vercel/blob": "2.8.2",
