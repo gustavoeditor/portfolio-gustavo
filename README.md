@@ -65,3 +65,9 @@ Os eventos de Web Analytics são anônimos e incluem: abertura do orçamento, br
 Confira `COMO-ADICIONAR-VIDEOS.md` para vídeos e `CANAIS-COLABORACOES.md` para canais. Logos devem ter uso autorizado. Depoimentos, resultados de clientes e métricas nunca devem ser publicados sem confirmação.
 
 O próximo ganho de confiança depende de conteúdo real: logos permitidos dos parceiros, estudos de caso de clientes e depoimentos verificados.
+
+## Abertura Keydrop Treino: qualidades móveis
+
+O vídeo original enviado no `/admin` utiliza Vercel Blob. O processo `scripts/generate-keydrop-renditions.cjs` roda no GitHub Actions e busca o upload publicado chamado **Abertura Keydrop Treino**. Ele gera arquivos MP4 H.264/AAC de 360p e 480p, faz verificação de resolução e SHA-256, e cria `video-renditions/abertura-keydrop-treino.json`. Os dois arquivos são hospedados estaticamente pela Vercel junto com o site, sem sobrescrever o original.
+
+O `G / PLAYER` só ativa os arquivos móveis quando o manifesto corresponde exatamente ao `src` do upload. Em telas pequenas, `Auto` seleciona 360p; 480p e Original são alternativas manuais. Se o manifesto estiver ausente ou o upload for substituído, o vídeo original continua funcionando. Os arquivos das resoluções móveis não devem ser considerados publicados até o CI gerar os MP4 e a produção atualizar.

@@ -1,0 +1,67 @@
+name: Generate Keydrop mobile quality versions
+on:
+  push:
+    branches:
+      - feature/keydrop-treino-mobile-360-480
+    paths:
+      - scripts/generate-keydrop-renditions.cjs
+      - .github/workflows/generate-keydrop-renditions.yml
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+    paths:
+      - scripts/generate-keydrop-renditions.cjs
+      - .github/workflows/generate-keydrop-renditions.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: keydrop-mobile-renditions
+  cancel-in-progress: false
+
+jobs:
+  convert:
+    if: github.repository == 'gustavoeditor/portfolio-gustavo'
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/keydrop-treino-mobile-360-480
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify FFmpeg tools
+        run: |
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+      - name: Check if this PR already contains verified MP4 variants
+        id: previous
+        run: |
+          if test -s videos-360/abertura-keydrop-treino.mp4 && test -s videos-480/abertura-keydrop-treino.mp4 && test -s video-renditions/abertura-keydrop-treino.json; then
+            echo 'needed=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'needed=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Download original from published project and encode both variants
+        if: steps.previous.outputs.needed == 'true'
+        run: node scripts/generate-keydrop-renditions.cjs
+      - name: Commit 360p, 480p and matching source manifest
+        if: steps.previous.outputs.needed == 'true'
+        run: |
+          set -euo pipefail
+          git add videos-360/abertura-keydrop-treino.mp4 videos-480/abertura-keydrop-treino.mp4 video-renditions/abertura-keydrop-treino.json
+          if git diff --staged --quiet; then
+            echo "Verified renditions unchanged."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'media: gerar 360p e 480p para Abertura Keydrop Treino'
+          git push origin HEAD:feature/keydrop-treino-mobile-360-480

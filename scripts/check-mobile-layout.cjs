@@ -203,6 +203,30 @@ async function run(){
    await ctx.close();
    console.log('Launch homepage entry and #contato deep links OK at '+width+'px');
   }
+  // Real Chrome test: the uploaded Keydrop project starts at 360p on mobile,
+  // and the user can explicitly choose 480p or Original.
+  {
+   const manifest=JSON.parse(fs.readFileSync(path.join(root,'video-renditions/abertura-keydrop-treino.json'),'utf8'));
+   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+   const page=await context.newPage();
+   await page.route('**/api/managed-projects',route=>route.fulfill({status:200,contentType:'application/json',
+    body:JSON.stringify({projects:[{title:'Abertura Keydrop Treino',src:manifest.source,
+      poster:new URL('/gustavo/capas/preview.webp',manifest.source).href,category:'cs2',position:0}]})}));
+   await page.goto(base,{waitUntil:'domcontentloaded'});
+   await page.locator('#featured-keydrop-treino:not([hidden])').waitFor({timeout:10000});
+   await page.locator('#featured-keydrop-treino').click();
+   await page.locator('.vip-quality').waitFor({timeout:5000});
+   const src=await page.locator('#modal-player').getAttribute('src');
+   assert.equal(src,'/videos-360/abertura-keydrop-treino.mp4','Mobile Auto should initially load 360p');
+   await page.locator('.vip-quality').click();
+   for(const quality of ['mobile','low','high'])assert.equal(
+    await page.locator('.vip-quality-option[data-quality="'+quality+'"]').count(),1,
+    'Missing player quality '+quality);
+   await page.locator('.vip-quality-option[data-quality="low"]').click();
+   await page.waitForFunction(()=>document.getElementById('modal-player').getAttribute('src')==='/videos-480/abertura-keydrop-treino.mp4',null,{timeout:6000});
+   await context.close();
+   console.log('Abertura Keydrop Treino: Auto 360p, 480p and Original available in mobile Chrome.');
+  }
  }finally{await browser.close();await close();}
 }
 run().catch(error=>{console.error(error?.stack||error);server.close();process.exitCode=1;});
