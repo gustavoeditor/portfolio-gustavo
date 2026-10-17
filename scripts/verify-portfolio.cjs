@@ -15,13 +15,14 @@ for(const p of projects){
   assert.ok(fs.existsSync(path.join(root,asset)),'Mídia ausente: '+asset);
  }
 }
+assert.ok(fs.existsSync(path.join(root,'scripts/generate-keydrop-renditions.cjs')),'Gerador das versões 360p/480p ausente');
 assert.ok(!projects.some(p=>p.title==='KeyDrop | AWP Product Cinematic'),'O vídeo substituído não deve continuar no catálogo');
 assert.ok(html.includes('id="featured-keydrop-treino"')&&html.includes("normalizedTitle(p.title)==='abertura keydrop treino'"),'Novo destaque precisa usar o vídeo enviado pelo painel');
 const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(new Set(ids).size,ids.length,'IDs duplicados');
 for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(ids.includes(id),'Link interno quebrado: '+id);
 for(const name of ['inicio','trabalhos','portfolio-grid','galeria','especialidades','metodo','sobre','contato','brief-form','pack-button','video-modal'])assert.ok(ids.includes(name),'Seção da V4 ausente: '+name);
-for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/player.js?v=4','/player.css?v=2','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
+for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/player.js?v=5','/player.css?v=2','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
  assert.ok(html.includes(snippet),'Integração obrigatória ausente: '+snippet);
 }
 
