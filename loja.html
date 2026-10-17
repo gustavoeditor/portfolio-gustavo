@@ -26,6 +26,50 @@
 .faq details{border-bottom:1px solid #352b40;padding:18px 0}.faq summary{font-weight:700;cursor:pointer}.faq p{color:var(--muted);max-width:850px}.foot{border-top:1px solid #30283b;padding:36px 0;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;color:#a99ab7;font-size:12px}.foot a{margin-left:15px}
 :focus-visible{outline:2px solid #dbbcff;outline-offset:3px}@media(max-width:800px){.hero{grid-template-columns:1fr;padding:45px 0 72px;gap:35px}.art{max-width:570px;transform:none}.purchase{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.top nav{gap:12px}}@media(max-width:540px){.wrap{width:min(100% - 30px,1150px)}.top{padding:20px 0}.top nav{font-size:11px;gap:10px}.brand{font-size:18px}.brand span{display:none}.hero h1{font-size:61px}.lead{font-size:15px}.grid{grid-template-columns:1fr}.section{padding:48px 0}.section-head{display:block}.purchase{padding:22px;margin:18px 0 54px}.feature{min-height:unset}.foot a{margin:0 9px 0 0}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.primary:hover,.secondary:hover{transform:none}}
+
+/* Refinamento visual da vitrine: profundidade, hierarquia e acabamento responsivo. */
+:root{--bg:#09080e;--panel:#15111e;--line:#393047;--accent:#d3baff}
+body{overflow-x:hidden;background:radial-gradient(ellipse 55% 30% at 78% 8%,rgba(110,61,175,.12),transparent 80%),#09080e}
+body:before{height:900px;background:radial-gradient(ellipse at 73% 24%,rgba(154,97,234,.18),transparent 53%),radial-gradient(ellipse at 15% 12%,rgba(89,66,151,.12),transparent 55%)}
+::selection{background:#bca0ec;color:#120e1c}
+.top{position:relative;isolation:isolate;border-bottom:1px solid #ffffff12}
+.top:after{content:"";position:absolute;bottom:-1px;left:0;width:130px;height:1px;background:linear-gradient(90deg,#c5a4ff,transparent)}
+.top nav a{transition:color .2s}.top nav a:hover{color:#e7d8ff}
+.hero{gap:clamp(32px,5vw,76px);padding-top:clamp(65px,9vw,124px);padding-bottom:clamp(90px,10vw,142px)}
+.hero h1{font-weight:850;text-shadow:0 12px 50px #0005}
+.hero h1 em{background:linear-gradient(115deg,#f1dfff 8%,#bc91f6 55%,#a5efe2);background-clip:text;-webkit-background-clip:text;color:transparent}
+.eyebrow{display:inline-flex;align-items:center;gap:11px}
+.eyebrow:before{content:"";width:22px;height:1px;background:currentColor;opacity:.7}
+.lead{max-width:570px}.pill{background:#ffffff04;backdrop-filter:blur(8px);border-color:#66547670;transition:border-color .2s,background .2s}.pill:hover{background:#ffffff0b;border-color:#ab8ed4}
+.primary,.secondary{min-height:49px;transition:transform .22s,box-shadow .22s,border-color .22s,filter .22s}
+.primary{background:linear-gradient(120deg,#e7d5ff,#c6a6f6 56%,#b7ebdd);box-shadow:0 12px 38px #b29bdf2c,inset 0 1px #ffffff9c}
+.primary:hover{box-shadow:0 16px 45px #b29bdf50}
+.secondary:hover{border-color:#9e81c0}
+.art{position:relative;isolation:isolate;box-shadow:0 40px 95px #000a,0 0 0 7px #ffffff05;transition:transform .45s cubic-bezier(.2,.75,.25,1),box-shadow .45s}
+.art:before{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;background:linear-gradient(135deg,#ffffff2a,transparent 36%,transparent 70%,#b6a0f91a);z-index:-1}
+.art:after{content:"";position:absolute;inset:auto 8% -24px;filter:blur(26px);height:30px;background:#9266da42;z-index:-2}
+.art:hover{transform:rotate(-.6deg) translateY(-5px);box-shadow:0 48px 105px #000b,0 0 0 7px #ffffff06}
+.app-top{color:#f2eaff}.tabs span{border-radius:5px 5px 0 0}.graph{box-shadow:inset 0 0 30px #8662b70c}
+.section{position:relative;padding:clamp(65px,8vw,110px) 0}.section-head{margin-bottom:40px}.section h2{font-weight:780}
+.feature{position:relative;overflow:hidden;min-height:225px;border-color:#ffffff19;background:linear-gradient(145deg,#211a2d 0%,#121019 75%);transition:transform .25s,border-color .25s,box-shadow .25s}
+.feature:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,#d7b9ff6b,transparent 80%)}
+.feature:hover{transform:translateY(-4px);border-color:#9275b37a;box-shadow:0 20px 45px #0005}
+.feature .symbol{display:grid;place-items:center;width:46px;height:46px;margin-bottom:24px;border-radius:11px;background:#bd96fa12;border:1px solid #c3a3ff2b;font-size:25px}
+.feature b{font-size:16px;letter-spacing:-.02em}.feature p{line-height:1.8}
+.purchase{position:relative;overflow:hidden;gap:clamp(28px,5vw,70px);padding:clamp(26px,5vw,58px);background:radial-gradient(ellipse at 5% 0%,#8d58cb30,transparent 62%),linear-gradient(140deg,#21172e,#100e16 75%);border-color:#8666a75c;box-shadow:0 30px 90px #0006}
+.purchase:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,#d6b4ff8c,transparent 85%)}
+.purchase h2{font-size:clamp(32px,3.8vw,47px)}.purchase p{line-height:1.85}
+.order{position:relative;border-color:#76608e75;border-radius:15px;background:linear-gradient(160deg,#1a1424,#100d16);box-shadow:0 18px 45px #0005;padding:clamp(20px,3vw,31px)}
+.order:before{content:"";display:block;width:34px;height:3px;border-radius:99px;background:linear-gradient(90deg,#e3c8ff,#a6e6da);margin-bottom:20px}
+.order b{letter-spacing:.08em}.price{font-size:clamp(23px,3vw,30px);letter-spacing:-.045em}
+.order button{transition:filter .2s,transform .2s}.order button:not(:disabled):hover{filter:brightness(1.12);transform:translateY(-2px)}
+.order button:disabled{opacity:.85}.faq details{transition:background .2s;padding-left:14px;padding-right:14px;border-radius:7px}
+.faq details:hover,.faq details[open]{background:#ffffff06}.faq summary{padding:3px 0;list-style:none}.faq summary::-webkit-details-marker{display:none}
+.faq summary:after{content:"+";float:right;font-size:21px;line-height:1;color:#d6baff}.faq details[open] summary:after{content:"−"}
+.foot{margin-top:20px}.foot a:hover{color:#e6d1ff}
+@media(max-width:800px){.art:hover{transform:none}.hero{padding-top:65px}.purchase{gap:30px}}
+@media(max-width:540px){.hero{padding-top:54px;padding-bottom:74px}.hero h1{font-size:clamp(52px,15vw,68px)}.hero .actions a{flex:1;min-width:145px}.art{padding:14px;border-radius:16px}.app-top{font-size:10px}.tabs span{font-size:9px}.bars{gap:6px}.bars div{font-size:10px;padding:8px 6px}.section{padding:58px 0}.feature{min-height:unset;padding:22px}.purchase{padding:24px 18px;margin-bottom:52px}.order{padding:20px}.faq details{padding:18px 10px}}
+@media(prefers-reduced-motion:reduce){.art,.feature,.primary,.secondary,.order button{transition:none!important}.art:hover,.feature:hover,.primary:hover,.secondary:hover,.order button:hover{transform:none!important}}
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Gustavo Trio","applicationCategory":"MultimediaApplication","operatingSystem":"Windows","description":"Ferramentas de curvas de velocidade, Bounce e Text Exploder para Adobe After Effects.","softwareRequirements":"Adobe After Effects 2026 com suporte a CEP (Extensões legadas)","author":{"@type":"Person","name":"Gustavo"},"url":"https://portfolio-gustavo-chi.vercel.app/loja.html"}</script>
 </head>
