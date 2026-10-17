@@ -15,6 +15,10 @@
     {
       "source": "/admin",
       "destination": "/admin-login.html"
+    },
+    {
+      "source": "/loja",
+      "destination": "/loja.html"
     }
   ],
   "headers": [
@@ -173,6 +177,19 @@
         {
           "key": "Cache-Control",
           "value": "private, no-store"
+        }
+      ]
+    },
+    {
+      "source": "/api/store/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
         }
       ]
     }
