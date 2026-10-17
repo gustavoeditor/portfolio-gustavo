@@ -72,6 +72,7 @@ test('Supabase entitlement writes are service-role only and user-bound',async()=
  }});
  a.match(urlString,/customer_entitlements\?on_conflict=stripe_session_id/);
  a.equal(headers.apikey,env.SUPABASE_SERVICE_ROLE_KEY);
+ a.equal(headers.Prefer,'resolution=ignore-duplicates,return=representation','duplicate webhooks must not revive revoked purchases');
  a.equal(parsed[0].user_id,uid);a.equal(parsed[0].stripe_session_id,s.id);
  a.rejects(()=>store.saveEntitlement(cfg,'123-not-a-uuid',s),/Entitlement input invalid/);
 });
