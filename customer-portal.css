@@ -60,3 +60,6 @@ footer{position:relative;z-index:1;border-top:1px solid #ffffff16;padding:30px m
 @media(max-width:900px){.layout{grid-template-columns:1fr}.buy{grid-template-columns:125px 1fr}.buy-visual{width:115px}.buy-action{grid-column:1/-1;border-left:0;border-top:1px solid #a98cb048;padding:20px 0 0}}
 @media(max-width:560px){.head{margin-top:10px;width:calc(100% - 20px);padding:9px 12px}.mark{width:33px;height:33px}.head nav{gap:10px}.head nav a{font-size:10px}.container{padding:64px 0 43px;width:calc(100% - 26px)}.lead{margin-bottom:33px}.card{padding:24px 20px;border-radius:20px}.buy{grid-template-columns:1fr;gap:15px;border-radius:20px}.buy-visual{width:100px}.buy-action{grid-column:1}.buy-action strong{font-size:31px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+
+/* A provider must be configured before its login button is advertised. */
+.socials[hidden],.socials .login[hidden],.divider[hidden]{display:none!important}
