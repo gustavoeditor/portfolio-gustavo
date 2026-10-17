@@ -14,13 +14,6 @@
     "description": "Cinematic de produto com iluminação dramática e detalhes macro."
   },
   {
-    "title": "KeyDrop | AWP Product Cinematic",
-    "category": "cinematics",
-    "src": "videos/keydrop-awp-cinematic.mp4",
-    "poster": "capas/keydrop-awp-cinematic.webp",
-    "description": "Animação de produto em ambiente escuro, com luzes e composição 3D."
-  },
-  {
     "title": "Flip Emerald | Sound Design Cut",
     "category": "cs2",
     "src": "videos/flip-emerald-sfx.mp4",
