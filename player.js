@@ -19,19 +19,22 @@ const time=(seconds)=>{
 function mount(video,options={}){
  const title=String(options.title||'Vídeo');
  const primarySource=String(options.source||video.currentSrc||video.src||'');
+ const mobileSource=typeof options.mobileSource==='string'&&options.mobileSource.startsWith('/videos-360/')?options.mobileSource:'';
  const lowSource=typeof options.lowSource==='string'&&options.lowSource.startsWith('/videos-480/')?options.lowSource:'';
  const fullSource=typeof options.fullSource==='string'&&options.fullSource.startsWith('/videos-1080/')?options.fullSource:'';
  // All original locally hosted projects have both encodes, verified in CI.
  // Avoid two HEAD requests and a second video download on each new player.
- const verifiedVariants=options.verifiedLocalVariants===true && /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(primarySource);
+ const verifiedVariants=(options.verifiedLocalVariants===true && /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(primarySource)) || (options.verifiedExternalVariants===true && /^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//i.test(primarySource));
+ const highLabel=options.highLabel==='Original'?'Original':'720p';
  const qualityPreferenceKey='gustavo-video-quality-v1';
  const audioPreferenceKey='gustavo-video-audio-v1';
- const validQualities=['auto','low','high','full'];
+ const validQualities=['auto','mobile','low','high','full'];
  let qualityChoice='auto';
  try{
    const saved=localStorage.getItem(qualityPreferenceKey);
    if(validQualities.includes(saved))qualityChoice=saved;
  }catch(_){}
+ let mobileReady=verifiedVariants&&Boolean(mobileSource);
  let lowReady=verifiedVariants&&Boolean(lowSource);
  let fullReady=verifiedVariants&&Boolean(fullSource);
  let currentQuality='high';
@@ -108,17 +111,23 @@ function mount(video,options={}){
  const subscriptions=[];
  const on=(el,event,handler,opts)=>{el.addEventListener(event,handler,opts);subscriptions.push(()=>el.removeEventListener(event,handler,opts));};
  function effectiveQuality(){
-   if(qualityChoice==='auto')return slowNetwork()&&lowReady?'low':'high';
+   if(qualityChoice==='auto'){
+     if(mobileReady && (slowNetwork() || matchMedia('(max-width:700px)').matches))return 'mobile';
+     if(lowReady && (slowNetwork() || (mobileSource&&matchMedia('(max-width:1024px)').matches)))return 'low';
+     return 'high';
+   }
    if(qualityChoice==='full')return fullReady?'full':'high';
+   if(qualityChoice==='mobile')return mobileReady?'mobile':lowReady?'low':'high';
    if(qualityChoice==='low')return lowReady?'low':'high';
    return 'high';
  }
  function renderQualityOptions(){
-   const shown=(qualityChoice==='full'&&!fullReady)||(qualityChoice==='low'&&!lowReady)?'high':qualityChoice;
-   const names={auto:'Auto',full:'1080p',high:'720p',low:'480p'};
+   const shown=(qualityChoice==='full'&&!fullReady)||(qualityChoice==='low'&&!lowReady)||(qualityChoice==='mobile'&&!mobileReady)?'high':qualityChoice;
+   const names={auto:'Auto',full:'1080p',high:highLabel,low:'480p',mobile:'360p'};
    qualitySelect.textContent=names[shown]+' ▾';
    qualityMenu.replaceChildren();
-   for(const [value,label] of [['auto','Auto'],['full','1080p'],['high','720p'],['low','480p']]){
+   for(const [value,label] of [['auto','Auto'],['full','1080p'],['high',highLabel],['low','480p'],['mobile','360p']]){
+     if(value==='mobile'&&!mobileReady)continue;
      if(value==='low'&&!lowReady)continue;
      if(value==='full'&&!fullReady)continue;
      const option=document.createElement('button');option.type='button';option.className='vip-quality-option';
@@ -133,12 +142,12 @@ function mount(video,options={}){
      });
      qualityMenu.append(option);
    }
-   qualityBox.hidden=!lowReady&&!fullReady;
+   qualityBox.hidden=!mobileReady&&!lowReady&&!fullReady;
  }
  function selectedSource(key){
-   return key==='low'&&lowReady?lowSource:key==='full'&&fullReady?fullSource:primarySource;
+   return key==='mobile'&&mobileReady?mobileSource:key==='low'&&lowReady?lowSource:key==='full'&&fullReady?fullSource:primarySource;
  }
- // Apply an already-saved 1080p/480p preference before playback starts.
+ // Apply a validated saved or automatic quality before the first byte of playback.
  // The source switch doesn't need an asynchronous metadata probe for bundled files.
  if(verifiedVariants) {
    currentQuality=effectiveQuality();
@@ -146,7 +155,7 @@ function mount(video,options={}){
    if(initial && video.src!==new URL(initial,document.baseURI).href) video.src=initial;
  }
   function changeSource(key){
-   const selected=key==='low'&&lowReady?'low':key==='full'&&fullReady?'full':'high';
+   const selected=key==='mobile'&&mobileReady?'mobile':key==='low'&&lowReady?'low':key==='full'&&fullReady?'full':'high';
    if(selected===currentQuality||!primarySource||switching||disposed)return;
    const previousTime=Number.isFinite(video.currentTime)?video.currentTime:0;
    const shouldResume=!video.paused&&!video.ended;
@@ -174,6 +183,7 @@ function mount(video,options={}){
    failed=()=>{
      if(settled||disposed)return;
      settled=true;cleanup();switching=false;
+     if(selected==='mobile')mobileReady=false;
      if(selected==='low')lowReady=false;
      if(selected==='full')fullReady=false;
      renderQualityOptions();
@@ -197,6 +207,7 @@ function mount(video,options={}){
    // Metadata only; no additional media is downloaded until selected.
    fetch(src,{method:'HEAD',cache:'force-cache'}).then(response=>{
      if(disposed||!response.ok||!String(response.headers.get('content-type')||'').toLowerCase().includes('video/'))return;
+     if(key==='mobile')mobileReady=true;
      if(key==='low')lowReady=true;
      if(key==='full')fullReady=true;
      renderQualityOptions();
@@ -224,6 +235,7 @@ function mount(video,options={}){
  });
  if(connection&&typeof connection.addEventListener==='function')on(connection,'change',()=>{if(qualityChoice==='auto')applyQuality();});
  if(!verifiedVariants) {
+   probeVariant(mobileSource,'mobile');
    probeVariant(lowSource,'low');
    probeVariant(fullSource,'full');
  }
