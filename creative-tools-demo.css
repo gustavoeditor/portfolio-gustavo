@@ -125,3 +125,6 @@
 }
 @media(max-width:360px){#ct-demo .ct-brand small{display:none}#ct-demo .ct-mark{height:25px;width:25px;flex-basis:25px}#ct-demo #ct-values{font-size:7px}#ct-demo .ct-metrics label>span{font-size:8px}#ct-demo .ct-number input{width:35px;font-size:9px}#ct-demo .ct-tabs button{font-size:7px}}
 @media(prefers-reduced-motion:reduce){#ct-demo *,#ct-demo *:before,#ct-demo *:after{animation:none!important;transition:none!important}}
+
+.art.ct-plugin{transform:none;padding:8px;border:1px solid #7294b855;background:linear-gradient(160deg,#151c2c,#0a111c)}
+.ct-showcase-caption{text-align:center;color:#8097ad;font:700 8px/1.6 ui-monospace,monospace;letter-spacing:.04em;margin:8px 1px 0}
