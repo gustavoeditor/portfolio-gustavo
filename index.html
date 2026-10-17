@@ -788,7 +788,7 @@ document.querySelectorAll('[data-service]').forEach(link=>link.addEventListener(
 document.getElementById('brief-form').addEventListener('submit',e=>{e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return;const name=document.getElementById('brief-name').value.trim().slice(0,60),type=document.getElementById('brief-type').value,detail=document.getElementById('brief-detail').value.trim().slice(0,1100);if(detail.length<10){document.getElementById('brief-detail').setCustomValidity('Escreva pelo menos 10 caracteres.');form.reportValidity();document.getElementById('brief-detail').setCustomValidity('');return}const msg=['Olá, Gustavo! Vi seu portfólio e gostaria de conversar sobre um projeto.',name?'Nome: '+name:'','Tipo de projeto: '+type,'Minha ideia: '+detail,'Podemos conversar sobre um orçamento?'].filter(Boolean).join('\n');const url='https://wa.me/5537988445372?text='+encodeURIComponent(msg);const popup=window.open(url,'_blank');if(popup){try{popup.opener=null}catch(_){}}else{window.location.assign(url)}});
 })();
 </script>
-<script defer src="/sales.js?v=2"></script>
+<script defer src="/sales.js?v=3"></script>
 <script defer src="/quote-modal.js?v=1"></script>
 <!-- G / AMBIENCE: completamente opcional; música e efeitos desligados na primeira visita. -->
 <aside class="ambience-dock" id="ambience-dock" data-playing="false" aria-label="Controles de áudio ambiente">
