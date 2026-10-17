@@ -168,6 +168,11 @@ async function boot(){
  try{
   const r=await fetch('/api/customer/settings',{cache:'no-store'});if(!r.ok)throw Error('Configuração indisponível.');
   config=await r.json();by('account-price').textContent=config.product?.priceLabel||'Preço a confirmar';
+  const oauth=config.providers||[];
+  by('google').hidden=!oauth.includes('google');
+  by('discord').hidden=!oauth.includes('discord');
+  by('social-login').hidden=!oauth.includes('google')&&!oauth.includes('discord');
+  const separator=document.querySelector('.divider');if(separator)separator.hidden=by('social-login').hidden;
   if(!validConfig()){by('availability').textContent='O acesso de clientes está sendo preparado. O cadastro ainda não está disponível.';by('buy-status').textContent='Aguardando a configuração segura do sistema de contas, dos pagamentos de teste e da entrega digital.';return;}
   by('availability').textContent='Login seguro com Google, Discord ou e-mail.';
   session=restore();await acceptCallback();
