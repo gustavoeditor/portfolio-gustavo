@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#100d18">
+<title>Receber Gustavo Trio | GUSTAVO®</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 60% 0%,#352244,#0e0b16 65%);font:15px/1.6 system-ui,sans-serif;color:#f6f0ff;display:grid;place-items:center;padding:24px}
+main{width:min(540px,100%);border:1px solid #5a426c;border-radius:19px;background:linear-gradient(140deg,#21192b,#12101b);padding:clamp(23px,5vw,43px);box-shadow:0 24px 80px #0008}
+.logo{font-weight:900;letter-spacing:-.06em;font-size:24px}small{display:block;color:#caadee;text-transform:uppercase;letter-spacing:.2em;margin:30px 0 10px;font-size:11px}h1{font-size:clamp(37px,6vw,58px);letter-spacing:-.07em;line-height:1.04;margin:0 0 14px}p{color:#c9bed3}button{width:100%;background:#d7c0fa;color:#190f25;border:0;border-radius:9px;padding:15px;font:800 14px system-ui;cursor:pointer;margin-top:16px}button:disabled{opacity:.45;cursor:not-allowed}#status{min-height:48px;font-size:13px}a{color:#d8c1fa;text-underline-offset:5px}footer{font-size:12px;margin-top:23px;color:#aa9ab8}
+</style>
+</head><body><main>
+<div class="logo">GUSTAVO®</div><small>Entrega digital protegida</small>
+<h1>Seu Gustavo Trio.</h1>
+<p>Se o pagamento foi confirmado, você pode baixar seu arquivo por esta página. A validação é feita diretamente com o provedor de pagamento.</p>
+<button type="button" id="download" disabled>Verificar compra e baixar</button>
+<p id="status" role="status" aria-live="polite">Verificando o identificador da compra…</p>
+<footer><a href="/loja.html">Voltar à loja</a> · Em caso de dificuldade, acesse o <a href="/#contato">contato</a>.</footer>
+</main>
+<script>
+(()=>{'use strict';
+const id=new URLSearchParams(location.search).get('session_id')||'';
+const btn=document.getElementById('download'),status=document.getElementById('status');
+if(!/^cs_live_[A-Za-z0-9_]{15,200}$/.test(id)){status.textContent='Link de compra ausente ou inválido. Se você pagou, consulte o suporte para recuperar o acesso.';return;}
+btn.disabled=false;status.textContent='Clique para validar o pagamento e iniciar o download.';
+btn.addEventListener('click',async()=>{
+  btn.disabled=true;status.textContent='Validando pagamento…';
+  try{
+    const response=await fetch('/api/store/download?session_id='+encodeURIComponent(id),{cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer'});
+    if(!response.ok)throw Error('Download indisponível. Confirme o pagamento ou procure suporte.');
+    const blob=await response.blob();
+    if(blob.type!=='application/zip'||blob.size===0)throw Error('Arquivo inválido.');
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='Gustavo_Trio.zip';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    status.textContent='Download iniciado. Guarde o instalador com segurança.';
+  }catch(e){status.textContent=e.message||'Não foi possível concluir o download. Tente novamente.';}
+  finally{btn.disabled=false;}
+});
+})();
+</script></body></html>
