@@ -3,6 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+/* Start every plain homepage visit at its hero, instead of a previously restored section.
+   Explicit #anchors remain deep-linkable and navigation stays untouched. */
+(()=>{
+  if(!/^\/(?:index\.html)?$/.test(location.pathname) || location.hash)return;
+  try{history.scrollRestoration='manual';}catch(_){}
+  let interacted=false;
+  for(const name of ['pointerdown','touchstart','wheel','keydown']){
+    addEventListener(name,()=>{interacted=true;},{capture:true,passive:true,once:true});
+  }
+  function restoreTop(){
+    if(interacted||location.hash)return;
+    const root=document.documentElement;
+    const prev=root.style.scrollBehavior;
+    root.style.scrollBehavior='auto';
+    scrollTo({left:0,top:0,behavior:'instant'});
+    root.style.scrollBehavior=prev;
+  }
+  document.addEventListener('DOMContentLoaded',restoreTop,{once:true});
+  addEventListener('pageshow',()=>{
+    restoreTop();
+    requestAnimationFrame(()=>requestAnimationFrame(restoreTop));
+  });
+})();
+</script>
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#08080d">
 <meta name="description" content="Gustavo, editor de vídeo especializado em CS2, cinematics, motion design e vídeos para YouTube. Explore meus trabalhos e solicite seu orçamento.">
@@ -27,6 +52,51 @@
 
 
 <title>GUSTAVO | Editor de Vídeo, Cinematics e Motion Design</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://portfolio-gustavo-chi.vercel.app/#website",
+      "url": "https://portfolio-gustavo-chi.vercel.app/",
+      "name": "GUSTAVO | Editor de Vídeo",
+      "inLanguage": "pt-BR",
+      "description": "Portfólio de edição de vídeo, CS2, cinematics, motion design e vídeos para YouTube."
+    },
+    {
+      "@type": "Person",
+      "@id": "https://portfolio-gustavo-chi.vercel.app/#editor",
+      "name": "Gustavo",
+      "url": "https://portfolio-gustavo-chi.vercel.app/",
+      "jobTitle": "Editor de vídeo",
+      "knowsAbout": [
+        "Edição de vídeo",
+        "Cinematics de CS2",
+        "Motion design",
+        "Edição para YouTube"
+      ],
+      "sameAs": [
+        "https://www.instagram.com/gustaeditor0812/"
+      ]
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://portfolio-gustavo-chi.vercel.app/#homepage",
+      "url": "https://portfolio-gustavo-chi.vercel.app/",
+      "name": "GUSTAVO | Editor de Vídeo, Cinematics e Motion Design",
+      "inLanguage": "pt-BR",
+      "isPartOf": {
+        "@id": "https://portfolio-gustavo-chi.vercel.app/#website"
+      },
+      "about": {
+        "@id": "https://portfolio-gustavo-chi.vercel.app/#editor"
+      }
+    }
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
