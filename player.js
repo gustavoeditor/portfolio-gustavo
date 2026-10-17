@@ -26,7 +26,9 @@ function mount(video,options={}){
  // Avoid two HEAD requests and a second video download on each new player.
  const verifiedVariants=(options.verifiedLocalVariants===true && /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(primarySource)) || (options.verifiedExternalVariants===true && /^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//i.test(primarySource));
  const highLabel=options.highLabel==='Original'?'Original':'720p';
- const qualityPreferenceKey='gustavo-video-quality-v1';
+ // Managed uploads use a separate preference, so a previous 720p/1080p choice
+ // cannot force a heavy original on a phone when mobile encodes are available.
+ const qualityPreferenceKey=options.verifiedExternalVariants===true?'gustavo-video-quality-managed-v1':'gustavo-video-quality-v1';
  const audioPreferenceKey='gustavo-video-audio-v1';
  const validQualities=['auto','mobile','low','high','full'];
  let qualityChoice='auto';
@@ -201,6 +203,19 @@ function mount(video,options={}){
    video.src=selectedSource(selected);
    video.load();
  }
+ // Recover if an initially selected mobile file is temporarily missing on the CDN.
+ // Never leave the customer with a broken player when the original still exists.
+ on(video,'error',()=>{
+   if(disposed||switching||currentQuality==='high')return;
+   if(currentQuality==='mobile')mobileReady=false;
+   else if(currentQuality==='low')lowReady=false;
+   else if(currentQuality==='full')fullReady=false;
+   currentQuality=lowReady?'low':'high';
+   const backup=selectedSource(currentQuality)||primarySource;
+   if(!backup||video.src===new URL(backup,document.baseURI).href)return;
+   video.src=backup;video.load();renderQualityOptions();
+   const playback=video.play();if(playback?.catch)playback.catch(()=>{});
+ });
  function applyQuality(){changeSource(effectiveQuality());}
  function probeVariant(src,key){
    if(!src||typeof fetch!=='function')return;
