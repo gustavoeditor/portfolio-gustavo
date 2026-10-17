@@ -250,3 +250,6 @@ button,input{font:inherit}a{color:inherit}button,a,input{-webkit-tap-highlight-c
  .product-story h2{font-size:39px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+
+/* Customer portal launch link: checkout is still disabled until validated. */
+.customer-link{display:block;text-align:center;margin:14px 0 5px;color:#624982;text-decoration:underline;text-underline-offset:4px;font-size:12px;font-weight:750}.customer-link:hover{color:#42305b}
