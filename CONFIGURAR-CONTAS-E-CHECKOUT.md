@@ -10,12 +10,14 @@ O fluxo existente `/api/store/checkout` e a página `/receber.html` continuam is
 
 ## Preparação Supabase
 
-1. Conectar um projeto **Supabase** separado para contas de clientes (recomendável um projeto de staging).
-2. Abrir o SQL Editor e aplicar **database/customer-entitlements.sql**. A tabela tem RLS para consultas do próprio usuário e impede gravar licenças diretamente do navegador.
-3. Em **Authentication > URL Configuration**, configurar o Site URL do ambiente de testes e permitir **exatamente** os endereços Preview que serão usados e `https://portfolio-gustavo-chi.vercel.app/conta.html` somente quando estivermos prontos para publicar. Os links precisam abrir no mesmo navegador que solicitou login PKCE.
-4. Em Authentication > Providers: configurar **Google** e **Discord** usando os Client IDs/Secrets de aplicativos criados pelo proprietário. Ativar **e-mail OTP/Magic Link** e entrega de e-mail confiável antes de uso real. Não incluir segredos OAuth no frontend.
+1. **CONCLUÍDO em 17/10/2026**: projeto Supabase `creative-tools-customers`, ID `orsgwajmgrozaujakcyh`, organização `gustavoeditor's Org`, região São Paulo (`sa-east-1`), custo indicado US$ 0/mês na criação. URL pública: `https://orsgwajmgrozaujakcyh.supabase.co`. O projeto está em `ACTIVE_HEALTHY`.
+2. **CONCLUÍDO**: a migração **database/customer-entitlements.sql** foi aplicada. Auditoria de segurança sem avisos; a tabela está inicialmente vazia, com RLS. Permissões verificadas: `anon` não lê nem escreve, `authenticated` apenas lê as próprias licenças, `service_role` pode gravar do servidor.
+3. **PENDENTE: requer o painel Supabase**, em **Authentication > URL Configuration**, configurar o Site URL do ambiente de testes e permitir **exatamente** os endereços Preview que serão usados e `https://portfolio-gustavo-chi.vercel.app/conta.html` somente quando estivermos prontos para publicar. Os links precisam abrir no mesmo navegador que solicitou login PKCE.
+4. **PENDENTE: credenciais OAuth**. Em Authentication > Providers: configurar **Google** e **Discord** usando os Client IDs/Secrets de aplicativos criados pelo proprietário. Redirect URI para cada app OAuth: `https://orsgwajmgrozaujakcyh.supabase.co/auth/v1/callback`. Ativar **e-mail OTP/Magic Link** e entrega de e-mail confiável antes de uso real. Não incluir segredos OAuth no frontend.
 5. Publicar o URL (publicável) e anon/publishable key do Supabase no Preview da Vercel. A chave `SUPABASE_SERVICE_ROLE_KEY` deve ficar **exclusivamente no servidor**, tipo sensitive, nunca exposta no site.
 6. Fazer cadastro e autenticação de teste no domínio Preview. Confirmar isolamento por usuário, reentrada e expiração de sessão.
+
+**Bloqueio Vercel confirmado:** a conexão atual retorna `403 forbidden` ao consultar/editar as variáveis do projeto do time `gustavo-editor`. A permissão precisa ser restabelecida pelo proprietário na Vercel; NÃO inserir service-role, Stripe Secret ou Blob token no GitHub e NÃO tentar contornar o acesso. Os deploys de prévia via GitHub continuam disponíveis e o código segue com as vendas desativadas.
 
 ## Ambiente Preview da Vercel
 
