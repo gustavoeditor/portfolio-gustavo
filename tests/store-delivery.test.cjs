@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),handler=require('../lib/store-delivery');
 const {settings,sessionAccepted,chargeAccepted}=handler._test,now=1800000000;
-const env={STORE_TRIO_PRICE_CENTS:'7900',STORE_TRIO_STRIPE_PAYMENT_LINK_ID:'plink_1234567890123456',STRIPE_SECRET_KEY:['sk','live','123456789012345678901234567890'].join('_'),STORE_TRIO_PRIVATE_BLOB_TOKEN:['blob','fake','123456789012345678901234567890123456'].join('_'),STORE_TRIO_PRIVATE_BLOB_PATH:'products/gustavo-trio/release-1.3.zip',STORE_TRIO_DELIVERY_READY:'true',STORE_TRIO_SALES_ENABLED:'true'};
+const env={STORE_TRIO_PRICE_CENTS:'7900',STORE_TRIO_STRIPE_PAYMENT_LINK_ID:'plink_1234567890123456',STRIPE_SECRET_KEY:['sk','live','123456789012345678901234567890'].join('_'),STORE_TRIO_PRIVATE_BLOB_TOKEN:['blob','fake','123456789012345678901234567890123456'].join('_'),STORE_TRIO_PRIVATE_BLOB_PATH:'products/gustavo-trio/release-1.3.zip',STORE_TRIO_DELIVERY_READY:'true',STORE_TRIO_SALES_ENABLED:'true',STORE_TRIO_COMMERCIAL_HOSTING_APPROVED:'true'};
 const session={object:'checkout.session',id:['cs','live','abcdefghijklmnopqrstuv'].join('_'),livemode:true,mode:'payment',status:'complete',payment_status:'paid',payment_link:env.STORE_TRIO_STRIPE_PAYMENT_LINK_ID,currency:'brl',amount_total:7900,amount_subtotal:7900,payment_intent:'pi_abcdefghijklmnopqrst',created:now-200};
 const intent={object:'payment_intent',id:session.payment_intent,livemode:true,status:'succeeded',currency:'brl',amount_received:7900,latest_charge:'ch_abcdefghijklmnopqrst'};
 const charge={object:'charge',id:intent.latest_charge,payment_intent:intent.id,paid:true,disputed:false,refunded:false,amount_refunded:0};
@@ -24,3 +24,5 @@ test('paid wrong product rejected',async()=>{const r=await mock({method:'GET',qu
 test('refund rejected',async()=>{const r=await mock({method:'GET',query:{session_id:session.id}},{stripeGet:async p=>p.startsWith('checkout')?session:p.startsWith('payment_intents')?intent:{...charge,refunded:true}});assert.equal(r.code,403);});
 test('private blob pathname not accepted from client',async()=>{let asked;const r=await mock({method:'GET',query:{session_id:session.id,pathname:'evil.zip'}},{blobGet:async path=>{asked=path;return {statusCode:404}}});assert.equal(asked,'products/gustavo-trio/release-1.3.zip');assert.equal(r.code,503);});
 test('no non-GET',async()=>{assert.equal((await mock({method:'POST',query:{session_id:session.id}})).code,405);});
+
+test('requires allowed commercial hosting before any download',async()=>{const result=await mock({method:'GET',query:{session_id:session.id}},{env:{...env,STORE_TRIO_COMMERCIAL_HOSTING_APPROVED:'false'}});assert.equal(result.code,503);});
