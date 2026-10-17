@@ -44,6 +44,14 @@ test('strict same-origin and validated Stripe CHECKOUT test session',()=>{
   [{...s,payment_intent:{...s.payment_intent,amount_received:5000}},'short'],
  ])a.equal(store.paidSession(bad,uid,cfg),false,reason);
 });
+test('existing purchases remain downloadable when catalog price later changes',()=>{
+ const current=store.settings({...env,STORE_CUSTOMER_PRICE_CENTS:'12900'});
+ const oldPurchase=purchase();
+ a.equal(store.paidSession(oldPurchase,uid,current),false,'new sales must follow current price');
+ a.equal(store.paidSession(oldPurchase,uid,current,7900),true,'past buyers retain old-price ownership');
+ a.equal(store.paidSession(oldPurchase,uid,current,100),false,'cannot substitute a lower purchased price');
+ a.equal(store.paidSession(oldPurchase,other,current,7900),false,'original buyer only');
+});
 test('Stripe webhook signatures prevent tampering and replay',()=>{
  const secret='whsec_1234567891011121314151617181920',now=1792271000;
  const raw=Buffer.from('{"test":true}'),ts=String(now),sig=createHmac('sha256',secret).update(ts+'.').update(raw).digest('hex');
