@@ -23,8 +23,8 @@ Portfólio profissional de edição de vídeo, cinematics de CS2, motion design 
 | `comparacoes.json` | Comparativos com material e resultado |
 | `index.html` | Estrutura do site, SEO e galeria |
 | `player.js` / `player.css` | Reprodutor próprio |
-| `ambient.css` / `ambient.js` | Iluminação e parallax ornamental |
-| `reveal.css` / `reveal.js` | Entrada por opacidade e deslocamento |
+| `ambience.css` / `ambience.js` | Música e efeitos opcionais; nunca iniciam automaticamente |
+| `index.html` (estilos locais) | Animações de revelação, iluminação e detalhes da página inicial |
 | `sales.css` / `sales.js` | Conteúdo comercial, formulário e métricas |
 | `quote-modal.css` / `quote-modal.js` | Modal de orçamento e teclado mobile |
 
@@ -71,3 +71,15 @@ O próximo ganho de confiança depende de conteúdo real: logos permitidos dos p
 O vídeo original enviado no `/admin` utiliza Vercel Blob. O processo `scripts/generate-keydrop-renditions.cjs` roda no GitHub Actions e busca o upload publicado chamado **Abertura Keydrop Treino**. Ele gera arquivos MP4 H.264/AAC de 360p e 480p, faz verificação de resolução e SHA-256, e cria `video-renditions/abertura-keydrop-treino.json`. Os dois arquivos são hospedados estaticamente pela Vercel junto com o site, sem sobrescrever o original.
 
 O `G / PLAYER` só ativa os arquivos móveis quando o manifesto corresponde exatamente ao `src` do upload. Em telas pequenas, `Auto` seleciona 360p; 480p e Original são alternativas manuais. Se o manifesto estiver ausente ou o upload for substituído, o vídeo original continua funcionando. Os arquivos das resoluções móveis não devem ser considerados publicados até o CI gerar os MP4 e a produção atualizar.
+
+## Peso do repositório e arquivos importantes
+
+Auditoria em 17/10/2026 da branch `main`: 169 arquivos e cerca de **209 MB** somados na árvore, dos quais aproximadamente **208 MB são vídeos**. A pasta `videos-1080/` ocupa cerca de **124 MB**; `videos/` (qualidade base) aproximadamente **69 MB**; `videos-480/` aproximadamente **15 MB**. Os números se referem à árvore atual, não ao tamanho do histórico Git nem ao consumo de RAM dos visitantes.
+
+**Não exclua as versões de vídeo como se fossem duplicatas:** o G / PLAYER utiliza arquivos 720p como fonte base, 480p em redes/telas menores, 1080p quando solicitado e 360p para o destaque Keydrop. A qualidade no navegador é selecionada sob demanda; as três cópias não são automaticamente baixadas juntas.
+
+Os arquivos `vendor/blob-client.js`, `api/`, `lib/`, `package.json`, `vercel.json`, `capas/` e o painel `/admin` **não são entulho**: compõem a experiência, o processamento privado, os uploads e a segurança. Os documentos `.md` e os testes servem à manutenção e são muito menores que os MP4.
+
+Foram removidos em uma branch separada somente sete arquivos de CSS/JS que não eram carregados por nenhuma página ativa: `ambient.css/js`, `reveal.css/js`, `channels.css/js` e `proof.js`. Os arquivos `ambience.css/js` (controle de som real) permanecem. A verificação de publicação foi atualizada para comparar os recursos realmente utilizados. **Economia calculada: 29.165 bytes (0,014% da árvore)**, útil para organização, não para liberar cota de builds da Vercel. O histórico Git conserva as versões antigas para recuperação.
+
+Uma economia maior exigiria reencodar os MP4 mais pesados e comparar visualmente com os originais, ou mover armazenamento de mídia com cuidados de custo e disponibilidade. Não faça nenhuma dessas alterações automaticamente em vídeos já publicados sem validar qualidade, player, original e fallback.
