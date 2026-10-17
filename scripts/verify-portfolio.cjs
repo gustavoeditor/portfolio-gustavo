@@ -2,6 +2,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const assert=require('node:assert/strict');
+const {createHash}=require('node:crypto');
 const root=path.resolve(__dirname,'..');
 const read=(p)=>fs.readFileSync(path.join(root,p),'utf8');
 const html=read('index.html');
@@ -16,6 +17,21 @@ for(const p of projects){
  }
 }
 assert.ok(fs.existsSync(path.join(root,'scripts/generate-keydrop-renditions.cjs')),'Gerador das versões 360p/480p ausente');
+const rendition=JSON.parse(read('video-renditions/abertura-keydrop-treino.json'));
+assert.equal(rendition.title,'Abertura Keydrop Treino','Manifesto de resoluções de outro vídeo');
+assert.match(rendition.source,/^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\//i,'URL de origem não é o Blob autorizado');
+for(const h of [360,480]){
+ const v=rendition.variants[String(h)],file='videos-'+h+'/abertura-keydrop-treino.mp4';
+ assert.equal(v.url,'/'+file,'Qualidade aponta para vídeo incorreto');
+ assert.equal(v.height,h,'Qualidade não corresponde à resolução');
+ const buffer=fs.readFileSync(path.join(root,file));
+ assert.ok(buffer.length>1024 && buffer.length<100*1024*1024,'Arquivo fora dos limites');
+ assert.equal(buffer.length,v.bytes,'Tamanho de mídia diferente do manifesto');
+ assert.equal(createHash('sha256').update(buffer).digest('hex'),v.sha256,'Arquivo de vídeo não corresponde ao manifesto');
+}
+const playerCode=read('player.js');
+for(const token of ['mobileSource','verifiedExternalVariants',"mobile:'360p'",'matchMedia(\'(max-width:700px)\')'])assert.ok(playerCode.includes(token),'Player sem seleção móvel: '+token);
+
 assert.ok(!projects.some(p=>p.title==='KeyDrop | AWP Product Cinematic'),'O vídeo substituído não deve continuar no catálogo');
 assert.ok(html.includes('id="featured-keydrop-treino"')&&html.includes("normalizedTitle(p.title)==='abertura keydrop treino'"),'Novo destaque precisa usar o vídeo enviado pelo painel');
 const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
