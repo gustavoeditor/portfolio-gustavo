@@ -31,7 +31,7 @@ a{color:inherit}button{font:inherit}button,a{-webkit-tap-highlight-color:transpa
 .nav-action:hover{background:#32243f!important;border-color:#b18fd7}
 .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.98fr);align-items:center;gap:clamp(32px,5vw,75px);padding:clamp(80px,9vw,141px) 0 clamp(76px,10vw,134px);position:relative}
 .hero::after{content:"";position:absolute;bottom:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,transparent,#58436e74,transparent)}
-.hero-copy{position:relative;z-index:1}
+.hero-copy{position:relative;z-index:1;min-width:0}
 .prelabel{display:inline-flex;align-items:center;gap:11px}
 .dot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--mint);box-shadow:0 0 0 5px #baf7de16,0 0 18px #baf7de60}
 .hero h1{font-size:clamp(76px,9.25vw,146px);line-height:.82;letter-spacing:-.105em;margin:28px 0 34px;font-weight:850}
@@ -49,7 +49,7 @@ a{color:inherit}button{font:inherit}button,a{-webkit-tap-highlight-color:transpa
 .primary:focus-visible,.secondary:focus-visible{outline:2px solid #ddc5ff;outline-offset:4px}
 .availability-note{display:flex;align-items:center;gap:9px;margin-top:25px;color:#a99fb3;font-size:12px}
 .availability-note::before{content:"";width:25px;height:1px;background:#9482a7}
-.hero-visual{position:relative;isolation:isolate;padding:34px 5px 33px 20px}
+.hero-visual{position:relative;isolation:isolate;min-width:0;padding:34px 5px 33px 20px}
 .hero-visual::before{content:"";position:absolute;z-index:-1;inset:10% -6%;border-radius:50%;background:#9871d559;filter:blur(95px);opacity:.68}
 .visual-caption{position:absolute;left:2px;top:-10px;color:#897e97;font:10px ui-monospace,Consolas,monospace;letter-spacing:.15em}
 .visual-label{position:absolute;right:-3px;bottom:-6px;color:#a69ab3;font:10px ui-monospace,Consolas,monospace;letter-spacing:.12em}
@@ -162,7 +162,7 @@ a{color:inherit}button{font:inherit}button,a{-webkit-tap-highlight-color:transpa
  .top nav a:not(.nav-action){display:none}
  .nav-action{padding:8px 10px;font-size:11px!important}
  .hero{padding:54px 0 65px;gap:30px}
- .hero h1{font-size:clamp(67px,18vw,93px)}
+ .hero h1{font-size:clamp(59px,17vw,83px)}
  .hero-intro{font-size:17px}
  .hero-copy .lead{font-size:13px}
  .pillrow{gap:6px}.pill{font-size:9px;padding:7px 8px}
