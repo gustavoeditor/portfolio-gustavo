@@ -787,7 +787,7 @@ function moveProject(direction){
 }
 previousProject.addEventListener('click',()=>moveProject(-1));
 nextProject.addEventListener('click',()=>moveProject(1));
-document.addEventListener('click',e=>{const button=e.target.closest('[data-open]');if(button){openProject(Number(button.dataset.open));return}if(e.target===modal)closeProject()});close.addEventListener('click',closeProject);document.addEventListener('keydown',e=>{if(modal.getAttribute('aria-hidden')!=='false')return;if(e.key==='Escape'){e.preventDefault();closeProject()}if(e.key==='Tab'){
+document.addEventListener('click',e=>{const button=e.target.closest('[data-open]');if(button){openProject(Number(button.dataset.open));return}if(e.target===modal)closeProject()});close.addEventListener('click',()=>closeProject());document.addEventListener('keydown',e=>{if(modal.getAttribute('aria-hidden')!=='false')return;if(e.key==='Escape'){e.preventDefault();closeProject()}if(e.key==='Tab'){
  const focusables=[...modal.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),video[controls]')].filter(el=>el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden');
  if(!focusables.length)return;
  const first=focusables[0],last=focusables[focusables.length-1];
