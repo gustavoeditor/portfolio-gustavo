@@ -7,7 +7,7 @@ const read=(p)=>fs.readFileSync(path.join(root,p),'utf8');
 const html=read('index.html');
 const projects=JSON.parse(read('projetos.json'));
 const channels=JSON.parse(read('canais.json'));
-assert.ok(Array.isArray(projects)&&projects.length>=17,'Catálogo original preservado');
+assert.ok(Array.isArray(projects)&&projects.length>=16,'Catálogo original preservado, exceto vídeo removido a pedido');
 assert.ok(Array.isArray(channels.atuais)&&Array.isArray(channels.anteriores),'Cadastro de canais preservado');
 for(const p of projects){
  assert.ok(p.title&&p.category&&p.src&&p.poster,'Projeto original incompleto');
@@ -15,6 +15,8 @@ for(const p of projects){
   assert.ok(fs.existsSync(path.join(root,asset)),'Mídia ausente: '+asset);
  }
 }
+assert.ok(!projects.some(p=>p.title==='KeyDrop | AWP Product Cinematic'),'O vídeo substituído não deve continuar no catálogo');
+assert.ok(html.includes('id="featured-keydrop-treino"')&&html.includes("normalizedTitle(p.title)==='abertura keydrop treino'"),'Novo destaque precisa usar o vídeo enviado pelo painel');
 const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(new Set(ids).size,ids.length,'IDs duplicados');
 for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(ids.includes(id),'Link interno quebrado: '+id);
