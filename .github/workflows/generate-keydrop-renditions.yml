@@ -6,6 +6,12 @@ on:
     paths:
       - scripts/generate-keydrop-renditions.cjs
       - .github/workflows/generate-keydrop-renditions.yml
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+    paths:
+      - scripts/generate-keydrop-renditions.cjs
+      - .github/workflows/generate-keydrop-renditions.yml
   workflow_dispatch:
 
 permissions:
@@ -35,9 +41,19 @@ jobs:
             sudo apt-get install -y ffmpeg
           fi
           ffmpeg -version | head -n 1
+      - name: Check if this PR already contains verified MP4 variants
+        id: previous
+        run: |
+          if test -s videos-360/abertura-keydrop-treino.mp4 && test -s videos-480/abertura-keydrop-treino.mp4 && test -s video-renditions/abertura-keydrop-treino.json; then
+            echo 'needed=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'needed=true' >> "$GITHUB_OUTPUT"
+          fi
       - name: Download original from published project and encode both variants
+        if: steps.previous.outputs.needed == 'true'
         run: node scripts/generate-keydrop-renditions.cjs
       - name: Commit 360p, 480p and matching source manifest
+        if: steps.previous.outputs.needed == 'true'
         run: |
           set -euo pipefail
           git add videos-360/abertura-keydrop-treino.mp4 videos-480/abertura-keydrop-treino.mp4 video-renditions/abertura-keydrop-treino.json
