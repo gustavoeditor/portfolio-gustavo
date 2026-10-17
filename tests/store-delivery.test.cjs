@@ -36,3 +36,23 @@ test('Stripe test checkout allowed only on preview and never in production',()=>
  assert.equal(settings({...testEnv,VERCEL_ENV:'production'}).valid,false);
  assert.equal(settings({...testEnv,STORE_TRIO_TEST_MODE:'false'}).valid,false);
 });
+
+test('valid paid session streams only the private product ZIP',async()=>{
+ const {Readable,Writable}=require('node:stream');
+ const bytes=[],headers={};
+ const res=new Writable({write(chunk,encoding,done){bytes.push(Buffer.from(chunk));done();}});
+ res.setHeader=(k,v)=>{headers[k]=v;};res.status=function(c){this.statusCode=c;return this;};
+ res.json=function(obj){throw Error('Unexpected error '+JSON.stringify(obj));};
+ const completed=new Promise((resolve,reject)=>{res.once('finish',resolve);res.once('error',reject);});
+ let pathUsed='',accessUsed='';
+ await handler({method:'GET',query:{session_id:session.id}},res,{
+   env,nowSec:now,
+   stripeGet:async p=>p.startsWith('checkout')?session:p.startsWith('payment_intents')?intent:charge,
+   blobGet:async (path,opts)=>{pathUsed=path;accessUsed=opts.access;return {statusCode:200,stream:Readable.from([Buffer.from('PK ZIP INTERNAL')])};}
+ });
+ await completed;
+ assert.equal(pathUsed,env.STORE_TRIO_PRIVATE_BLOB_PATH);assert.equal(accessUsed,'private');
+ assert.equal(headers['Content-Type'],'application/zip');
+ assert.match(headers['Content-Disposition'],/attachment/);
+ assert.equal(Buffer.concat(bytes).toString(),'PK ZIP INTERNAL');
+});
