@@ -138,6 +138,41 @@ test('public Supabase credentials enable preview email login without enabling pu
  })();
 });
 
+
+test('webhook accepts only signed TEST payments and rejects tampering or live events',async()=>{
+ const handler=require('../lib/customer-routes/webhook');
+ const secret='whsec_1234567891011121314151617181920';
+ const before={...process.env},oldGet=store.stripeGetSession,oldSave=store.saveEntitlement;
+ let saved=0,lookups=0;
+ const respond=()=>({code:200,payload:null,headers:{},setHeader(k,v){this.headers[k]=v;},status(n){this.code=n;return this;},json(x){this.payload=x;return this;}});
+ const signed=(event,signatureRaw)=>{
+  const raw=Buffer.from(JSON.stringify(event));const value=signatureRaw||raw,ts=String(Math.floor(Date.now()/1000));
+  const sig=createHmac('sha256',secret).update(ts+'.').update(value).digest('hex');
+  return {method:'POST',rawBody:raw,headers:{'stripe-signature':'t='+ts+',v1='+sig}};
+ };
+ const ev={id:'evt_1234567890',livemode:false,type:'checkout.session.completed',data:{object:{id:purchase().id,livemode:false}}};
+ try{
+  Object.assign(process.env,env,{STRIPE_TEST_WEBHOOK_SECRET:secret});
+  store.stripeGetSession=async()=>{lookups++;return purchase();};
+  store.saveEntitlement=async(uidValue,orderId,session)=>{saved++;a.equal(uidValue,store.settings().url?'123e4567-e89b-42d3-a456-426614174000':'invalid');a.equal(orderId.client_reference_id,uid);};
+  let res=respond();await handler(signed(ev),res);
+  a.equal(res.code,200);a.equal(res.payload?.paid,true);a.equal(saved,1);a.equal(lookups,1);
+  res=respond();await handler(signed(ev,Buffer.from('different event')),res);
+  a.equal(res.code,400,'altered content cannot pass signature');a.equal(saved,1);
+  res=respond();await handler(signed({...ev,livemode:true,data:{object:{...ev.data.object,livemode:true}}}),res);
+  a.equal(res.code,400,'signed LIVE payloads must still be rejected');a.equal(saved,1);
+  store.stripeGetSession=async()=>({...purchase(),payment_status:'unpaid'});
+  res=respond();await handler(signed(ev),res);
+  a.equal(res.code,200);a.equal(res.payload?.paid,false);a.equal(saved,1,'unpaid purchases never grant licenses');
+  await a.rejects(()=>handler._test.readRaw({rawBody:Buffer.alloc(256*1024+1)}),/too large/);
+  await a.rejects(()=>handler._test.readRaw({body:'x'.repeat(256*1024+1)}),/too large/);
+ }finally{
+  store.stripeGetSession=oldGet;store.saveEntitlement=oldSave;
+  for(const key of Object.keys(process.env))if(!(key in before))delete process.env[key];
+  Object.assign(process.env,before);
+ }
+});
+
 test('email PKCE callback works in a new tab and rejects expired or implicit callbacks',async()=>{
  const vm=require('node:vm'),fs=require('node:fs');
  const shared=new Map(),storage=map=>({getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)});
