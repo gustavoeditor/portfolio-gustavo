@@ -294,3 +294,12 @@ button,input{font:inherit}a{color:inherit}button,a,input{-webkit-tap-highlight-c
  .trust-strip p{flex-basis:calc(100% - 35px)}
  .trust-strip>div{width:100%;flex-direction:row;justify-content:flex-start;padding-left:22px}
 }
+
+/* Optional editing pack interest, not a product checkout or waiting list database. */
+.pack-launch{margin:0 auto 80px;padding:clamp(26px,4vw,45px);display:flex;align-items:center;justify-content:space-between;gap:30px;border:1px solid #a591cd55;border-radius:28px;background:radial-gradient(ellipse 65% 90% at 7% 30%,#7958bc2d,transparent),linear-gradient(115deg,#1c192c,#14141e)}
+.pack-launch h2{font-size:clamp(34px,4.6vw,58px);line-height:1.07;letter-spacing:-.067em;margin:13px 0 15px}
+.pack-launch h2 em{font-style:normal;color:#d3baff}
+.pack-launch p{max-width:640px;color:#c1b6d4;font-size:14px;line-height:1.75;margin:0}
+.pack-launch-link{flex:none;display:inline-flex;gap:12px;align-items:center;justify-content:center;min-height:50px;padding:12px 19px;border:1px solid #ffffff82;border-radius:15px;background:#d5c2fb;color:#1b1527;font-size:13px;font-weight:750;text-decoration:none}
+.pack-launch-link:hover{background:#eee2ff}
+@media(max-width:750px){.pack-launch{display:block;margin-bottom:55px}.pack-launch-link{margin-top:25px;width:100%}}
