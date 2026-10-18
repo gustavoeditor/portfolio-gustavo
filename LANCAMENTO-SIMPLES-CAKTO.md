@@ -6,10 +6,16 @@
 
 Todo o checkout antigo Stripe, o PR de contas #61, vídeos, uploads, Sentinel e admin continuam preservados e desligados onde necessário. **Nenhum pagamento real foi ativado.**
 
+## Verificação obrigatória da política de produtos
+
+**Atenção:** a política atual da Cakto (https://www.cakto.com.br/politica-de-conteudo) determina que os produtos tenham finalidade educacional e restringe conteúdos sem essa finalidade. O Creative Tools é um plugin de software, não necessariamente um infoproduto educacional. **Não assumir elegibilidade:** pedir confirmação explícita ao suporte da Cakto, identificando o tipo de produto, a entrega de ZXP e a existência ou não de aulas tutoriais. Não disfarçar o plugin como curso para burlar regras.
+
+**Se a Cakto não aceitar software avulso**, avaliar provedor com política expressamente compatível com venda de licenças de software, antes de qualquer tentativa de cobrança. A flag `STORE_CAKTO_PRODUCT_APPROVED=true` só deve ser configurada após essa confirmação.
+
 ## Passo a passo que depende do proprietário
 
 1. Acesse https://app.cakto.com.br/ e crie/acesse sua conta de produtor. Acesse **Produtos > Adicionar produto**.
-2. Cadastre **Creative Tools Alpha**, descrição e página de vendas `https://portfolio-gustavo-chi.vercel.app/loja.html`. Use o preço de lançamento **aprovado pelo proprietário**; os R$39 usados no Preview são apenas uma hipótese, não preço de venda autorizado.
+2. Primeiro obtenha confirmação do suporte de que o plugin é aceito; após aprovação, cadastre **Creative Tools Alpha**, descrição e página de vendas `https://portfolio-gustavo-chi.vercel.app/loja.html`. Use o preço de lançamento **aprovado pelo proprietário**; os R$39 usados no Preview são apenas uma hipótese, não preço de venda autorizado.
 3. **Não selecione mera entrega de serviços**. Selecione *Acesso por e-mail* com arquivo/link disponibilizado pela plataforma **ou Cakto Members**, conforme a capacidade da conta para distribuir o ZXP e o manual. O pacote deve ser a Alpha homologada e **assinada**; não publique ZIP de testes com `PlayerDebugMode`.
 4. Faça um teste controlado da entrega em sua conta, sem assumir que o link no e-mail é privado/irreplicável. Confira recuperação de acesso, reembolso, suporte e o que aparece ao comprador.
 5. Abra o produto > **Links** (ou menu de três pontos > Ver links) e copie a **URL real de checkout** `https://pay.cakto.com.br/...`. Não usar a URL de outro vendedor e não inventar um caminho.
@@ -17,6 +23,7 @@ Todo o checkout antigo Stripe, o PR de contas #61, vídeos, uploads, Sentinel e 
    - `STORE_CAKTO_CHECKOUT_URL`: URL exata e oficial da oferta no domínio `pay.cakto.com.br`.
    - `STORE_CAKTO_PRICE_CENTS`: preço em centavos confirmado na Cakto, exemplo `3900` para R$39.
    - `STORE_CAKTO_DELIVERY_READY=true`: somente depois de entrega real verificada.
+   - `STORE_CAKTO_PRODUCT_APPROVED=true`: somente depois de confirmação de aceitação pela Cakto.
    - `STORE_CAKTO_SALES_ENABLED=true`: flag final para ligar o botão.
    - `STORE_TRIO_COMMERCIAL_HOSTING_APPROVED=true`: somente após a hospedagem ser aprovada para uso comercial, respeitando as condições do serviço.
 7. Conferir `GET /api/store/checkout` (`available:true`, `provider:'cakto'`, `priceLabel` igual ao checkout real); o formulário existente `POST /api/store/checkout` deve retornar `303` para o domínio autorizado. Confirmar navegação manual no celular e desktop e a entrega pós-compra.
@@ -24,7 +31,7 @@ Todo o checkout antigo Stripe, o PR de contas #61, vídeos, uploads, Sentinel e 
 
 ## Como o código evita a venda prematura
 
-- Todo o fluxo Cakto é fechado por padrão; faltando URL, valor, entrega, permissão comercial ou flag final, retorna indisponível e não redireciona.
+- Todo o fluxo Cakto é fechado por padrão; faltando URL, valor, entrega, **aprovação da categoria de software na Cakto**, permissão comercial ou flag final, retorna indisponível e não redireciona.
 - A URL da oferta deve usar HTTPS, host exato `pay.cakto.com.br`, sem credenciais no endereço e sem fragmentos. Não admite domínio parecido ou injeção pelo navegador.
 - Enquanto `STORE_CAKTO_SALES_ENABLED=true`, qualquer erro nas configurações da Cakto **não** faz fallback para checkout Stripe.
 - A página pública não contém segredos ou parâmetros de pagamento. Nenhum endpoint da Cakto recebe dados de visitante via back-end do portfólio.
