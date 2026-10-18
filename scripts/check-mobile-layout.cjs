@@ -338,6 +338,33 @@ async function run(){
    await ctx.close();
    console.log('Customer account mock sign-in and library display OK');
   }
+
+  // Supabase login can be exercised in Preview before private checkout/entitlement
+  // credentials are provisioned. No library request or purchase may be made.
+  {
+   const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+   const page=await ctx.newPage();
+   await page.addInitScript(()=>sessionStorage.setItem('creative-tools-customer-session',JSON.stringify({
+    access_token:'a'.repeat(70),refresh_token:'b'.repeat(70),expires_at:Math.floor(Date.now()/1000)+3600
+   })));
+   let libraryCalls=0;
+   await page.route('**/api/customer/settings',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+    enabled:true,libraryEnabled:false,auth:{url:'https://demo-auth.supabase.co',anonKey:'public-key-for-browser-tests'},
+    testCheckoutEnabled:false,testMode:true,product:{priceLabel:'R$ 79,00'}
+   })}));
+   await page.route('https://demo-auth.supabase.co/auth/v1/user',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+    id:'123e4567-e89b-42d3-a456-426614174000',email:'teste@exemplo.test',
+    email_confirmed_at:'2026-10-17T19:00:00Z',user_metadata:{full_name:'Cliente de Preview'}
+   })}));
+   await page.route('**/api/customer/library',route=>{libraryCalls++;return route.fulfill({status:500,body:'Unexpected library request'});});
+   await page.goto(base+'/conta.html',{waitUntil:'domcontentloaded'});
+   await page.locator('#member:not([hidden])').waitFor({timeout:8000});
+   assert.ok((await page.locator('#library').innerText()).includes('Conta de teste conectada'));
+   assert.equal(await page.locator('#test-buy').isDisabled(),true);
+   assert.equal(libraryCalls,0,'Auth-only Preview must not fetch entitlements without server credentials');
+   await ctx.close();
+   console.log('Customer Preview auth-only mode with commerce disabled OK');
+  }
  }finally{await browser.close();await close();}
 }
 run().catch(error=>{console.error(error?.stack||error);server.close();process.exitCode=1;});
