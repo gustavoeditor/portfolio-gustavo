@@ -1,5 +1,14 @@
 # Creative Tools | Contas e checkout de teste
 
+## Estado verificado em 18/10/2026
+
+- **Stripe Sandbox**: webhook de teste `we_1URw44HHrwaBEYdjZ84hXHBr` criado com eventos `checkout.session.completed` e `checkout.session.async_payment_succeeded`; segredo `STRIPE_TEST_WEBHOOK_SECRET` guardado diretamente nas variáveis **Preview**.
+- **Vercel Preview**: `STORE_CUSTOMER_TEST_ENABLED=true`, `STORE_CUSTOMER_PRICE_CENTS=7900`, URL e chave pública Supabase registradas; deploy recompilado e READY após configuração. As cobranças reais continuam bloqueadas pelo código.
+- **Vercel Blob privado**: store `store_T2YYsk1a6qufzdx4`, `creative-tools-private-preview`, criado em `gru1`. Token copiado com segurança para `STORE_TRIO_PRIVATE_BLOB_TOKEN` no **Preview**. O token padrão `BLOB_READ_WRITE_TOKEN` foi restringido ao Preview e **não** está no ambiente Production; o upload dos vídeos públicos preserva o Blob original/OIDC.
+- **Arquivo comercial**: `Creative_Tools_v1.4.16_CRIACAO_DIRETA.zip` localizado na Biblioteca e verificado, SHA-256 `8bddb13ad82654691f9600a63d96a8e55bde40bc567e470aab07231ec282ae09`, 57380 bytes. Seis testes Node automatizados passaram; um teste visual depende do Playwright; teste no After Effects real pendente. O ZIP atual instala uma extensão CEP **não assinada** e liga `PlayerDebugMode` para teste, então **não deve ser entregue como versão comercial homologada**.
+- **Bloqueios externos**: proprietário precisa configurar `STRIPE_TEST_SECRET_KEY` e `SUPABASE_SERVICE_ROLE_KEY` na Vercel (somente Preview), configurar os redirects de autenticação em Supabase e aprovar/assinar a distribuição ZXP. **Não** liberar checkout nem criar licença vendável enquanto não houver ZIP privado assinável e end-to-end completo.
+- **Hospedagem e pagamentos reais**: antes da venda comercial revisar a política de uso do plano Vercel e obter aprovação explícita do proprietário para qualquer upgrade/cobrança. Nenhum plano pago foi contratado.
+
 ## Escopo e estado
 
 Versão do produto: **Creative Tools v1.4.16** para Windows / After Effects 2026.
