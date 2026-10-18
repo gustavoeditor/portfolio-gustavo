@@ -175,7 +175,10 @@ async function boot(){
   by('availability').textContent='Entre com '+[...(oauth.includes('google')?['Google']:[]),...(oauth.includes('discord')?['Discord']:[]),'e-mail'].join(', ')+'.';
   session=restore();await acceptCallback();
   const user=await whoami();renderUser(user);
-  if(user){await claimPending();await library();}
+  if(user){
+   if(config.libraryEnabled){await claimPending();await library();}
+   else{const panel=by('library');panel.replaceChildren();const note=document.createElement('p');note.className='empty';note.textContent='Conta de teste conectada. A biblioteca de compras será habilitada após a configuração segura do servidor.';panel.appendChild(note);}
+  }
   by('test-buy').disabled=!user||!config.testCheckoutEnabled;
   by('test-buy').textContent=config.testCheckoutEnabled?(user?'Simular compra ↗':'Entre para testar a compra'):'Pagamento de teste indisponível';
   by('buy-status').textContent=config.testCheckoutEnabled?'Ambiente de testes Stripe: nenhuma cobrança real será realizada.':'Checkout aguardando configuração de teste e arquivo privado.';
