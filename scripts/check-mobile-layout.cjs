@@ -300,14 +300,14 @@ async function run(){
    page.on('pageerror',e=>errors.push(String(e).slice(0,220)));
    await page.route('**/api/customer/settings',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
     enabled:false,auth:null,testCheckoutEnabled:false,testMode:false,
-    product:{priceLabel:'R$ 79,00'}
+    product:{priceLabel:'R$ 39,00'}
    })}));
    await page.goto(base+'/conta.html',{waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>document.querySelector('#availability').textContent.includes('está sendo preparado'),null,{timeout:7000});
    assert.equal(await page.locator('#guest').isHidden(),true);
    assert.equal(await page.locator('#member').isHidden(),true);
    assert.equal(await page.locator('#test-buy').isDisabled(),true);
-   assert.equal(await page.locator('#account-price').innerText(),'R$ 79,00');
+   assert.equal(await page.locator('#account-price').innerText(),'R$ 39,00');
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+3),true,'Account page horizontal overflow '+width);
    assert.deepEqual(errors,[],'Account portal errors '+width+'px');
    await ctx.close();
@@ -323,7 +323,7 @@ async function run(){
    })));
    await page.route('**/api/customer/settings',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
     enabled:true,libraryEnabled:true,auth:{url:'https://demo-auth.supabase.co',anonKey:'public-key-for-browser-tests'},
-    testCheckoutEnabled:false,product:{priceLabel:'R$ 79,00'}
+    testCheckoutEnabled:false,product:{priceLabel:'R$ 39,00'}
    })}));
    await page.route('https://demo-auth.supabase.co/auth/v1/user',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
     id:'123e4567-e89b-42d3-a456-426614174000',email:'comprador@exemplo.test',
@@ -350,7 +350,7 @@ async function run(){
    let libraryCalls=0;
    await page.route('**/api/customer/settings',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
     enabled:true,libraryEnabled:false,auth:{url:'https://demo-auth.supabase.co',anonKey:'public-key-for-browser-tests'},
-    testCheckoutEnabled:false,testMode:true,product:{priceLabel:'R$ 79,00'}
+    testCheckoutEnabled:false,testMode:true,product:{priceLabel:'R$ 39,00'}
    })}));
    await page.route('https://demo-auth.supabase.co/auth/v1/user',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
     id:'123e4567-e89b-42d3-a456-426614174000',email:'teste@exemplo.test',
