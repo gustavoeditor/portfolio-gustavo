@@ -322,7 +322,7 @@ async function run(){
     access_token:'a'.repeat(70),refresh_token:'b'.repeat(70),expires_at:Math.floor(Date.now()/1000)+3600
    })));
    await page.route('**/api/customer/settings',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
-    enabled:true,auth:{url:'https://demo-auth.supabase.co',anonKey:'public-key-for-browser-tests'},
+    enabled:true,libraryEnabled:true,auth:{url:'https://demo-auth.supabase.co',anonKey:'public-key-for-browser-tests'},
     testCheckoutEnabled:false,product:{priceLabel:'R$ 79,00'}
    })}));
    await page.route('https://demo-auth.supabase.co/auth/v1/user',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
