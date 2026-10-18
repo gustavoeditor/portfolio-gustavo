@@ -30,7 +30,8 @@ test('Pack em pré-lançamento convida para contato, sem checkout fictício',()=
  const home=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
  const sales=fs.readFileSync(path.join(__dirname,'../sales.js'),'utf8');
  assert.match(html,/id="pack-interesse"/);
- assert.match(html,/href="\/?interesse=pack"/);
+ assert.ok(html.includes('href="/?interesse=pack"'));
+
  assert.match(home,/value="pack"/);
  assert.match(sales,/isPack=service==='pack'/);
  assert.match(html,/Ainda não existe checkout, entrega ou data oficial/);
