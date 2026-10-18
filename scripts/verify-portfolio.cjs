@@ -43,7 +43,7 @@ for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/socia
 }
 
 /* O botão flutuante e o briefing do WhatsApp são conversões essenciais, não decoração. */
-for(const feature of ['id="quote-floating-trigger"','data-open-quote','id="quick-quote-dialog"','id="quote-form"','id="quote-service"','id="quote-details"','id="quote-duration"','id="quote-deadline"','id="quote-reference"','/sales.js?v=2','/quote-modal.js?v=1','/quote-modal.css?v=1']){
+for(const feature of ['id="quote-floating-trigger"','data-open-quote','id="quick-quote-dialog"','id="quote-form"','id="quote-service"','id="quote-details"','id="quote-duration"','id="quote-deadline"','id="quote-reference"','/sales.js?v=3','/quote-modal.js?v=1','/quote-modal.css?v=1']){
  assert.ok(html.includes(feature),'Orçamento rápido ausente: '+feature);
 }
 for(const file of ['quote-modal.css','quote-modal.js','sales.js'])assert.ok(fs.existsSync(path.join(root,file)),'Recurso do formulário ausente: '+file);
@@ -146,4 +146,6 @@ assert.match(sitemap,/<loc>https:\/\/portfolio-gustavo-chi\.vercel\.app\/<\/loc>
 assert.match(sitemap,/<lastmod>2026-10-16<\/lastmod>/);
 assert.match(read('robots.txt'),/Sitemap: https:\/\/portfolio-gustavo-chi\.vercel\.app\/sitemap\.xml/);
 
+assert.ok(html.includes('value="pack"')&&html.includes("interesse')!=='pack'"), 'Pack lead handoff missing');
+assert.ok(read('sales.js').includes("isPack=service==='pack'"), 'Pack WhatsApp format missing');
 console.log('Portfolio V4 validado: '+projects.length+' vídeos, admin, SEO e interface.');

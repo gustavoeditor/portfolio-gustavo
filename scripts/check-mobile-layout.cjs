@@ -277,6 +277,21 @@ async function run(){
    console.log('Creative Tools v1.4.16 interactive store demo '+width+'px OK');
   }
 
+  // Pack interest should navigate to a prefilled quote without sending data.
+  {
+   const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+   const page=await ctx.newPage();
+   await page.goto(base+'/loja.html',{waitUntil:'domcontentloaded'});
+   await page.locator('#pack-interesse .pack-launch-link').click();
+   await page.locator('#quick-quote-dialog[open]').waitFor({timeout:10000});
+   assert.equal(await page.locator('#quote-service').inputValue(),'pack');
+   assert.match(await page.locator('#quote-details').inputValue(),/Pack de edição/);
+   await page.keyboard.press('Escape');
+   await page.locator('#quick-quote-dialog').waitFor({state:'hidden',timeout:5000});
+   await ctx.close();
+   console.log('Pack interest: store link to prefilled WhatsApp briefing OK.');
+  }
+
  }finally{await browser.close();await close();}
 }
 run().catch(error=>{console.error(error?.stack||error);server.close();process.exitCode=1;});

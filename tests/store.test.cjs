@@ -24,3 +24,15 @@ test('transparência não inventa certificações nem ativa checkout',()=>{
  assert.doesNotMatch(html,/100% seguro|certificado oficial|verificado por terceiros/i);
  assert.doesNotMatch(info,/100% seguro|certificado oficial|verificado por terceiros/i);
 });
+
+test('Pack em pré-lançamento convida para contato, sem checkout fictício',()=>{
+ const html=fs.readFileSync(path.join(__dirname,'../loja.html'),'utf8');
+ const home=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+ const sales=fs.readFileSync(path.join(__dirname,'../sales.js'),'utf8');
+ assert.match(html,/id="pack-interesse"/);
+ assert.ok(html.includes('href="/?interesse=pack"'));
+
+ assert.match(home,/value="pack"/);
+ assert.match(sales,/isPack=service==='pack'/);
+ assert.match(html,/Ainda não existe checkout, entrega ou data oficial/);
+});

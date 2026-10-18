@@ -596,7 +596,7 @@ body{
       <form id="quote-form" class="quote-form" autocomplete="on">
         <div class="quote-row">
           <div class="quote-field"><label for="quote-name">Como posso te chamar? <span>Opcional</span></label><input id="quote-name" name="clientName" type="text" maxlength="60" autocomplete="name" placeholder="Seu nome"></div>
-          <div class="quote-field"><label for="quote-service">Que tipo de edição você precisa? *</label><select id="quote-service" name="service" required><option value="">Selecionar serviço</option><option value="youtube">Edição para YouTube</option><option value="cinematics">Cinematics / Gaming</option><option value="motion">Motion design / VFX</option><option value="outros">Outro tipo de projeto</option></select></div>
+          <div class="quote-field"><label for="quote-service">Que tipo de edição você precisa? *</label><select id="quote-service" name="service" required><option value="">Selecionar serviço</option><option value="youtube">Edição para YouTube</option><option value="cinematics">Cinematics / Gaming</option><option value="motion">Motion design / VFX</option><option value="outros">Outro tipo de projeto</option><option value="pack">Pack de edição · Quero novidades</option></select></div>
         </div>
         <div class="quote-row">
           <div class="quote-field"><label for="quote-duration">Duração aproximada <span>Opcional</span></label><select id="quote-duration" name="duration"><option value="">Ainda não sei</option><option>Até 30 segundos</option><option>30 segundos a 2 minutos</option><option>2 a 10 minutos</option><option>Mais de 10 minutos</option></select></div>
@@ -820,7 +820,7 @@ document.querySelectorAll('[data-service]').forEach(link=>link.addEventListener(
 document.getElementById('brief-form').addEventListener('submit',e=>{e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return;const name=document.getElementById('brief-name').value.trim().slice(0,60),type=document.getElementById('brief-type').value,detail=document.getElementById('brief-detail').value.trim().slice(0,1100);if(detail.length<10){document.getElementById('brief-detail').setCustomValidity('Escreva pelo menos 10 caracteres.');form.reportValidity();document.getElementById('brief-detail').setCustomValidity('');return}const msg=['Olá, Gustavo! Vi seu portfólio e gostaria de conversar sobre um projeto.',name?'Nome: '+name:'','Tipo de projeto: '+type,'Minha ideia: '+detail,'Podemos conversar sobre um orçamento?'].filter(Boolean).join('\n');const url='https://wa.me/5537988445372?text='+encodeURIComponent(msg);const popup=window.open(url,'_blank');if(popup){try{popup.opener=null}catch(_){}}else{window.location.assign(url)}});
 })();
 </script>
-<script defer src="/sales.js?v=2"></script>
+<script defer src="/sales.js?v=3"></script>
 <script defer src="/quote-modal.js?v=1"></script>
 <!-- G / AMBIENCE: completamente opcional; música e efeitos desligados na primeira visita. -->
 <aside class="ambience-dock" id="ambience-dock" data-playing="false" aria-label="Controles de áudio ambiente">
@@ -842,5 +842,19 @@ document.getElementById('brief-form').addEventListener('submit',e=>{e.preventDef
 </aside>
 <script defer src="/ambience.js?v=2"></script>
 <script src="/sentinel-client.js?v=2" defer></script>
+<script>
+// Interest handoff from the pre-launch product. Never sends data automatically.
+document.addEventListener('DOMContentLoaded',()=>{
+ const url=new URL(location.href);
+ if(url.searchParams.get('interesse')!=='pack')return;
+ url.searchParams.delete('interesse');
+ history.replaceState({},'',url.pathname+url.search+url.hash);
+ const select=document.getElementById('quote-service'),details=document.getElementById('quote-details');
+ if(!select||!details)return;
+ select.value='pack';
+ if(!details.value.trim())details.value='Tenho interesse no futuro Pack de edição. Gostaria de receber novidades quando estiver disponível.';
+ document.getElementById('quote-floating-trigger')?.click();
+});
+</script>
 </body>
 </html>
