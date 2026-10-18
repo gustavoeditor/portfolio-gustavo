@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Compare the PUBLIC production site to the latest public files on main.
+# Compare ACTIVE PUBLIC production assets to the latest main release.
+# Unused legacy CSS/JS are intentionally excluded from production parity checks.
 # No Vercel token, secret or admin credentials are needed.
 set -euo pipefail
 site='https://portfolio-gustavo-chi.vercel.app'
 revision="$(git rev-parse --short=12 HEAD)"
-paths=(index.html loja.html loja.css receber.html sales.css ambient.css reveal.css reveal.js quote-modal.css player.js channels.js canais.json projetos.json)
+paths=(index.html loja.html loja.css creative-tools-demo.css creative-tools-demo.js receber.html privacidade.html player.css player.js ambience.css ambience.js sales.js quote-modal.css quote-modal.js sentinel-client.js canais.json projetos.json)
 stale=0
 failed=0
 temp="$(mktemp)"
