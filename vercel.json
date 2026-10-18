@@ -1,6 +1,30 @@
 {
   "rewrites": [
     {
+      "source": "/api/customer/webhook",
+      "destination": "/api/managed-projects?customer=webhook"
+    },
+    {
+      "source": "/api/customer/download",
+      "destination": "/api/managed-projects?customer=download"
+    },
+    {
+      "source": "/api/customer/claim",
+      "destination": "/api/managed-projects?customer=claim"
+    },
+    {
+      "source": "/api/customer/checkout",
+      "destination": "/api/managed-projects?customer=checkout"
+    },
+    {
+      "source": "/api/customer/library",
+      "destination": "/api/managed-projects?customer=library"
+    },
+    {
+      "source": "/api/customer/settings",
+      "destination": "/api/managed-projects?customer=settings"
+    },
+    {
       "source": "/api/store/download",
       "destination": "/api/managed-projects?store=download"
     },
@@ -224,6 +248,40 @@
         {
           "key": "Cache-Control",
           "value": "private, no-store, max-age=0"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/api/customer/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/conta.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
         },
         {
           "key": "Referrer-Policy",
