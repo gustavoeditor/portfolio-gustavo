@@ -34,7 +34,7 @@ async function protectedFetch(url,options={}){
  return r;
 }
 function b64url(bytes){let binary='';for(const b of bytes)binary+=String.fromCharCode(b);return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
-async function verifierChallenge(){const bytes=new Uint8Array(48);crypto.getRandomValues(bytes);const v=b64url(bytes),digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));try{sessionStorage.setItem(PKCE,v);}catch(_){throw Error('Ative o armazenamento temporário do navegador para fazer login.');}return b64url(new Uint8Array(digest));}
+async function verifierChallenge(){const bytes=new Uint8Array(48);crypto.getRandomValues(bytes);const v=b64url(bytes),digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));try{localStorage.setItem(PKCE,JSON.stringify({verifier:v,expiresAt:Date.now()+60*60*1000}));}catch(_){throw Error('Ative o armazenamento temporário do navegador para fazer login.');}return b64url(new Uint8Array(digest));}
 async function startOAuth(provider){
  if(!validConfig())return notify('A integração de contas ainda não está disponível.');
  try{
@@ -69,19 +69,17 @@ async function acceptCallback(){
  const code=params.get('code');
  if(code){
   if(!/^[a-zA-Z0-9_-]{15,512}$/.test(code))return notify('Código de autenticação inválido.');
-  let verifier;try{verifier=sessionStorage.getItem(PKCE);}catch(_){}
+  let verifier;try{const pending=JSON.parse(localStorage.getItem(PKCE)||'null');if(pending?.expiresAt>Date.now()&&/^[A-Za-z0-9_-]{64}$/.test(pending.verifier))verifier=pending.verifier;else localStorage.removeItem(PKCE);}catch(_){}
   if(!verifier)return notify('Link expirado ou aberto em outro navegador. Faça login novamente.');
   try{
    notify('Confirmando seu login…');
    saveTokens(await authRequest('token?grant_type=pkce',{auth_code:code,code_verifier:verifier}));
-   sessionStorage.removeItem(PKCE);
+   localStorage.removeItem(PKCE);
    params.delete('code');params.delete('sb_flow_id');history.replaceState({},'',location.pathname+(params.toString()?'?'+params:''));
   }catch(err){notify(err.message);}
- }else if(hash.has('access_token')&&hash.has('refresh_token')){
-  // Some e-mail templates still use implicit redirects. Strip tokens from URL immediately.
-  const data={access_token:hash.get('access_token'),refresh_token:hash.get('refresh_token'),expires_in:Number(hash.get('expires_in')||3600)};
+ }else if(hash.has('access_token')||hash.has('refresh_token')){
   history.replaceState({},'',location.pathname+location.search);
-  try{saveTokens(data);}catch(err){notify(err.message);}
+  notify('Este link utiliza um formato antigo. Solicite um novo link de acesso.');
  }
 }
 function renderUser(user){
@@ -174,7 +172,7 @@ async function boot(){
   by('social-login').hidden=!oauth.includes('google')&&!oauth.includes('discord');
   const separator=document.querySelector('.divider');if(separator)separator.hidden=by('social-login').hidden;
   if(!validConfig()){by('availability').textContent='O acesso de clientes está sendo preparado. O cadastro ainda não está disponível.';by('buy-status').textContent='Aguardando a configuração segura do sistema de contas, dos pagamentos de teste e da entrega digital.';return;}
-  by('availability').textContent='Login seguro com Google, Discord ou e-mail.';
+  by('availability').textContent='Entre com '+[...(oauth.includes('google')?['Google']:[]),...(oauth.includes('discord')?['Discord']:[]),'e-mail'].join(', ')+'.';
   session=restore();await acceptCallback();
   const user=await whoami();renderUser(user);
   if(user){await claimPending();await library();}

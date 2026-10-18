@@ -98,3 +98,40 @@ test('sales page does not enable live checkout and account page links exist',()=
  a.doesNotMatch(client,/sk_live_|service_role|BLOB_READ_WRITE_TOKEN/);
  for(const file of ['customer-portal.js','lib/customer-store.js','lib/customer-routes/checkout.js','lib/customer-routes/claim.js','lib/customer-routes/library.js','lib/customer-routes/download.js','lib/customer-routes/webhook.js'])new Function(fs.readFileSync(path.join(root,file),'utf8'));
 });
+
+test('checkout settings and route stay closed without a valid webhook secret',async()=>{
+ const before={...process.env};
+ const settingsRoute=require('../lib/customer-routes/settings');
+ const checkoutRoute=require('../lib/customer-routes/checkout');
+ function response(){return {code:200,setHeader(){},status(code){this.code=code;return this;},json(body){this.body=body;return this;}};}
+ try{
+  Object.assign(process.env,env);delete process.env.STRIPE_TEST_WEBHOOK_SECRET;
+  let res=response();settingsRoute({method:'GET'},res);a.equal(res.body.testCheckoutEnabled,false);
+  res=response();await checkoutRoute({method:'POST'},res);a.equal(res.code,503);
+  process.env.STRIPE_TEST_WEBHOOK_SECRET='whsec_1234567890123456';
+  res=response();settingsRoute({method:'GET'},res);a.equal(res.body.testCheckoutEnabled,true);
+  process.env.VERCEL_ENV='production';
+  res=response();await checkoutRoute({method:'POST'},res);a.equal(res.code,503);
+ }finally{for(const key of Object.keys(process.env))if(!(key in before))delete process.env[key];Object.assign(process.env,before);}
+});
+
+test('email PKCE callback works in a new tab and rejects expired or implicit callbacks',async()=>{
+ const vm=require('node:vm'),fs=require('node:fs');
+ const shared=new Map(),storage=map=>({getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)});
+ const source=fs.readFileSync(require('node:path').join(__dirname,'../customer-portal.js'),'utf8').replace('boot();','globalThis.portal={verifierChallenge,acceptCallback,setConfig:c=>config=c,getSession:()=>session};');
+ const calls=[];
+ function tab(search='',hash=''){
+  const nodes=new Map();
+  const context={URL,URLSearchParams,TextEncoder,Uint8Array,crypto:require('node:crypto').webcrypto,btoa:s=>Buffer.from(s,'binary').toString('base64'),localStorage:storage(shared),sessionStorage:storage(new Map()),location:{search,hash,pathname:'/conta.html'},history:{replaceState(...args){calls.push({history:args});}},document:{getElementById(id){if(!nodes.has(id))nodes.set(id,{});return nodes.get(id);}},fetch:async(url,options)=>{calls.push({url,body:JSON.parse(options.body)});return {ok:true,json:async()=>({access_token:'access',refresh_token:'refresh',expires_in:3600})};}};
+  vm.runInNewContext(source,context);context.portal.setConfig({auth:{url:'https://example.supabase.co',anonKey:'public'}});return context;
+ }
+ const first=tab();await first.portal.verifierChallenge();
+ const key='creative-tools-pkce-verifier',pending=JSON.parse(shared.get(key));
+ const second=tab('?code=valid_auth_code_123456789');await second.portal.acceptCallback();
+ a.equal(calls.find(x=>x.url)?.body.code_verifier,pending.verifier);
+ a.equal(second.portal.getSession().access_token,'access');a.equal(shared.has(key),false);
+ shared.set(key,JSON.stringify({...pending,expiresAt:Date.now()-1}));
+ const expired=tab('?code=valid_auth_code_123456789');await expired.portal.acceptCallback();a.equal(expired.portal.getSession(),null);a.equal(shared.has(key),false);
+ const implicit=tab('','#access_token=untrusted&refresh_token=untrusted');await implicit.portal.acceptCallback();a.equal(implicit.portal.getSession(),null);
+ a.equal(calls.filter(x=>x.url).length,1,'only the valid PKCE callback exchanges credentials');
+});
