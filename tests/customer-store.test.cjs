@@ -115,6 +115,29 @@ test('checkout settings and route stay closed without a valid webhook secret',as
  }finally{for(const key of Object.keys(process.env))if(!(key in before))delete process.env[key];Object.assign(process.env,before);}
 });
 
+test('public Supabase credentials enable preview email login without enabling purchases',()=>{
+ const before={...process.env};
+ const settingsRoute=require('../lib/customer-routes/settings');
+ const checkoutRoute=require('../lib/customer-routes/checkout');
+ function response(){return {code:200,setHeader(){},status(code){this.code=code;return this;},json(body){this.body=body;return this;}};}
+ return (async()=>{
+  try{
+   Object.assign(process.env,env);
+   delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+   let res=response();settingsRoute({method:'GET'},res);
+   a.equal(res.body.enabled,true,'public authentication should be available on Preview');
+   a.equal(res.body.libraryEnabled,false,'library must remain server-gated');
+   a.equal(res.body.testCheckoutEnabled,false,'checkout must remain server-gated');
+   a.equal(res.body.auth.url,env.SUPABASE_URL);
+   res=response();await checkoutRoute({method:'POST'},res);a.equal(res.code,503);
+   process.env.VERCEL_ENV='production';
+   res=response();settingsRoute({method:'GET'},res);
+   a.equal(res.body.enabled,false,'production must remain closed');
+   a.equal(res.body.auth,null,'public key not exposed by customer route in production');
+  }finally{for(const key of Object.keys(process.env))if(!(key in before))delete process.env[key];Object.assign(process.env,before);}
+ })();
+});
+
 test('email PKCE callback works in a new tab and rejects expired or implicit callbacks',async()=>{
  const vm=require('node:vm'),fs=require('node:fs');
  const shared=new Map(),storage=map=>({getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)});
