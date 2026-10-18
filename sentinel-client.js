@@ -4,6 +4,8 @@
  'use strict';
  // Honor explicit privacy signals before any telemetry is initialized.
  if(navigator.globalPrivacyControl===true||navigator.doNotTrack==='1'||window.doNotTrack==='1')return;
+ // Standalone entrypoint remains fail-closed if loaded without consent bootstrap.
+ try{if(sessionStorage.getItem('gustavo-sentinel-consent-v1')!=='yes')return;}catch(_){return;}
  const endpoint='/api/sentinel-event';
  let disabled=false,enabled=false,initializing=true,remaining=12;
  const pending=[];
