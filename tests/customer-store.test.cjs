@@ -27,6 +27,15 @@ test('account configuration fails closed without credentials or release',()=>{
  a.equal(store.checkoutOrigin(env),'https://portfolio-test-pr-123.vercel.app');
  a.equal(store.checkoutOrigin({...env,VERCEL_ENV:'production'}),null);
 });
+test('checkout success stays on same authorized preview origin for sessionStorage login',()=>{
+ const cfg={...env,STORE_CUSTOMER_PREVIEW_HOST:'portfolio-gustavo-git-feature-customer-pr-a6f143-gustavo-editor.vercel.app'};
+ const branch='https://'+cfg.STORE_CUSTOMER_PREVIEW_HOST;
+ a.equal(store.checkoutOrigin(cfg,{headers:{origin:branch,host:cfg.STORE_CUSTOMER_PREVIEW_HOST}}),branch);
+ a.equal(store.checkoutOrigin(cfg,{headers:{origin:'https://evil.vercel.app',host:'evil.vercel.app'}}),'https://'+cfg.VERCEL_URL);
+ a.equal(store.checkoutOrigin(cfg,{headers:{origin:branch,host:'other.vercel.app'}}),'https://'+cfg.VERCEL_URL);
+ a.equal(store.checkoutOrigin({...cfg,VERCEL_ENV:'production'},{headers:{origin:branch,host:cfg.STORE_CUSTOMER_PREVIEW_HOST}}),null);
+});
+
 test('strict same-origin and validated Stripe CHECKOUT test session',()=>{
  a.equal(store.requestOrigin({headers:{origin:'https://store.evil.tld',host:'portfolio-test-pr-123.vercel.app'}}),false);
  a.equal(store.requestOrigin({headers:{origin:'https://portfolio-test-pr-123.vercel.app',host:'portfolio-test-pr-123.vercel.app'}}),true);
