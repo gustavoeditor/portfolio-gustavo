@@ -154,7 +154,7 @@ test('webhook accepts only signed TEST payments and rejects tampering or live ev
  try{
   Object.assign(process.env,env,{STRIPE_TEST_WEBHOOK_SECRET:secret});
   store.stripeGetSession=async()=>{lookups++;return purchase();};
-  store.saveEntitlement=async(uidValue,orderId,session)=>{saved++;a.equal(uidValue,store.settings().url?'123e4567-e89b-42d3-a456-426614174000':'invalid');a.equal(orderId.client_reference_id,uid);};
+  store.saveEntitlement=async(cfg,userId,session)=>{saved++;a.equal(cfg.testMode,true);a.equal(userId,uid);a.equal(session.client_reference_id,uid);};
   let res=respond();await handler(signed(ev),res);
   a.equal(res.code,200);a.equal(res.payload?.paid,true);a.equal(saved,1);a.equal(lookups,1);
   res=respond();await handler(signed(ev,Buffer.from('different event')),res);
