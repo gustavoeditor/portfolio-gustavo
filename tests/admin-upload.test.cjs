@@ -137,8 +137,8 @@ test('video thumbnail picker has an accessible timeline and never publishes with
  assert.match(html,/id="auto-cover-range"[^>]*type="range"/);
  assert.match(html,/id="auto-cover-confirm" disabled/);
  assert.match(html,/id="auto-change-cover">Enviar imagem/);
- assert.match(html,/admin-smart-upload\\.js\\?v=4/);
- assert.match(html,/upload-ui\\.css\\?v=3/);
+ assert.ok(html.includes('/admin-smart-upload.js?v=4'));
+ assert.ok(html.includes('/upload-ui.css?v=3'));
  const uploader=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
  assert.doesNotThrow(()=>new vm.Script(uploader));
  assert.match(uploader,/coverVideo\.addEventListener\('seeked',readyFrame\)/);
@@ -190,7 +190,7 @@ test('authenticated panel permits the upload SDK control API and serves its own 
  env();const handler=require('../api/admin-panel'),res=response();handler(request({},'GET'),res);
  assert.equal(res.code,200);assert.match(res.headers['Content-Security-Policy'],/https:\/\/vercel\.com\/api\/blob\//);
  assert.ok(!res.headers['Content-Security-Policy'].includes('https://esm.sh'));
- assert.match(res.body,/admin-smart-upload\.js\?v=3/);
+ assert.ok(res.body.includes('/admin-smart-upload.js?v=4'));
  assert.ok(fs.existsSync(path.join(root,'vendor/blob-client.js')));
 });
 
