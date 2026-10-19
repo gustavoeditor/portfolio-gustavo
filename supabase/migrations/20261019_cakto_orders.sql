@@ -74,7 +74,7 @@ grant execute on function public.record_creative_tools_cakto_order(text,text,tex
 -- A licence created after a refund/chargeback must start revoked as well.
 create or replace function public.reject_revoked_creative_tools_licence()
 returns trigger language plpgsql security invoker set search_path = ''
-as $
+as $$
 begin
   if exists (
     select 1 from public.creative_tools_cakto_revocations
@@ -84,7 +84,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 revoke all on function public.reject_revoked_creative_tools_licence() from public, anon, authenticated;
 drop trigger if exists prevent_revoked_creative_tools_licence on public.creative_tools_cakto_licenses;
 create trigger prevent_revoked_creative_tools_licence
