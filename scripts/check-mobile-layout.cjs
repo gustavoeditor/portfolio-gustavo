@@ -154,6 +154,17 @@ async function run(){
   const adminHTML=JSON.parse(encodedAdmin[1]).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
   assert.match(adminHTML,/href="\/sentinel"/);
   assert.match(adminHTML,/id="logout-button"/);
+  // Native HTML label must open the OS file-picker even with uploader JS disabled.
+  const chooserContext=await browser.newContext({viewport:{width:1100,height:780}});
+  const chooserPage=await chooserContext.newPage();
+  await chooserPage.goto(base,{waitUntil:'domcontentloaded'});
+  await chooserPage.setContent(adminHTML,{waitUntil:'load'});
+  const chooserEvent=chooserPage.waitForEvent('filechooser',{timeout:5000});
+  await chooserPage.locator('#auto-drop').click();
+  const chooser=await chooserEvent;
+  assert.equal(chooser.isMultiple(),false,'Admin should open a single-video file picker');
+  await chooserContext.close();
+  console.log('Protected admin: native file picker opens without upload JS.');
   for(const width of [320,360,390,430,600,768,1024,1440]){
    const context=await browser.newContext({viewport:{width,height:844},deviceScaleFactor:1,isMobile:width<=768,hasTouch:width<=768});
    const page=await context.newPage();
