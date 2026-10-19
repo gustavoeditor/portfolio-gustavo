@@ -106,3 +106,5 @@ function handlerFactory(deps = {}) {
 }
 module.exports = handlerFactory();
 module.exports._test = {equal, isValidSignature, rawRequestBody, settings, acceptedOrder, recordOrder, handlerFactory};
+// Keep original incoming bytes intact for HMAC validation on compatible runtimes.
+module.exports.config = {api:{bodyParser:false}};
