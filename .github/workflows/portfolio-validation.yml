@@ -43,6 +43,8 @@ jobs:
         run: node scripts/check-mobile-layout.cjs
       - name: Validate Gustavo Trio storefront on phone, tablet and desktop
         run: node scripts/check-storefront-layout.cjs
+      - name: Test automatic titles and frame picker in Chrome
+        run: node scripts/check-admin-cover.cjs
       - name: Save storefront visual reference
         uses: actions/upload-artifact@v4
         if: always()
