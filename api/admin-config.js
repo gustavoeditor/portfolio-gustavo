@@ -8,9 +8,10 @@ module.exports = function handler(req, res) {
   return res.status(200).json({
     storageReady:Boolean(storageMode()),
     uploadMode:storageMode(),
-    // Indicates that credentials exist, not that credits or model calls work.
-    visualAIReady:Boolean(visualAIConfig()),
-    visualAIConfigured:Boolean(visualAIConfig()),
+    // Static keys or a token can be detected; request-scoped OIDC is only potential.
+    visualAIReady:Boolean(process.env.OPENAI_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN),
+    visualAIConfigured:Boolean(process.env.OPENAI_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN),
+    visualAIOidcPotential:Boolean(process.env.VERCEL === '1' && !process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN && !process.env.OPENAI_API_KEY),
     visualAIProvider:visualAIConfig()?.provider || null,
     secondFactorEnabled:Boolean(process.env.ADMIN_TOTP_SECRET),
     sharedLoginLimit:Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
