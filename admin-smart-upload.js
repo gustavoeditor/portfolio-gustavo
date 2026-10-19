@@ -280,7 +280,15 @@
       copy.textContent = 'Copiar link do vídeo';
       copy.addEventListener('click', async () => {
         const url = String(item.src||'');
-        if (!/^https:\\/\\/[^/]+\\.public\\.blob\\.vercel-storage\\.com\\//.test(url)) {
+        let validLink = false;
+        try {
+          const parsed = new URL(url);
+          validLink = parsed.protocol === 'https:' &&
+            parsed.hostname.endsWith('.public.blob.vercel-storage.com') &&
+            parsed.hostname.length > '.public.blob.vercel-storage.com'.length &&
+            !parsed.username && !parsed.password && !parsed.port;
+        } catch (_) { /* Malformed or unsupported URL. */ }
+        if (!validLink) {
           tell('Este vídeo ainda não possui um link público válido.', true); return;
         }
         try {
