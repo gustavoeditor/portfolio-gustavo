@@ -37,6 +37,7 @@ function fallbackResult(fallback, code) {
   return {...fallback, reasonCode:code, explanation:guidance[code] || guidance.provider_error};
 }
 function failureCode(error) {
+  if (error?.name === 'MissingAICredentialsError') return 'unauthorized';
   if (error?.name === 'TimeoutError' || error?.name === 'AbortError') return 'timeout';
   if (error?.name === 'InvalidAIResponseError') return 'invalid_response';
   if (error?.status === 401 || error?.status === 403) return 'unauthorized';
