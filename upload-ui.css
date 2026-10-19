@@ -29,3 +29,11 @@
 .cover-dialog :is(button,input):focus-visible{outline:2px solid #d9c5ff;outline-offset:3px}
 @media(max-width:560px){.cover-dialog-actions .btn{flex:1}.cover-actions .btn{flex:1;min-width:135px}.cover-dialog{width:calc(100vw - 16px);max-height:96vh;padding:16px}.cover-timeline{margin-top:13px}}
 @media(prefers-reduced-motion:reduce){.cover-dialog::backdrop{backdrop-filter:none}}
+
+/* Feedback transparente da IA e tentativa manual após o envio. */
+.title-ai-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.title-ai-actions .btn{min-height:39px;white-space:nowrap}
+.title-ai-status{color:#b9aec8;font-size:11px;line-height:1.5;flex:1 1 145px}
+.title-ai-status[data-mode="error"]{color:#ffc0c6}
+.title-ai-status[data-mode="success"]{color:#c5f3d6}
+@media(max-width:520px){.title-ai-actions .btn{width:100%}}
