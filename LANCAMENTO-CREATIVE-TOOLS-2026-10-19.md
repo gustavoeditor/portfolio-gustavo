@@ -21,14 +21,14 @@
 4. **Entrega real**: configurar Cakto Members ou acesso por e-mail com ZIP/instalador **aprovado** e aula gravada; validar e-mail real, recuperação, suporte e reembolso. O ZXP atual não usa o back-end de ativação de licenças, então **não anunciar chave individual** antes da integração e teste completos.
 5. **Pagamento real**: conferir no painel Cakto que produto, ID de produto UUID, oferta ID e valor são os corretos; no momento só se conhece o endereço do checkout fornecido pelo produtor. Não há acesso autenticado ao painel Cakto nesta sessão.
 6. **Identificação comercial**: completar publicamente os dados exigidos do fornecedor, canais de atendimento, compatibilidade, versão, condições de atualização, licença, privacidade e política de reembolso, de acordo com legislação aplicável. Conferir cadastro de recebimento e obrigações fiscais.
-7. **Teste E2E**: enviar webhook de teste oficial; conferir assinatura raw e registro no Supabase; uma compra válida (segundo as regras da Cakto, sem autoccompra indevida), entrega no e-mail correto, download, instalação, acesso e caminho de estorno. Revisar histórico do webhook para entregas com erro, porque respostas HTTP de falha podem não gerar retentativas automáticas. Não colocar carga ou pagamentos fictícios.
+7. **Teste E2E**: enviar webhook de teste oficial; conferir assinatura raw e registro no Supabase; uma compra válida (segundo as regras da Cakto, sem compra própria indevida), entrega no e-mail correto, download, instalação, acesso e caminho de estorno. Revisar histórico do webhook para entregas com erro, porque respostas HTTP de falha podem não gerar retentativas automáticas. Não colocar carga ou pagamentos fictícios.
 
 ## Variáveis privadas, quando estiver tudo validado
 
 Configuração da rota de venda **no projeto Vercel autorizado, ambiente Production somente após homologação**:
 - `STORE_CAKTO_CHECKOUT_URL`: URL oficial (não encurtada).
 - `STORE_CAKTO_PRICE_CENTS=3990` somente se confirmado no checkout.
-- `CAKTO_PRODUCT_ID`: UUID real da oferta Cakto (nunca inventar).
+- `CAKTO_PRODUCT_ID`: UUID real do produto Cakto (nunca inventar).
 - `STORE_CAKTO_DELIVERY_VERIFIED=true`: somente se um comprador-testador recebeu e instalou.
 - `STORE_CAKTO_LICENSE_VERIFIED=true`: somente se ZXP realmente exige/verifica a chave gerada, ou o requisito for removido após decisão comercial documentada.
 - `STORE_CAKTO_SALES_ENABLED=true`: **último passo**, só com todos os anteriores confirmados.
