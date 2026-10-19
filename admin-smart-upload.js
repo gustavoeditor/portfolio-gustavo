@@ -508,7 +508,9 @@
       uploadMode = config.uploadMode || 'token';
       const visualStatus = config.visualAIConfigured
         ? 'Credencial de IA encontrada. A conexão e os créditos serão verificados na tentativa de gerar o título.'
-        : 'IA visual não configurada: falta credencial de AI Gateway ou OpenAI na Vercel. O título exibido inicialmente usa o nome do arquivo.';
+        : (config.visualAIOidcPotential
+          ? 'Autenticação temporária da Vercel (OIDC) será testada ao analisar o vídeo; ela ainda não está confirmada.'
+          : 'IA visual não configurada: falta credencial de AI Gateway ou OpenAI na Vercel. O título inicial usa o nome do arquivo.');
       setup.textContent = (storageReady
         ? 'Armazenamento conectado. '
         : 'Publicação desativada: conecte o armazenamento do portfólio. Ainda é possível preparar a capa e o título. ') + visualStatus;
