@@ -465,13 +465,12 @@
       totalProjects = staticCount + extraCount;
       storageReady = Boolean(config.storageReady);
       uploadMode = config.uploadMode || 'token';
-      if (storageReady) {
-        setup.textContent = config.visualAIReady
-          ? 'Armazenamento conectado. A análise visual tentará classificar quadros ao longo do vídeo; revise a sugestão antes de publicar.'
-          : 'Armazenamento conectado. A sugestão usa o nome do arquivo; você pode escolher a categoria manualmente.';
-      } else {
-        setup.textContent = 'A publicação ainda está desativada: falta conectar o armazenamento do portfólio. Você pode testar a seleção, capa e categoria, mas o vídeo só será enviado quando esta conexão estiver pronta.';
-      }
+      const visualStatus = config.visualAIReady
+        ? 'IA visual disponível: o título, a categoria e a descrição são gerados a partir de até 8 quadros. Você pode editar qualquer sugestão.'
+        : 'IA visual não configurada: o título provisório vem do nome do arquivo. Você pode alterá-lo manualmente.';
+      setup.textContent = (storageReady
+        ? 'Armazenamento conectado. '
+        : 'Publicação desativada: conecte o armazenamento do portfólio. Ainda é possível preparar a capa e o título. ') + visualStatus;
     } catch(e) {
       storageReady=false;
       setup.textContent='Não foi possível verificar a configuração do painel. Faça login novamente se sua sessão expirou.';
