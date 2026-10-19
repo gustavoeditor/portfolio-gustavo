@@ -108,14 +108,14 @@ test('visual analysis sanitizes model output, limits frames, and honestly falls 
  global.fetch=async(url,opts)=>{const body=JSON.parse(opts.body);assert.equal(body.messages[1].content.length,9);return new Response(JSON.stringify({choices:[{message:{content:JSON.stringify({title:'Fixture',category:'invented',position:9999,description:'x'.repeat(500)})}}]}));};
  const req=request({name:'motion-test.mp4',total:17,frames:Array(12).fill('data:image/jpeg;base64,YWJj')});
  const res=response();await handler(req,res);assert.equal(res.body.source,'ai');assert.equal(res.body.title,'Fixture');assert.equal(res.body.category,'motion');assert.equal(res.body.position,17);assert.equal(res.body.description.length,220);
- global.fetch=async()=>{throw new Error('unavailable');};const fallback=response();await handler(req,fallback);assert.equal(fallback.body.source,'filename');assert.match(fallback.body.explanation,/nome do arquivo/);
+ global.fetch=async()=>{throw new Error('unavailable');};const fallback=response();await handler(req,fallback);assert.equal(fallback.body.source,'filename');assert.equal(fallback.body.reasonCode,'provider_error');
 });
 
 test('Vercel hosting alone is not proof of AI credentials',()=>{
  env();
  process.env.VERCEL='1';
  const {visualAIConfig}=require('../lib/visual-ai');
- assert.equal(visualAIConfig(),null);
+ assert.equal(visualAIConfig().provider,'gateway');
  const handler=load('api/admin-config.js',{
    '../lib/storage-config':{storageMode:()=>null}
  });
@@ -123,6 +123,7 @@ test('Vercel hosting alone is not proof of AI credentials',()=>{
  assert.equal(res.code,200);
  assert.equal(res.body.visualAIReady,false);
  assert.equal(res.body.visualAIConfigured,false);
+ assert.equal(res.body.visualAIOidcPotential,true);
  process.env.AI_GATEWAY_API_KEY='test-gateway-key';
  assert.equal(visualAIConfig().provider,'gateway');
  const configured=response();handler(request({},'GET'),configured);
