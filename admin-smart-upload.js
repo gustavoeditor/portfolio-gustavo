@@ -8,6 +8,13 @@
   const editor = $('auto-editor');
   const preview = $('auto-preview');
   const poster = $('auto-poster');
+  const titleInput = $('auto-title-input');
+  const coverDialog = $('auto-cover-dialog');
+  const coverVideo = $('auto-cover-video');
+  const coverRange = $('auto-cover-range');
+  const coverTime = $('auto-cover-time');
+  const coverStatus = $('auto-cover-status');
+  const coverConfirm = $('auto-cover-confirm');
   const publish = $('auto-publish');
   const cancel = $('auto-cancel');
   const progress = $('auto-progress');
@@ -17,6 +24,9 @@
 
   let file = null;
   let posterFile = null;
+  let customCover = false;
+  let titleEdited = false;
+  let coverReady = false;
   let frames = [];
   let previewUrl = null;
   let storageReady = false;
@@ -51,12 +61,15 @@
   };
   function clearSelection() {
     if (uploading) return;
+    if (coverDialog.open) coverDialog.close();
     releasePreview();
     if (poster.src.startsWith('blob:')) URL.revokeObjectURL(poster.src);
     file = null;
     pending = null;
     analyzing = false;
     posterFile = null;
+    customCover = false;
+    titleEdited = false;
     frames = [];
     editor.hidden = true;
     cancel.hidden = true;
@@ -126,6 +139,136 @@
     return {frames:out,thumbnail};
   }
 
+  // A capa selecionada permanece local até o usuário clicar em Publicar.
+  function setCover(blob, manual) {
+    if (!blob) return false;
+    if (poster.src.startsWith('blob:')) URL.revokeObjectURL(poster.src);
+    posterFile = blob;
+    customCover = manual;
+    if (pending) pending.cover = null;
+    poster.src = URL.createObjectURL(blob);
+    poster.hidden = false;
+    syncPublish();
+    return true;
+  }
+
+  function formatFrameTime(seconds) {
+    const value = Number.isFinite(seconds) ? Math.max(0,seconds) : 0;
+    const minutes = Math.floor(value / 60);
+    const whole = Math.floor(value % 60);
+    const fraction = Math.floor((value % 1) * 100);
+    return String(minutes).padStart(2,'0') + ':' +
+      String(whole).padStart(2,'0') + '.' + String(fraction).padStart(2,'0');
+  }
+  const displayFrameTime = () => {
+    coverTime.textContent = formatFrameTime(Number(coverRange.value)) + ' / ' +
+      formatFrameTime(coverVideo.duration);
+  };
+  function closeCoverPicker() {
+    if (coverDialog.open) coverDialog.close();
+  }
+  function resetCoverPicker() {
+    coverReady = false;
+    coverConfirm.disabled = true;
+    coverRange.disabled = true;
+    coverVideo.pause();
+    coverVideo.removeAttribute('src');
+    coverVideo.load();
+  }
+  $('auto-pick-frame').addEventListener('click', () => {
+    if (!file || !previewUrl || uploading) return;
+    coverReady = false;
+    coverConfirm.disabled = true;
+    coverRange.disabled = true;
+    coverRange.value = '0';
+    coverTime.textContent = '00:00.00 / 00:00.00';
+    coverStatus.textContent = 'Preparando frames do vídeo...';
+    coverDialog.showModal();
+    coverVideo.src = previewUrl;
+    coverVideo.load();
+  });
+  coverVideo.addEventListener('loadedmetadata', () => {
+    if (!coverDialog.open) return;
+    const duration = coverVideo.duration;
+    if (!Number.isFinite(duration) || duration <= 0 || !coverVideo.videoWidth) {
+      coverStatus.textContent = 'Não foi possível ler a timeline deste vídeo. Envie uma imagem pronta.';
+      return;
+    }
+    coverRange.max = String(duration);
+    coverRange.value = String(Math.min(duration * .05, Math.max(0,duration - .001)));
+    coverRange.disabled = false;
+    displayFrameTime();
+    coverStatus.textContent = 'Deslize para encontrar o melhor momento.';
+    coverConfirm.disabled = true;
+    try { coverVideo.currentTime = Number(coverRange.value); }
+    catch (_) { coverStatus.textContent = 'Este momento não pôde ser exibido.'; }
+  });
+  const readyFrame = () => {
+    if (!coverDialog.open) return;
+    coverReady = coverVideo.readyState >= 2 && !coverVideo.seeking &&
+      coverVideo.videoWidth > 0 && coverVideo.videoHeight > 0;
+    coverConfirm.disabled = !coverReady;
+    if (coverReady) {
+      coverRange.value = String(coverVideo.currentTime);
+      displayFrameTime();
+      coverStatus.textContent = 'Frame carregado. Clique em “Usar este frame como capa”.';
+    }
+  };
+  coverVideo.addEventListener('seeked',readyFrame);
+  coverVideo.addEventListener('loadeddata',readyFrame);
+  coverVideo.addEventListener('error', () => {
+    if (!coverDialog.open) return;
+    coverReady = false;
+    coverConfirm.disabled = true;
+    coverStatus.textContent = 'Não foi possível visualizar o vídeo. Use “Enviar imagem”.';
+  });
+  coverRange.addEventListener('input', () => {
+    if (coverRange.disabled || !coverDialog.open) return;
+    coverReady = false;
+    coverConfirm.disabled = true;
+    coverStatus.textContent = 'Carregando frame...';
+    displayFrameTime();
+    try { coverVideo.currentTime = Number(coverRange.value); }
+    catch (_) { coverStatus.textContent = 'Não foi possível acessar esse frame.'; }
+  });
+  coverConfirm.addEventListener('click', async () => {
+    if (!coverReady || !file || uploading || !coverDialog.open ||
+        coverVideo.readyState < 2 || coverVideo.seeking) return;
+    const selectedVideo = file;
+    coverConfirm.disabled = true;
+    coverStatus.textContent = 'Criando thumbnail a partir do frame selecionado...';
+    try {
+      const w = coverVideo.videoWidth, h = coverVideo.videoHeight;
+      if (!w || !h) throw new Error('Frame não disponível.');
+      const scale = Math.min(1280 / w, 720 / h, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1,Math.round(w * scale));
+      canvas.height = Math.max(1,Math.round(h * scale));
+      const ctx = canvas.getContext('2d',{alpha:false});
+      if (!ctx) throw new Error('Canvas indisponível.');
+      ctx.drawImage(coverVideo,0,0,canvas.width,canvas.height);
+      let blob = await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.88));
+      if (!blob || blob.type !== 'image/webp') {
+        blob = await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.86));
+      }
+      if (!blob || blob.size > 8*1024*1024) throw new Error('A thumbnail excede 8 MB.');
+      // Closing or replacing a video during encoding must not modify its thumbnail.
+      if (file !== selectedVideo || !coverDialog.open) return;
+      setCover(blob,true);
+      closeCoverPicker();
+      tell('Thumbnail escolhida no tempo ' + formatFrameTime(coverVideo.currentTime) +
+        '. Revise o título e publique quando quiser.');
+    } catch (error) {
+      coverStatus.textContent = error.message || 'Não foi possível criar a capa deste frame.';
+      coverConfirm.disabled = !coverReady;
+    }
+  });
+  $('auto-cover-close').addEventListener('click',closeCoverPicker);
+  $('auto-cover-cancel').addEventListener('click',closeCoverPicker);
+  coverDialog.addEventListener('close',resetCoverPicker);
+  // An editor can correct the automatic title while analysis continues.
+  titleInput.addEventListener('input', () => { titleEdited = true; });
+
   async function chooseFile(chosen) {
     if (uploading) return;
     if (!validVideo(chosen)) { tell('Selecione um arquivo MP4 ou WebM.',true); return; }
@@ -138,12 +281,12 @@
     preview.muted = true;
     editor.hidden = false;
     cancel.hidden = false;
-    $('auto-title-input').value = chosen.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').slice(0,90);
+    titleInput.value = chosen.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').slice(0,90);
     $('auto-category').value = 'cinematics';
     $('auto-position').value = String(totalProjects+1);
     $('auto-description').value = '';
-    $('auto-reason').textContent = 'Analisando o vídeo para sugerir categoria e posição...';
-    tell('Preparando a capa e a sugestão de classificação...');
+    $('auto-reason').textContent = 'Analisando quadros do vídeo para criar título, descrição, categoria e posição...';
+    tell('Extraindo quadros para a capa e o título automático...');
     analyzing = true;
     syncPublish();
     let selectedFrames=[];
@@ -152,11 +295,7 @@
       if (file !== chosen) return;
       frames = samples.frames;
       selectedFrames=samples.frames;
-      posterFile = samples.thumbnail;
-      if (posterFile) {
-        poster.src = URL.createObjectURL(posterFile);
-        poster.hidden = false;
-      }
+      if (!customCover) setCover(samples.thumbnail, false);
     } catch (_) {
       if (file !== chosen) return;
       tell('Não foi possível gerar a capa automaticamente. Escolha uma capa usando “Trocar capa”.',true);
@@ -168,12 +307,15 @@
         body:JSON.stringify({name:chosen.name,frames:selectedFrames,total:totalProjects})
       }));
       if (file !== chosen) return;
-      $('auto-title-input').value = result.title || $('auto-title-input').value;
+      if (!titleEdited && result.title) titleInput.value = result.title;
       if (['cs2','cinematics','motion','youtube','outros'].includes(result.category))
         $('auto-category').value = result.category;
       $('auto-position').value = String(Math.max(1,Math.min(totalProjects+1,(result.position||0)+1)));
       $('auto-description').value = result.description || '';
-      $('auto-reason').textContent = (result.source === 'ai' ? 'IA visual: ' : 'Sugestão pelo nome: ') + (result.explanation || 'Revise antes de publicar.');
+      $('auto-reason').textContent = (result.source === 'ai'
+        ? 'Título, categoria e descrição gerados por IA a partir de até 8 quadros: '
+        : 'IA visual indisponível. Título provisório pelo nome do arquivo: ') +
+        (result.explanation || 'Revise antes de publicar.');
       if (posterFile) tell(storageReady ? 'Pronto. Revise os dados e clique em Publicar.' : 'Capa criada. Configure o armazenamento para ativar a publicação.');
     } catch (error) {
       if (file !== chosen) return;
@@ -186,7 +328,7 @@
 
   async function uploadAndPublish() {
     if (publish.disabled || !file || !posterFile) return;
-    const title = $('auto-title-input').value.trim();
+    const title = titleInput.value.trim();
     const category = $('auto-category').value;
     const position = Number($('auto-position').value)-1;
     if (!title || title.length>90 || !Number.isInteger(position) || position<0 || position>150) {
@@ -375,13 +517,8 @@
     if(!['image/webp','image/jpeg','image/png'].includes(picked.type)||picked.size>8*1024*1024){
       tell('Escolha uma capa WebP, JPG ou PNG de até 8 MB.',true);return;
     }
-    if (poster.src.startsWith('blob:')) URL.revokeObjectURL(poster.src);
-    posterFile=picked;
-    if(pending)pending.cover=null;
-    poster.src=URL.createObjectURL(picked);
-    poster.hidden=false;
-    syncPublish();
-    tell('Capa atualizada. Revise e publique.');
+    setCover(picked,true);
+    tell('Imagem de capa personalizada. Revise e publique.');
   });
   cancel.addEventListener('click',clearSelection);
   publish.addEventListener('click',uploadAndPublish);
