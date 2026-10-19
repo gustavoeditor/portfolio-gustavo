@@ -123,7 +123,7 @@ test('public drop prevents file navigation and opens an accessible admin notice'
 test('native admin picker and inline drop guard keep working before uploader script',async()=>{
  const source=fs.readFileSync(path.join(root,'api/admin-panel.js'),'utf8');
  const prefix='const PANEL_HTML = ';
- const stop=source.indexOf(';\\nconst {isAdmin');
+ const stop=source.indexOf(';'+String.fromCharCode(10)+'const {isAdmin');
  const html=JSON.parse(source.slice(prefix.length,stop));
  assert.match(html,/<label id="auto-drop" for="auto-file"/);
  assert.match(html,/<input type="file" id="auto-file" class="file-input-accessible"/);
