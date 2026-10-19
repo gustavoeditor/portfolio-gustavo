@@ -120,11 +120,56 @@ test('public drop prevents file navigation and opens an accessible admin notice'
  assert.equal(prevented,true);assert.equal(nodes[0].role,'status');assert.equal(nodes[0].children[1].href,'/admin');
 });
 
+test('uploader script parses fully and cannot disable file selection',()=>{
+ const source=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
+ assert.doesNotThrow(()=>new vm.Script(source,{filename:'admin-smart-upload.js'}));
+ assert.match(source,/__gustavoAdminDrop\.register\(chooseFile\)/);
+});
+
+test('native admin picker and inline drop guard keep working before uploader script',async()=>{
+ const source=fs.readFileSync(path.join(root,'api/admin-panel.js'),'utf8');
+ const encoded=/^const PANEL_HTML = (".*");$/m.exec(source);
+ assert.ok(encoded,'Admin template source missing');
+ const html=JSON.parse(encoded[1]);
+ assert.match(html,/<label id="auto-drop" for="auto-file"/);
+ assert.match(html,/<input type="file" id="auto-file" class="file-input-accessible"/);
+ const token='/* A seleção de arquivos continua funcionando';
+ const start=html.lastIndexOf('<script>',html.indexOf(token))+'<script>'.length;
+ const end=html.indexOf('</script>',html.indexOf(token));
+ assert.ok(start>8 && end>start,'Inline drop guard must appear in the HTML');
+ const script=html.slice(start,end);
+ const listeners={window:{},document:{},area:{},input:{}};
+ const add=(target)=>(type,fn)=>{listeners[target][type]=fn;};
+ const status={textContent:'',dataset:{}};
+ const picked={name:'MEU_TAKE.mp4',size:123,type:'video/mp4'};
+ let calls=0,scrolled=false;
+ const area={addEventListener:add('area'),classList:{add(){},remove(){}},contains(t){return t===area;},scrollIntoView(){scrolled=true;}};
+ const input={files:[picked],value:'test',addEventListener:add('input'),click(){calls++;}};
+ const win={addEventListener:add('window')};
+ const doc={getElementById:id=>({'auto-drop':area,'auto-file':input,'auto-feedback':status})[id],addEventListener:add('document')};
+ vm.runInNewContext(script,{window:win,document:doc,Promise});
+ assert.ok(win.__gustavoAdminDrop?.register,'Module must be able to register its handler');
+ assert.equal(listeners.area.click,undefined,'Native label must not invoke a second file chooser');
+ listeners.area.keydown({key:'Enter',preventDefault(){}});assert.equal(calls,1,'Keyboard selection should open file chooser');
+ let prevented=false;
+ const event={dataTransfer:{types:['Files'],files:[picked]},target:area,preventDefault(){prevented=true;}};
+ listeners.window.dragover(event);assert.equal(prevented,true,'Browser navigation must be blocked');
+ prevented=false;listeners.document.drop(event);assert.equal(prevented,true,'Dropped file must not navigate');
+ assert.match(status.textContent,/Preparando o painel/);
+ const selected=[];win.__gustavoAdminDrop.register(file=>selected.push(file.name));
+ await new Promise(setImmediate);
+ assert.deepEqual(selected,[picked.name],'File dropped before module startup should be delivered exactly once');
+ listeners.input.change();await new Promise(setImmediate);
+ assert.deepEqual(selected,[picked.name,picked.name],'Windows file input selection should use same handler');
+ assert.equal(input.value,'','File selection should reset so same video can be picked again');
+ assert.equal(scrolled,false,'Area already under pointer should not scroll unexpectedly');
+});
+
 test('authenticated panel permits the upload SDK control API and serves its own client bundle',()=>{
  env();const handler=require('../api/admin-panel'),res=response();handler(request({},'GET'),res);
  assert.equal(res.code,200);assert.match(res.headers['Content-Security-Policy'],/https:\/\/vercel\.com\/api\/blob\//);
  assert.ok(!res.headers['Content-Security-Policy'].includes('https://esm.sh'));
- assert.match(res.body,/admin-smart-upload\.js\?v=2/);
+ assert.match(res.body,/admin-smart-upload\.js\?v=3/);
  assert.ok(fs.existsSync(path.join(root,'vendor/blob-client.js')));
 });
 
