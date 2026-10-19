@@ -40,7 +40,7 @@ function settings(env) {
   let host = '';
   try { const parsed = new URL(supabaseUrl); host = parsed.protocol === 'https:' ? parsed.hostname : ''; }
   catch (_) { return null; }
-  if (!secret || secret.length < 24 || !/^[0-9a-f-]{36}$/i.test(projectId) ||
+  if (!secret || secret.length < 24 || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(projectId) ||
       !/^[a-zA-Z0-9_-]{4,100}$/.test(offerId) ||
       !/^[a-z0-9]{20}\.supabase\.co$/.test(host) || !supabaseKey || supabaseKey.length < 24) return null;
   return {secret, projectId: projectId.toLowerCase(), offerId, supabaseUrl: 'https://' + host, supabaseKey};
@@ -49,7 +49,7 @@ function acceptedOrder(event, order, cfg) {
   if (!order || typeof order !== 'object' || Array.isArray(order) ||
       String(order.product?.id || '').toLowerCase() !== cfg.projectId ||
       String(order.offer?.id || '') !== cfg.offerId || order.offer_type !== 'main') return null;
-  if (!/^[0-9a-f-]{36}$/i.test(String(order.id || '')) || order.currency !== 'BRL') return null;
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(order.id || '')) || order.currency !== 'BRL') return null;
   const expectedStatus = {purchase_approved:'paid', refund:'refunded', chargeback:'chargedback'}[event];
   if (order.status !== expectedStatus) return null;
   const email = String(order.customer?.email || '').trim().toLowerCase();
