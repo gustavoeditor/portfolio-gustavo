@@ -8,7 +8,9 @@ module.exports = function handler(req, res) {
   return res.status(200).json({
     storageReady:Boolean(storageMode()),
     uploadMode:storageMode(),
+    // Indicates that credentials exist, not that credits or model calls work.
     visualAIReady:Boolean(visualAIConfig()),
+    visualAIConfigured:Boolean(visualAIConfig()),
     visualAIProvider:visualAIConfig()?.provider || null,
     secondFactorEnabled:Boolean(process.env.ADMIN_TOTP_SECRET),
     sharedLoginLimit:Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
