@@ -12,7 +12,7 @@ const match = /^const PANEL_HTML = (".*");$/m.exec(source);
 if (!match) throw Error('Admin HTML not found');
 const html = JSON.parse(match[1]);
 const routeData = {
-  '/api/admin-config':{storageReady:true,uploadMode:'token',visualAIReady:true},
+  '/api/admin-config':{storageReady:true,uploadMode:'token',visualAIReady:true,visualAIConfigured:true},
   '/api/admin-analyze':{title:'Cinematic da AWP',category:'cs2',description:'Revelação cinematográfica da AWP.',position:4,source:'ai',explanation:'Cenário CS2 visível nos quadros.'},
   '/api/managed-projects':{projects:[]}
 };
