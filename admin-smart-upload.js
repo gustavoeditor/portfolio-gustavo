@@ -9,6 +9,8 @@
   const preview = $('auto-preview');
   const poster = $('auto-poster');
   const titleInput = $('auto-title-input');
+  const aiRetry = $('auto-regenerate-title');
+  const aiTitleStatus = $('auto-title-ai-status');
   const coverDialog = $('auto-cover-dialog');
   const coverVideo = $('auto-cover-video');
   const coverRange = $('auto-cover-range');
@@ -46,6 +48,7 @@
   const syncPublish = () => {
     publish.disabled = !file || !posterFile || !storageReady || analyzing || uploading;
     publish.textContent = uploading ? 'Enviando…' : 'Publicar no site ↗';
+    aiRetry.disabled = !file || analyzing || uploading;
   };
   const safeJson = async (response) => {
     const data = await response.json().catch(() => ({}));
@@ -71,6 +74,8 @@
     customCover = false;
     titleEdited = false;
     frames = [];
+    aiTitleStatus.textContent = 'Aguardando vídeo.';
+    aiTitleStatus.dataset.mode = '';
     editor.hidden = true;
     cancel.hidden = true;
     input.value = '';
@@ -115,22 +120,30 @@
       canvas.height = Math.max(1,Math.round(element.videoHeight*scale));
       const ctx = canvas.getContext('2d',{alpha:false});
       if (!ctx) throw new Error('Canvas indisponível.');
+      // One undecodable timestamp should not throw away all successfully read
+      // frames and silently force a filename-based title.
       for (const percentage of [.05,.16,.29,.43,.57,.71,.84,.95]) {
         const target = Math.min(element.duration*percentage,Math.max(0,element.duration-.001));
-        if (Math.abs(element.currentTime-target)>.015) {
-          const seeked = waitFor('seeked',6500);
-          element.currentTime = target;
-          await seeked;
-        }
-        ctx.drawImage(element,0,0,canvas.width,canvas.height);
-        out.push(canvas.toDataURL('image/jpeg',.54));
-        if (!thumbnail) {
-          thumbnail = await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.78));
-          if (!thumbnail || thumbnail.type !== 'image/webp') {
-            thumbnail = await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.8));
+        try {
+          if (Math.abs(element.currentTime-target)>.015) {
+            const seeked = waitFor('seeked',6500);
+            element.currentTime = target;
+            await seeked;
           }
+          ctx.drawImage(element,0,0,canvas.width,canvas.height);
+          out.push(canvas.toDataURL('image/jpeg',.54));
+          if (!thumbnail) {
+            thumbnail = await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.78));
+            if (!thumbnail || thumbnail.type !== 'image/webp') {
+              thumbnail = await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.8));
+            }
+          }
+        } catch (_) {
+          // Keep other frames available to the visual model.
+          if (!out.length && percentage >= .57) break;
         }
       }
+      if (!out.length) throw new Error('Nenhum quadro do vídeo pôde ser lido.');
     } finally {
       element.removeAttribute('src');
       element.load();
@@ -286,46 +299,73 @@
     $('auto-category').value = 'cinematics';
     $('auto-position').value = String(totalProjects+1);
     $('auto-description').value = '';
-    $('auto-reason').textContent = 'Analisando quadros do vídeo para criar título, descrição, categoria e posição...';
+    $('auto-reason').textContent = 'Extraindo quadros para analisar visualmente o vídeo...';
+    aiTitleStatus.textContent = 'Preparando imagens do vídeo...';
+    aiTitleStatus.dataset.mode = '';
     tell('Extraindo quadros para a capa e o título automático...');
     analyzing = true;
     syncPublish();
-    let selectedFrames=[];
     try {
       const samples = await takeFrames(chosen);
       if (file !== chosen) return;
       frames = samples.frames;
-      selectedFrames=samples.frames;
       if (!customCover) setCover(samples.thumbnail, false);
     } catch (_) {
       if (file !== chosen) return;
-      tell('Não foi possível gerar a capa automaticamente. Escolha uma capa usando “Trocar capa”.',true);
+      tell('Não foi possível extrair quadros automaticamente. Você pode enviar uma capa e verificar a compatibilidade do vídeo.',true);
     }
     if (file !== chosen) return;
+    await requestAnalysis(chosen);
+  }
+
+  async function requestAnalysis(chosen) {
+    if (uploading || !chosen || file !== chosen) return;
+    analyzing = true;
+    syncPublish();
+    aiTitleStatus.textContent = 'Analisando o conteúdo visual...';
+    aiTitleStatus.dataset.mode = '';
     try {
       const result = await safeJson(await fetch('/api/admin-analyze',{
         method:'POST',credentials:'same-origin',headers,
-        body:JSON.stringify({name:chosen.name,frames:selectedFrames,total:totalProjects})
+        body:JSON.stringify({name:chosen.name,frames,total:totalProjects})
       }));
       if (file !== chosen) return;
-      if (!titleEdited && result.title) titleInput.value = result.title;
-      if (['cs2','cinematics','motion','youtube','outros'].includes(result.category))
-        $('auto-category').value = result.category;
-      $('auto-position').value = String(Math.max(1,Math.min(totalProjects+1,(result.position||0)+1)));
-      $('auto-description').value = result.description || '';
-      $('auto-reason').textContent = (result.source === 'ai'
-        ? 'Título, categoria e descrição gerados por IA a partir de até 8 quadros: '
-        : 'IA visual indisponível. Título provisório pelo nome do arquivo: ') +
-        (result.explanation || 'Revise antes de publicar.');
-      if (posterFile) tell(storageReady ? 'Pronto. Revise os dados e clique em Publicar.' : 'Capa criada. Configure o armazenamento para ativar a publicação.');
+      if (result.source === 'ai') {
+        if (!titleEdited && result.title) titleInput.value = result.title;
+        if (['cs2','cinematics','motion','youtube','outros'].includes(result.category))
+          $('auto-category').value = result.category;
+        $('auto-position').value = String(Math.max(1,Math.min(totalProjects+1,(result.position||0)+1)));
+        $('auto-description').value = result.description || '';
+        aiTitleStatus.textContent = titleEdited ? 'Título gerado. Sua edição foi preservada.' : 'Título criado pela IA visual ✓';
+        aiTitleStatus.dataset.mode = 'success';
+        $('auto-reason').textContent = 'Análise por IA de até 8 quadros: ' +
+          (result.explanation || 'Revise o título antes de publicar.');
+        tell(storageReady ? 'Título criado pela IA. Revise e publique.' : 'Título criado pela IA. Falta habilitar o armazenamento para publicar.');
+      } else {
+        const reason = result.explanation || 'A IA não conseguiu analisar este vídeo.';
+        aiTitleStatus.textContent = 'IA não gerou título.';
+        aiTitleStatus.dataset.mode = 'error';
+        $('auto-reason').textContent = reason;
+        tell(reason,true);
+      }
     } catch (error) {
       if (file !== chosen) return;
-      $('auto-reason').textContent = 'Não foi possível analisar agora. Preencha os campos manualmente.';
-      tell(error.message,true);
+      const message = 'Erro de conexão ao analisar o vídeo. Verifique a sessão ou tente novamente.';
+      aiTitleStatus.textContent = 'Falha ao gerar título por IA.';
+      aiTitleStatus.dataset.mode = 'error';
+      $('auto-reason').textContent = message;
+      tell(error?.message || message,true);
     } finally {
-      if (file === chosen) {analyzing = false;syncPublish();}
+      if (file === chosen) { analyzing = false; syncPublish(); }
     }
   }
+  aiRetry.addEventListener('click', () => {
+    if (!file || uploading || analyzing) return;
+    // A retry is an explicit request to replace the current fallback title, but
+    // typing while AI works still takes precedence over the eventual response.
+    titleEdited = false;
+    requestAnalysis(file);
+  });
 
   async function uploadAndPublish() {
     if (publish.disabled || !file || !posterFile) return;
@@ -466,9 +506,11 @@
       totalProjects = staticCount + extraCount;
       storageReady = Boolean(config.storageReady);
       uploadMode = config.uploadMode || 'token';
-      const visualStatus = config.visualAIReady
-        ? 'IA visual disponível: o título, a categoria e a descrição são gerados a partir de até 8 quadros. Você pode editar qualquer sugestão.'
-        : 'IA visual não configurada: o título provisório vem do nome do arquivo. Você pode alterá-lo manualmente.';
+      const visualStatus = config.visualAIConfigured
+        ? 'Credencial de IA encontrada. A conexão e os créditos serão verificados na tentativa de gerar o título.'
+        : (config.visualAIOidcPotential
+          ? 'Autenticação temporária da Vercel (OIDC) será testada ao analisar o vídeo; ela ainda não está confirmada.'
+          : 'IA visual não configurada: falta credencial de AI Gateway ou OpenAI na Vercel. O título inicial usa o nome do arquivo.');
       setup.textContent = (storageReady
         ? 'Armazenamento conectado. '
         : 'Publicação desativada: conecte o armazenamento do portfólio. Ainda é possível preparar a capa e o título. ') + visualStatus;

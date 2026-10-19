@@ -108,7 +108,69 @@ test('visual analysis sanitizes model output, limits frames, and honestly falls 
  global.fetch=async(url,opts)=>{const body=JSON.parse(opts.body);assert.equal(body.messages[1].content.length,9);return new Response(JSON.stringify({choices:[{message:{content:JSON.stringify({title:'Fixture',category:'invented',position:9999,description:'x'.repeat(500)})}}]}));};
  const req=request({name:'motion-test.mp4',total:17,frames:Array(12).fill('data:image/jpeg;base64,YWJj')});
  const res=response();await handler(req,res);assert.equal(res.body.source,'ai');assert.equal(res.body.title,'Fixture');assert.equal(res.body.category,'motion');assert.equal(res.body.position,17);assert.equal(res.body.description.length,220);
- global.fetch=async()=>{throw new Error('unavailable');};const fallback=response();await handler(req,fallback);assert.equal(fallback.body.source,'filename');assert.match(fallback.body.explanation,/nome do arquivo/);
+ global.fetch=async()=>{throw new Error('unavailable');};const fallback=response();await handler(req,fallback);assert.equal(fallback.body.source,'filename');assert.equal(fallback.body.reasonCode,'provider_error');
+});
+
+test('Vercel hosting alone is not proof of AI credentials',()=>{
+ env();
+ process.env.VERCEL='1';
+ const {visualAIConfig}=require('../lib/visual-ai');
+ assert.equal(visualAIConfig().provider,'gateway');
+ const handler=load('api/admin-config.js',{
+   '../lib/storage-config':{storageMode:()=>null}
+ });
+ const res=response();handler(request({},'GET'),res);
+ assert.equal(res.code,200);
+ assert.equal(res.body.visualAIReady,false);
+ assert.equal(res.body.visualAIConfigured,false);
+ assert.equal(res.body.visualAIOidcPotential,true);
+ process.env.AI_GATEWAY_API_KEY='test-gateway-key';
+ assert.equal(visualAIConfig().provider,'gateway');
+ const configured=response();handler(request({},'GET'),configured);
+ assert.equal(configured.body.visualAIConfigured,true);
+});
+
+test('visual title failure gives concrete diagnosis, not a fake AI result',async()=>{
+ env();
+ const frames=['data:image/jpeg;base64,YWJj'];
+ const handler=load('api/admin-analyze.js',{'../lib/visual-ai':{
+   visualAIConfig:()=>({provider:'gateway',url:'https://ai.test',model:'fixture'}),
+   visualAIToken:async()=> 'test-token'
+ }});
+ const req=request({name:'take-001.mp4',total:17,frames});
+ for(const [status,code] of [[401,'unauthorized'],[402,'credits'],[404,'model_unavailable'],[429,'rate_limited'],[503,'provider_error']]){
+   global.fetch=async()=>new Response('unavailable',{status});
+   const res=response();await handler(req,res);
+   assert.equal(res.code,200);
+   assert.equal(res.body.source,'filename');
+   assert.equal(res.body.reasonCode,code);
+   assert.match(res.body.explanation,/IA|modelo|serviço/i);
+ }
+ global.fetch=async()=>new Response(JSON.stringify({choices:[{message:{content:'{}'}}]}));
+ const invalid=response();await handler(req,invalid);
+ assert.equal(invalid.body.reasonCode,'invalid_response');
+ assert.equal(invalid.body.source,'filename');
+ const noFrames=response();await handler(request({name:'take-001.mp4',frames:[]}),noFrames);
+ assert.equal(noFrames.body.reasonCode,'no_frames');
+ const unconfigured=load('api/admin-analyze.js',{'../lib/visual-ai':{visualAIConfig:()=>null,visualAIToken:async()=>null}});
+ const noKey=response();await unconfigured(req,noKey);
+ assert.equal(noKey.body.reasonCode,'not_configured');
+});
+
+test('admin title generator offers a retry with transparent status',()=>{
+ const source=fs.readFileSync(path.join(root,'api/admin-panel.js'),'utf8');
+ const encoded=/^const PANEL_HTML = (".*");$/m.exec(source);
+ assert.ok(encoded);
+ const html=JSON.parse(encoded[1]);
+ assert.ok(html.includes('id="auto-regenerate-title"'));
+ assert.ok(html.includes('id="auto-title-ai-status"'));
+ assert.ok(html.includes('/admin-smart-upload.js?v=5'));
+ assert.ok(html.includes('/upload-ui.css?v=4'));
+ const uploader=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
+ assert.doesNotThrow(()=>new vm.Script(uploader));
+ assert.match(uploader,/aiRetry\.addEventListener\('click'/);
+ assert.match(uploader,/await requestAnalysis\(chosen\)/);
+ assert.match(uploader,/aiTitleStatus\.dataset\.mode = 'error'/);
 });
 
 test('public drop prevents file navigation and opens an accessible admin notice',()=>{
@@ -137,8 +199,8 @@ test('video thumbnail picker has an accessible timeline and never publishes with
  assert.match(html,/id="auto-cover-range"[^>]*type="range"/);
  assert.match(html,/id="auto-cover-confirm" disabled/);
  assert.match(html,/id="auto-change-cover">Enviar imagem/);
- assert.ok(html.includes('/admin-smart-upload.js?v=4'));
- assert.ok(html.includes('/upload-ui.css?v=3'));
+ assert.ok(html.includes('/admin-smart-upload.js?v=5'));
+ assert.ok(html.includes('/upload-ui.css?v=4'));
  const uploader=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
  assert.doesNotThrow(()=>new vm.Script(uploader));
  assert.match(uploader,/coverVideo\.addEventListener\('seeked',readyFrame\)/);
@@ -190,7 +252,7 @@ test('authenticated panel permits the upload SDK control API and serves its own 
  env();const handler=require('../api/admin-panel'),res=response();handler(request({},'GET'),res);
  assert.equal(res.code,200);assert.match(res.headers['Content-Security-Policy'],/https:\/\/vercel\.com\/api\/blob\//);
  assert.ok(!res.headers['Content-Security-Policy'].includes('https://esm.sh'));
- assert.ok(res.body.includes('/admin-smart-upload.js?v=4'));
+ assert.ok(res.body.includes('/admin-smart-upload.js?v=5'));
  assert.ok(fs.existsSync(path.join(root,'vendor/blob-client.js')));
 });
 

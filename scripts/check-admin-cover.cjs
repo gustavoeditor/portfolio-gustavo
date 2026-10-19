@@ -11,8 +11,9 @@ const source = fs.readFileSync(path.join(root,'api/admin-panel.js'),'utf8');
 const match = /^const PANEL_HTML = (".*");$/m.exec(source);
 if (!match) throw Error('Admin HTML not found');
 const html = JSON.parse(match[1]);
+let analyses = 0;
 const routeData = {
-  '/api/admin-config':{storageReady:true,uploadMode:'token',visualAIReady:true},
+  '/api/admin-config':{storageReady:true,uploadMode:'token',visualAIReady:true,visualAIConfigured:true},
   '/api/admin-analyze':{title:'Cinematic da AWP',category:'cs2',description:'Revelação cinematográfica da AWP.',position:4,source:'ai',explanation:'Cenário CS2 visível nos quadros.'},
   '/api/managed-projects':{projects:[]}
 };
@@ -23,7 +24,15 @@ const server = http.createServer((req,res)=>{
     res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});res.end(html);return;
   }
   if (Object.hasOwn(routeData,pathname)) {
-    res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(routeData[pathname]));return;
+    let answer = routeData[pathname];
+    if (pathname === '/api/admin-analyze') {
+      analyses++;
+      if (analyses === 2) answer = {
+        title:'abertura-keydrop-treino',source:'filename',reasonCode:'credits',
+        explanation:'A IA não conseguiu concluir por limite de créditos ou orçamento.'
+      };
+    }
+    res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(answer));return;
   }
   if (pathname.startsWith('/api/')) {
     res.writeHead(403,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Not enabled during UI test'}));return;
@@ -52,7 +61,7 @@ const server = http.createServer((req,res)=>{
     await page.locator('#auto-file').setInputFiles(fixture);
     await page.locator('#auto-editor').waitFor({state:'visible',timeout:10000});
     await page.waitForFunction(()=>document.getElementById('auto-title-input')?.value==='Cinematic da AWP',{timeout:45000});
-    assert.match(await page.locator('#auto-reason').textContent(),/Título, categoria e descrição gerados por IA/);
+    assert.match(await page.locator('#auto-reason').textContent(),/Análise por IA de até 8 quadros/);
     await page.locator('#auto-poster').waitFor({state:'visible',timeout:10000});
     const original=await page.locator('#auto-poster').getAttribute('src');
     assert.ok(original?.startsWith('blob:'),'Generated poster should be a local image blob');
@@ -71,6 +80,13 @@ const server = http.createServer((req,res)=>{
       document.getElementById('auto-poster').src!==old,original,{timeout:12000});
     assert.match(await page.locator('#auto-feedback').textContent(),/Thumbnail escolhida/);
     assert.equal(await page.locator('#auto-publish').isEnabled(),true);
+    // Retry must show operational errors and recover on a subsequent attempt.
+    await page.locator('#auto-regenerate-title').click();
+    await page.waitForFunction(()=>document.getElementById('auto-title-ai-status').dataset.mode==='error',{timeout:10000});
+    assert.match(await page.locator('#auto-reason').textContent(),/créditos/);
+    await page.locator('#auto-regenerate-title').click();
+    await page.waitForFunction(()=>document.getElementById('auto-title-ai-status').dataset.mode==='success',{timeout:10000});
+    assert.equal(await page.locator('#auto-title-input').inputValue(),'Cinematic da AWP');
     await page.locator('#auto-pick-frame').click();
     await page.locator('#auto-cover-cancel').click();
     assert.equal(await page.locator('#auto-cover-dialog').isVisible(),false);
