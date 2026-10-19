@@ -61,7 +61,7 @@ const server = http.createServer((req,res)=>{
     await page.locator('#auto-file').setInputFiles(fixture);
     await page.locator('#auto-editor').waitFor({state:'visible',timeout:10000});
     await page.waitForFunction(()=>document.getElementById('auto-title-input')?.value==='Cinematic da AWP',{timeout:45000});
-    assert.match(await page.locator('#auto-reason').textContent(),/Título, categoria e descrição gerados por IA/);
+    assert.match(await page.locator('#auto-reason').textContent(),/Análise por IA de até 8 quadros/);
     await page.locator('#auto-poster').waitFor({state:'visible',timeout:10000});
     const original=await page.locator('#auto-poster').getAttribute('src');
     assert.ok(original?.startsWith('blob:'),'Generated poster should be a local image blob');
