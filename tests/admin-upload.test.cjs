@@ -251,7 +251,7 @@ test('authenticated panel permits the upload SDK control API and serves its own 
  env();const handler=require('../api/admin-panel'),res=response();handler(request({},'GET'),res);
  assert.equal(res.code,200);assert.match(res.headers['Content-Security-Policy'],/https:\/\/vercel\.com\/api\/blob\//);
  assert.ok(!res.headers['Content-Security-Policy'].includes('https://esm.sh'));
- assert.ok(res.body.includes('/admin-smart-upload.js?v=4'));
+ assert.ok(res.body.includes('/admin-smart-upload.js?v=5'));
  assert.ok(fs.existsSync(path.join(root,'vendor/blob-client.js')));
 });
 
