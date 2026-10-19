@@ -254,9 +254,10 @@
       if (!blob || blob.size > 8*1024*1024) throw new Error('A thumbnail excede 8 MB.');
       // Closing or replacing a video during encoding must not modify its thumbnail.
       if (file !== selectedVideo || !coverDialog.open) return;
+      const selectedTime = coverVideo.currentTime;
       setCover(blob,true);
       closeCoverPicker();
-      tell('Thumbnail escolhida no tempo ' + formatFrameTime(coverVideo.currentTime) +
+      tell('Thumbnail escolhida no tempo ' + formatFrameTime(selectedTime) +
         '. Revise o título e publique quando quiser.');
     } catch (error) {
       coverStatus.textContent = error.message || 'Não foi possível criar a capa deste frame.';
