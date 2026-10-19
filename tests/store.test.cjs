@@ -1,12 +1,44 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const handler=require('../lib/store-checkout.js');
 function mock(method,headers={}){const res={code:0,headers:{},body:null,setHeader(k,v){this.headers[k]=v},status(c){this.code=c;return this},json(b){this.body=b;return this},end(){return this}};handler({method,headers},res);return res;}
-function configure(){process.env.STORE_TRIO_COMMERCIAL_HOSTING_APPROVED='true';process.env.STORE_TRIO_CHECKOUT_URL='https://buy.stripe.com/abcdefghi';process.env.STORE_TRIO_PRICE_CENTS='7900';process.env.STORE_TRIO_STRIPE_PAYMENT_LINK_ID='plink_1234567890123456';process.env.STRIPE_SECRET_KEY=['sk','live','123456789012345678901234567890'].join('_');process.env.STORE_TRIO_PRIVATE_BLOB_TOKEN=['blob','fake','123456789012345678901234567890123456'].join('_');process.env.STORE_TRIO_PRIVATE_BLOB_PATH='products/gustavo-trio/release-1.3.zip';process.env.STORE_TRIO_RELEASE_SHA256='a'.repeat(64);}
-function reset(){for(const k of ['STORE_TRIO_COMMERCIAL_HOSTING_APPROVED','STORE_TRIO_SALES_ENABLED','STORE_TRIO_DELIVERY_READY','STORE_TRIO_CHECKOUT_URL' ,'STORE_TRIO_PRICE_CENTS','STORE_TRIO_STRIPE_PAYMENT_LINK_ID','STRIPE_SECRET_KEY','STORE_TRIO_PRIVATE_BLOB_TOKEN','STORE_TRIO_PRIVATE_BLOB_PATH','STORE_TRIO_RELEASE_SHA256'])delete process.env[k];}
-test('checkout bloqueado por padrão',()=>{reset();assert.equal(mock('GET').body.available,false);assert.equal(mock('POST').code,503);});
-test('não permite redirect perigoso',()=>{for(const x of ['https://evil.example/pago','http://buy.stripe.com/test','https://buy.stripe.com.evil.example/test','javascript:alert(1)','https://user:pass@buy.stripe.com/test'])assert.equal(handler._test.paymentLink(x),null);});
-test('checkout só abre com entrega pronta e comprovável',()=>{reset();configure();process.env.STORE_TRIO_SALES_ENABLED='true';assert.equal(mock('GET').body.available,false);process.env.STORE_TRIO_DELIVERY_READY='true';assert.equal(mock('GET').body.available,true);assert.match(mock('GET').body.priceLabel,/79,00/);assert.equal(mock('POST').code,303);assert.equal(mock('POST').headers.Location,'https://buy.stripe.com/abcdefghi');reset();});
-test('bloqueia origin estranho e métodos extras',()=>{reset();configure();process.env.STORE_TRIO_SALES_ENABLED='true';process.env.STORE_TRIO_DELIVERY_READY='true';assert.equal(mock('POST',{origin:'https://outro.example',host:'portfolio-gustavo-chi.vercel.app'}).code,403);assert.equal(mock('PUT').code,405);reset();});
+function configure(){
+ process.env.STORE_CAKTO_CHECKOUT_URL='https://pay.cakto.com.br/g6gcpgr_1217766';
+ process.env.STORE_CAKTO_PRICE_CENTS='3990';
+ process.env.CAKTO_PRODUCT_ID='11111111-1111-4111-8111-111111111111';
+ process.env.STORE_CAKTO_DELIVERY_VERIFIED='true';
+ process.env.STORE_CAKTO_LICENSE_VERIFIED='true';
+ process.env.STORE_CAKTO_SALES_ENABLED='true';
+}
+function reset(){
+ for(const key of ['STORE_CAKTO_CHECKOUT_URL','STORE_CAKTO_PRICE_CENTS','CAKTO_PRODUCT_ID',
+ 'STORE_CAKTO_DELIVERY_VERIFIED','STORE_CAKTO_LICENSE_VERIFIED','STORE_CAKTO_SALES_ENABLED']) delete process.env[key];
+}
+test('Cakto checkout blocked unless verified',()=>{
+ reset();assert.equal(mock('GET').body.available,false);assert.equal(mock('POST').code,503);
+ configure();assert.equal(mock('GET').body.available,true);
+ assert.match(mock('GET').body.priceLabel,/39,90/);
+ assert.equal(mock('POST').code,303);
+ assert.equal(mock('POST').headers.Location,'https://pay.cakto.com.br/g6gcpgr_1217766');
+ for(const key of ['STORE_CAKTO_DELIVERY_VERIFIED','STORE_CAKTO_LICENSE_VERIFIED','STORE_CAKTO_SALES_ENABLED','CAKTO_PRODUCT_ID']){
+   const saved=process.env[key];delete process.env[key];
+   assert.equal(mock('GET').body.available,false,key);process.env[key]=saved;
+ }
+ reset();
+});
+test('rejects wrong payment URLs, payment price and origin',()=>{
+ for(const x of ['https://evil.example/pago','http://pay.cakto.com.br/g6gcpgr_1217766',
+ 'https://pay.cakto.com.br.evil.example/g6gcpgr_1217766',
+ 'https://pay.cakto.com.br/g6gcpgr_1217766?other=1',
+ 'https://pay.cakto.com.br/g6gcpgr_1217766#x',
+ 'https://pay.cakto.com.br/other-checkout'])
+ assert.equal(handler._test.paymentLink(x),null,x);
+ configure();
+ assert.equal(mock('POST',{origin:'https://outro.example',host:'portfolio-gustavo-chi.vercel.app'}).code,403);
+ assert.equal(mock('PUT').code,405);
+ process.env.STORE_CAKTO_PRICE_CENTS='7900';
+ assert.equal(mock('GET').body.available,false);
+ reset();
+});
 test('loja contém informações e bloqueio antes de configurar',()=>{const html=fs.readFileSync(path.join(__dirname,'../loja.html'),'utf8');assert.match(html,/id="checkout" type="submit" disabled/);assert.match(html,/id="recursos"/);assert.match(html,/id="duvidas"/);assert.doesNotMatch(html,/sk_live_|pk_live_|BLOB_READ_WRITE_TOKEN/);});
 
 
