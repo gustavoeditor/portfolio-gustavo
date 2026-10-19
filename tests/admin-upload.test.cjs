@@ -107,7 +107,7 @@ test('visual analysis sanitizes model output, limits frames, and honestly falls 
  env();const handler=load('api/admin-analyze.js',{'../lib/visual-ai':{visualAIConfig:()=>({url:'https://ai.test',model:'fixture'}),visualAIToken:async()=> 'fixture'}});
  global.fetch=async(url,opts)=>{const body=JSON.parse(opts.body);assert.equal(body.messages[1].content.length,9);return new Response(JSON.stringify({choices:[{message:{content:JSON.stringify({title:'Fixture',category:'invented',position:9999,description:'x'.repeat(500)})}}]}));};
  const req=request({name:'motion-test.mp4',total:17,frames:Array(12).fill('data:image/jpeg;base64,YWJj')});
- const res=response();await handler(req,res);assert.equal(res.body.source,'ai');assert.equal(res.body.category,'motion');assert.equal(res.body.position,17);assert.equal(res.body.description.length,220);
+ const res=response();await handler(req,res);assert.equal(res.body.source,'ai');assert.equal(res.body.title,'Fixture');assert.equal(res.body.category,'motion');assert.equal(res.body.position,17);assert.equal(res.body.description.length,220);
  global.fetch=async()=>{throw new Error('unavailable');};const fallback=response();await handler(req,fallback);assert.equal(fallback.body.source,'filename');assert.match(fallback.body.explanation,/nome do arquivo/);
 });
 
@@ -124,6 +124,27 @@ test('uploader script parses fully and cannot disable file selection',()=>{
  const source=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
  assert.doesNotThrow(()=>new vm.Script(source,{filename:'admin-smart-upload.js'}));
  assert.match(source,/__gustavoAdminDrop\.register\(chooseFile\)/);
+});
+
+test('video thumbnail picker has an accessible timeline and never publishes without confirmation',()=>{
+ const source=fs.readFileSync(path.join(root,'api/admin-panel.js'),'utf8');
+ const encoded=/^const PANEL_HTML = (".*");$/m.exec(source);
+ assert.ok(encoded);
+ const html=JSON.parse(encoded[1]);
+ assert.match(html,/<dialog id="auto-cover-dialog"/);
+ assert.match(html,/id="auto-pick-frame"/);
+ assert.match(html,/id="auto-cover-video"/);
+ assert.match(html,/id="auto-cover-range"[^>]*type="range"/);
+ assert.match(html,/id="auto-cover-confirm" disabled/);
+ assert.match(html,/id="auto-change-cover">Enviar imagem/);
+ assert.ok(html.includes('/admin-smart-upload.js?v=4'));
+ assert.ok(html.includes('/upload-ui.css?v=3'));
+ const uploader=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
+ assert.doesNotThrow(()=>new vm.Script(uploader));
+ assert.match(uploader,/coverVideo\.addEventListener\('seeked',readyFrame\)/);
+ assert.match(uploader,/canvas\.toBlob\(resolve,'image\/webp'/);
+ assert.match(uploader,/if \(!customCover\) setCover\(samples\.thumbnail, false\)/);
+ assert.match(uploader,/if \(!titleEdited && result\.title\)/);
 });
 
 test('native admin picker and inline drop guard keep working before uploader script',async()=>{
@@ -169,7 +190,7 @@ test('authenticated panel permits the upload SDK control API and serves its own 
  env();const handler=require('../api/admin-panel'),res=response();handler(request({},'GET'),res);
  assert.equal(res.code,200);assert.match(res.headers['Content-Security-Policy'],/https:\/\/vercel\.com\/api\/blob\//);
  assert.ok(!res.headers['Content-Security-Policy'].includes('https://esm.sh'));
- assert.match(res.body,/admin-smart-upload\.js\?v=3/);
+ assert.ok(res.body.includes('/admin-smart-upload.js?v=4'));
  assert.ok(fs.existsSync(path.join(root,'vendor/blob-client.js')));
 });
 
