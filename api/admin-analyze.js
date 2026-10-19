@@ -22,6 +22,29 @@ function cleanAIResult(raw, total, fallback) {
     explanation:String(raw.reason || 'Sugestão baseada em quadros do vídeo, sujeita à revisão.').slice(0,220)
   };
 }
+function fallbackResult(fallback, code) {
+  const guidance = {
+    not_configured:'A IA visual não está configurada neste site. Falta uma credencial do AI Gateway ou OpenAI na Vercel. O título atual usa o nome do arquivo.',
+    no_frames:'O navegador não conseguiu extrair os quadros necessários para o título visual. Tente um MP4 H.264 ou WebM compatível.',
+    unauthorized:'A autenticação da IA foi recusada. Verifique a credencial ou a integração OIDC do projeto na Vercel.',
+    credits:'A IA não conseguiu concluir por limite de créditos ou orçamento. Nenhum novo serviço foi contratado.',
+    rate_limited:'O serviço de IA atingiu o limite de requisições. Tente novamente mais tarde.',
+    model_unavailable:'O modelo de análise visual configurado não está disponível. Verifique o modelo no painel da Vercel.',
+    timeout:'A análise visual demorou além do limite. Tente novamente.',
+    invalid_response:'O serviço respondeu sem um título visual válido. Tente novamente.',
+    provider_error:'O serviço de análise visual falhou. Verifique os registros privados da Vercel.'
+  };
+  return {...fallback, reasonCode:code, explanation:guidance[code] || guidance.provider_error};
+}
+function failureCode(error) {
+  if (error?.name === 'TimeoutError' || error?.name === 'AbortError') return 'timeout';
+  if (error?.name === 'InvalidAIResponseError') return 'invalid_response';
+  if (error?.status === 401 || error?.status === 403) return 'unauthorized';
+  if (error?.status === 402) return 'credits';
+  if (error?.status === 429) return 'rate_limited';
+  if (error?.status === 404 || error?.status === 400 || error?.status === 422) return 'model_unavailable';
+  return 'provider_error';
+}
 module.exports=async function handler(req,res) {
   privateHeaders(res);
   if (req.method !== 'POST') { res.setHeader('Allow','POST'); return res.status(405).end(); }
@@ -32,10 +55,10 @@ module.exports=async function handler(req,res) {
   const total=Math.max(0,Math.min(150,Number(body.total)||17));
   const fallback=guess(name,total);
   const config=visualAIConfig();
-  if (!config) return res.status(200).json(fallback);
+  if (!config) return res.status(200).json(fallbackResult(fallback,'not_configured'));
   const frames=Array.isArray(body.frames)?body.frames.slice(0,8):[];
   if (!frames.length||frames.some(f=>typeof f!=='string'||f.length>220000||!/^data:image\/(jpeg|webp);base64,[a-zA-Z0-9+/=]+$/.test(f))) {
-    return res.status(200).json(fallback);
+    return res.status(200).json(fallbackResult(fallback,'no_frames'));
   }
   try{
     const response=await fetch(config.url,{
@@ -53,12 +76,27 @@ module.exports=async function handler(req,res) {
       }),
       signal:AbortSignal.timeout(18000)
     });
-    if(!response.ok) throw new Error('AI HTTP '+response.status);
+    if (!response.ok) {
+      const problem = new Error('AI request rejected');
+      problem.status = response.status;
+      throw problem;
+    }
     const data=await response.json();
-    const suggestion=JSON.parse(data.choices?.[0]?.message?.content||'{}');
+    const content=data.choices?.[0]?.message?.content;
+    let suggestion;
+    try { suggestion=typeof content === 'string' ? JSON.parse(content) : null; }
+    catch (_) { /* Invalid model output, never use it as a generated title. */ }
+    if (!suggestion || typeof suggestion.title !== 'string' ||
+        suggestion.title.trim().length < 4 || suggestion.title.trim().length > 120) {
+      const invalid = new Error('Invalid AI title');
+      invalid.name = 'InvalidAIResponseError';
+      throw invalid;
+    }
     return res.status(200).json(cleanAIResult(suggestion,total,fallback));
   }catch(e){
-    console.error('visual classification unavailable');
-    return res.status(200).json({...fallback,explanation:'A análise visual não ficou disponível. Sugestão feita pelo nome do arquivo; revise antes de publicar.'});
+    const code=failureCode(e);
+    // Safe operational signal only: no filenames, image frames, API responses or tokens.
+    console.warn('admin_visual_ai_unavailable',code,config.provider);
+    return res.status(200).json(fallbackResult(fallback,code));
   }
 };
