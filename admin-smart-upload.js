@@ -330,28 +330,34 @@
     syncPublish();
   }
 
-  drop.addEventListener('click',()=>input.click());
-  drop.addEventListener('keydown',event=>{
-    if(event.key==='Enter'||event.key===' '){event.preventDefault();input.click();}
-  });
-  drop.addEventListener('dragenter',event=>{event.preventDefault();drop.classList.add('dragover');});
-  drop.addEventListener('dragover',event=>{event.preventDefault();event.dataTransfer.dropEffect='copy';drop.classList.add('dragover');});
-  drop.addEventListener('dragleave',event=>{if(!drop.contains(event.relatedTarget))drop.classList.remove('dragover');});
-  drop.addEventListener('drop',event=>{
-    event.preventDefault();
-    drop.classList.remove('dragover');
-    const chosen = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
-    if (chosen) chooseFile(chosen);
-  });
-  input.addEventListener('change',()=>{if(input.files && input.files[0])chooseFile(input.files[0]);});
-  const hasFiles=event=>Array.from(event.dataTransfer?.types || []).includes('Files');
-  document.addEventListener('dragover',event=>{if(hasFiles(event))event.preventDefault();});
-  document.addEventListener('drop',event=>{
-    if (!hasFiles(event) || event.defaultPrevented) return;
-    event.preventDefault();
-    const chosen=event.dataTransfer?.files?.[0];
-    if(chosen){chooseFile(chosen);drop.scrollIntoView({behavior:'smooth',block:'center'});}
-  });
+  // Current admin HTML has a native file-input label and captures file drops inline.
+  // Legacy cached HTML still uses the original handlers as a compatibility fallback.
+  if (window.__gustavoAdminDrop && typeof window.__gustavoAdminDrop.register === 'function') {
+    window.__gustavoAdminDrop.register(chooseFile);
+  } else {
+    drop.addEventListener('click',()=>input.click());
+    drop.addEventListener('keydown',event=>{
+      if(event.key==='Enter'||event.key===' '){event.preventDefault();input.click();}
+    });
+    drop.addEventListener('dragenter',event=>{event.preventDefault();drop.classList.add('dragover');});
+    drop.addEventListener('dragover',event=>{event.preventDefault();event.dataTransfer.dropEffect='copy';drop.classList.add('dragover');});
+    drop.addEventListener('dragleave',event=>{if(!drop.contains(event.relatedTarget))drop.classList.remove('dragover');});
+    drop.addEventListener('drop',event=>{
+      event.preventDefault();
+      drop.classList.remove('dragover');
+      const chosen = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+      if (chosen) chooseFile(chosen);
+    });
+    input.addEventListener('change',()=>{if(input.files && input.files[0])chooseFile(input.files[0]);});
+    const hasFiles=event=>Array.from(event.dataTransfer?.types || []).includes('Files');
+    document.addEventListener('dragover',event=>{if(hasFiles(event))event.preventDefault();});
+    document.addEventListener('drop',event=>{
+      if (!hasFiles(event) || event.defaultPrevented) return;
+      event.preventDefault();
+      const chosen=event.dataTransfer?.files?.[0];
+      if(chosen){chooseFile(chosen);drop.scrollIntoView({behavior:'smooth',block:'center'});}
+    });
+  }
   window.addEventListener('beforeunload',event=>{if(uploading){event.preventDefault();event.returnValue='';}});
   $('auto-change-cover').addEventListener('click',()=>coverInput.click());
   coverInput.addEventListener('change',()=>{
