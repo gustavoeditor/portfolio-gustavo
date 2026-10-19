@@ -120,22 +120,30 @@
       canvas.height = Math.max(1,Math.round(element.videoHeight*scale));
       const ctx = canvas.getContext('2d',{alpha:false});
       if (!ctx) throw new Error('Canvas indisponível.');
+      // One undecodable timestamp should not throw away all successfully read
+      // frames and silently force a filename-based title.
       for (const percentage of [.05,.16,.29,.43,.57,.71,.84,.95]) {
         const target = Math.min(element.duration*percentage,Math.max(0,element.duration-.001));
-        if (Math.abs(element.currentTime-target)>.015) {
-          const seeked = waitFor('seeked',6500);
-          element.currentTime = target;
-          await seeked;
-        }
-        ctx.drawImage(element,0,0,canvas.width,canvas.height);
-        out.push(canvas.toDataURL('image/jpeg',.54));
-        if (!thumbnail) {
-          thumbnail = await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.78));
-          if (!thumbnail || thumbnail.type !== 'image/webp') {
-            thumbnail = await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.8));
+        try {
+          if (Math.abs(element.currentTime-target)>.015) {
+            const seeked = waitFor('seeked',6500);
+            element.currentTime = target;
+            await seeked;
           }
+          ctx.drawImage(element,0,0,canvas.width,canvas.height);
+          out.push(canvas.toDataURL('image/jpeg',.54));
+          if (!thumbnail) {
+            thumbnail = await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.78));
+            if (!thumbnail || thumbnail.type !== 'image/webp') {
+              thumbnail = await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.8));
+            }
+          }
+        } catch (_) {
+          // Keep other frames available to the visual model.
+          if (!out.length && percentage >= .57) break;
         }
       }
+      if (!out.length) throw new Error('Nenhum quadro do vídeo pôde ser lido.');
     } finally {
       element.removeAttribute('src');
       element.load();
