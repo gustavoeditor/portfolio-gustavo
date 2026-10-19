@@ -120,6 +120,12 @@ test('public drop prevents file navigation and opens an accessible admin notice'
  assert.equal(prevented,true);assert.equal(nodes[0].role,'status');assert.equal(nodes[0].children[1].href,'/admin');
 });
 
+test('uploader script parses fully and cannot disable file selection',()=>{
+ const source=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
+ assert.doesNotThrow(()=>new vm.Script(source,{filename:'admin-smart-upload.js'}));
+ assert.match(source,/__gustavoAdminDrop\.register\(chooseFile\)/);
+});
+
 test('native admin picker and inline drop guard keep working before uploader script',async()=>{
  const source=fs.readFileSync(path.join(root,'api/admin-panel.js'),'utf8');
  const encoded=/^const PANEL_HTML = (".*");$/m.exec(source);
