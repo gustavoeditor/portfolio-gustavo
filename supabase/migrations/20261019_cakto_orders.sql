@@ -70,4 +70,25 @@ $$;
 
 revoke all on function public.record_creative_tools_cakto_order(text,text,text,text,text) from public, anon, authenticated;
 grant execute on function public.record_creative_tools_cakto_order(text,text,text,text,text) to service_role;
+
+-- A licence created after a refund/chargeback must start revoked as well.
+create or replace function public.reject_revoked_creative_tools_licence()
+returns trigger language plpgsql security invoker set search_path = ''
+as $
+begin
+  if exists (
+    select 1 from public.creative_tools_cakto_revocations
+    where order_id = new.order_id
+  ) then
+    new.status := 'revoked';
+  end if;
+  return new;
+end;
+$;
+revoke all on function public.reject_revoked_creative_tools_licence() from public, anon, authenticated;
+drop trigger if exists prevent_revoked_creative_tools_licence on public.creative_tools_cakto_licenses;
+create trigger prevent_revoked_creative_tools_licence
+before insert or update of status, order_id on public.creative_tools_cakto_licenses
+for each row execute function public.reject_revoked_creative_tools_licence();
+
 commit;
