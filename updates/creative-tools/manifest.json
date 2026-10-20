@@ -3,7 +3,21 @@
   "product": "creative-tools",
   "channel": "alpha",
   "latest": null,
-  "releases": [],
-  "message": "O canal de atualizações está em preparação. Nenhum instalador oficial foi publicado ou validado neste catálogo.",
-  "updatedAt": "2026-10-19"
+  "releases": [
+    {
+      "version": "1.4.20",
+      "date": "2026-10-20",
+      "status": "preview",
+      "changes": [
+        "Novo painel de âncora de nove pontos ao lado do gráfico de curvas.",
+        "Nulo coletivo mantém o comportamento original do nulo individual.",
+        "Criação de câmera centralizada em composições de diferentes dimensões.",
+        "Instalador Windows v1.7 com botão de consulta de atualizações.",
+        "Atualizador preparado para download protegido por licença e SHA-256."
+      ],
+      "sha256": "77f99e89ecfcdd239d4c372629163eb14c436b0431099e8320470281ff19c2b2"
+    }
+  ],
+  "message": "Creative Tools Alpha 1.4.20 em validação privada. Atualizações para clientes serão disponibilizadas aqui após ativação do download protegido.",
+  "updatedAt": "2026-10-20"
 }
