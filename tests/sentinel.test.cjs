@@ -40,14 +40,16 @@ test('Telemetry capability endpoint never exposes infrastructure secrets',()=>{
  assert.equal(response.headers['X-Robots-Tag'],'noindex');
 });
 test('No remote writes without Redis-backed shared rate limiting',async()=>{
- const prior={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN};
+ const keys=['UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN','KV_REST_API_URL','KV_REST_API_TOKEN'];
+ const prior=Object.fromEntries(keys.map(key=>[key,process.env[key]]));
  try{
-  delete process.env.UPSTASH_REDIS_REST_URL;delete process.env.UPSTASH_REDIS_REST_TOKEN;
+  for(const key of keys)delete process.env[key];
   assert.equal(sentinel.enabled(),false);
   const reply=res();await ingest(req('POST'),reply);assert.equal(reply.statusCode,503);
  }finally{
-  if(prior.url!==undefined)process.env.UPSTASH_REDIS_REST_URL=prior.url;
-  if(prior.token!==undefined)process.env.UPSTASH_REDIS_REST_TOKEN=prior.token;
+  for(const key of keys){
+   if(prior[key]===undefined)delete process.env[key];else process.env[key]=prior[key];
+  }
  }
 });
 test('SENTINEL requires opt-in and a validated Upstash endpoint',()=>{
@@ -69,6 +71,44 @@ test('SENTINEL requires opt-in and a validated Upstash endpoint',()=>{
  }finally{
   if(before.url===undefined)delete process.env.UPSTASH_REDIS_REST_URL;else process.env.UPSTASH_REDIS_REST_URL=before.url;
   if(before.token===undefined)delete process.env.UPSTASH_REDIS_REST_TOKEN;else process.env.UPSTASH_REDIS_REST_TOKEN=before.token;
+ }
+});
+
+
+test('Reuse Vercel KV Upstash integration without mixing credential pairs',async()=>{
+ const keys=['UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN','KV_REST_API_URL','KV_REST_API_TOKEN'];
+ const previous=Object.fromEntries(keys.map(key=>[key,process.env[key]]));
+ const oldFetch=global.fetch;
+ const calls=[];
+ try{
+  delete process.env.UPSTASH_REDIS_REST_URL;
+  delete process.env.UPSTASH_REDIS_REST_TOKEN;
+  process.env.KV_REST_API_URL='https://redis-example.upstash.io';
+  process.env.KV_REST_API_TOKEN='kv-test-token-long-enough';
+  assert.equal(sentinel.enabled(),true);
+  global.fetch=async(url,options)=>{
+   calls.push({url,options});
+   return {ok:true,json:async()=>({result:['visit:page','2']})};
+  };
+  const data=await sentinel.summary(1);
+  assert.equal(data[0].stats['visit:page'],2);
+  assert.equal(calls[0].url,'https://redis-example.upstash.io/');
+  assert.equal(calls[0].options.headers.Authorization,'Bearer kv-test-token-long-enough');
+  process.env.UPSTASH_REDIS_REST_URL='https://malicious.test';
+  assert.equal(sentinel.enabled(),false,'a broken dedicated pair must not fall back to KV');
+  delete process.env.UPSTASH_REDIS_REST_URL;
+  process.env.KV_REST_API_URL='https://redis-example.upstash.io/private';
+  assert.equal(sentinel.enabled(),false);
+  process.env.KV_REST_API_URL='http://redis-example.upstash.io/';
+  assert.equal(sentinel.enabled(),false);
+  process.env.KV_REST_API_URL='https://redis-example.upstash.io';
+  process.env.KV_REST_API_TOKEN='short';
+  assert.equal(sentinel.enabled(),false);
+ }finally{
+  global.fetch=oldFetch;
+  for(const key of keys){
+   if(previous[key]===undefined)delete process.env[key];else process.env[key]=previous[key];
+  }
  }
 });
 
