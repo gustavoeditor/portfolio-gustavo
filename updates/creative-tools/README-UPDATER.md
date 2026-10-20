@@ -1,4 +1,15 @@
-# Creative Tools Updater v1.0 · Distribuição oficial
+# Creative Tools Updater · Distribuição oficial
+
+## Aviso de segurança: Updater v1.0 em quarentena no Windows (20/10/2026)
+
+O autor relatou que o Microsoft Defender excluiu o instalador do **Updater v1.0**. **A classificação da ameaça ainda não foi informada pelo Windows**; não declarar falso positivo nem afirmar que o problema foi resolvido.
+
+A auditoria do código revelou autocópia do EXE em `%LOCALAPPDATA%\\CreativeTools\\Updater` e criação de tarefa horária via `schtasks.exe` após habilitar atualização automática. Esses mecanismos são comuns em atualizadores legítimos, mas devem receber revisão de segurança e uma identidade de publicador confiável antes da distribuição.
+
+O **Updater v1.1, prévia portátil**, removeu ambos: não cria tarefa, não se copia para outro diretório e não possui execução agendada/silenciosa. O botão **AUTO (JANELA)** verifica o site a cada hora somente enquanto a janela estiver aberta. Foram preservados HTTPS oficial, verificação de licença, SHA-256, Adobe UPIA e DPAPI. O código foi compilado sem obfuscação/empacotador nem remoção dos símbolos de depuração; testes locais de núcleo e regressão passaram. **A nova versão continua sem assinatura Windows e não foi executada no Defender real.**
+
+Antes de disponibilizar comercialmente: (1) coletar o nome da ameaça em Segurança do Windows → Histórico de proteção; (2) investigar ou submeter o binário ao [portal de análise da Microsoft](https://www.microsoft.com/wdsi/filesubmission) com autorização do proprietário; (3) adquirir certificado Authenticode de editor validado, sem burlar SmartScreen; (4) validar em um PC Windows real; (5) reintroduzir atualizações em segundo plano apenas por um mecanismo explícito e assinado. Se o usuário chegou a ativar o agendamento na v1.0, deve desabilitar manualmente a tarefa `CreativeToolsUpdater-Horario` no Agendador de Tarefas.
+
 
 O aplicativo Windows consulta exclusivamente `https://portfolio-gustavo-chi.vercel.app/updates/creative-tools/manifest.json`. Ele aceita somente versões `status: "published"` que coincidam com `latest` e tenham SHA-256 de 64 dígitos; baixa `GET /api/creative-tools-update?version=<versao>` com `Authorization: Bearer <chave_cliente>`.
 
@@ -8,7 +19,7 @@ O servidor, reaproveitando a função `api/managed-projects.js` para permanecer 
 
 - A Alpha 1.4.24 continua `preview` e `latest: null`. **Não é possível disparar download automático hoje**, por escolha de segurança.
 - As variáveis `CT_UPDATE_*` não estavam configuradas em produção na auditoria inicial do app. O endpoint protegido permanece indisponível até ativação.
-- O updater para Windows compila e passa nos testes automatizados, mas **não** foi executado em um PC Windows real com After Effects e Adobe Creative Cloud.
+- Updaters para Windows v1.0 e v1.1 compilaram e passaram nos testes automatizados, mas **não** foram executados em um PC Windows real com After Effects, Adobe Creative Cloud ou Defender para confirmar segurança.
 - O executável do updater permanece sem assinatura Authenticode. Não anunciá-lo como release comercial definitivo até adquirir certificado verificável.
 - O sistema de chaves da Cakto ainda não está integrado ao licenciamento do Updater. As chaves devem ser geradas e vinculadas a compras confirmadas, com revogação e suporte.
 
@@ -26,14 +37,14 @@ O servidor, reaproveitando a função `api/managed-projects.js` para permanecer 
    - `CT_UPDATE_LICENSE_SHA256=<hash SHA-256 de cada chave individual, separado por vírgulas>`.
 5. Antes de alterar `latest`, chamar o endpoint com licença **inválida** e confirmar HTTP 403 (com a versão aprovada em ambiente de prévia); depois usar uma licença teste válida e conferir o SHA-256 do pacote. Não colocar a licença em query string nem em logs.
 6. Atualizar `updates/creative-tools/manifest.json`: definir a entrada aprovada `status: "published"` e `latest` igual à versão, mantendo hash idêntico ao token de storage. Fazer PR, passar testes e publicar Vercel. **Só depois** permitir ao aplicativo atualizar.
-7. Um computador Windows com updater ativado buscará novas versões a cada hora via Agendador de Tarefas. Se After Effects estiver aberto, apenas adia; não encerra a sessão. Se não houver licença válida, não baixa nem instala.
+7. A versão v1.1 portátil buscará novas versões a cada hora apenas com a janela aberta, se o usuário ativar AUTO (JANELA). O Agendador da v1.0 foi descontinuado após quarentena reportada no Windows. Se After Effects estiver aberto, apenas adia; não encerra a sessão. Se não houver licença válida, não baixa nem instala.
 8. Para **revogar** uma release problemática, remover `latest` (colocar `null`), retornar `status` para `preview` e desativar `CT_UPDATE_ENABLED`. Para revogar clientes, remover hash de `CT_UPDATE_LICENSE_SHA256`.
 
 ## Segurança e operação
 
 - O Windows aplica **DPAPI** à chave de acesso local em `%LOCALAPPDATA%\\CreativeTools\\Updater\\settings.json` e a instalação usa `UnifiedPluginInstallerAgent.exe /install` com limite de quatro minutos, sem executar arquivos `.exe` baixados.
 - Nunca desabilitar SmartScreen, UAC ou verificações Adobe. A presença de `META-INF/signatures.xml` não substitui a validação criptográfica feita pelo Adobe UPIA.
-- O modo automático só é ativado com o clique do usuário em **AUTOMÁTICO: ON**; tarefas horárias podem ser removidas por **AUTOMÁTICO: OFF**.
+- A versão de teste v1.1 não possui tarefas horárias persistentes: apenas AUTO (JANELA), mediante clique do usuário. O Agendador original da v1.0 não deve ser reintroduzido antes de assinatura e avaliação de segurança.
 - A verificação e a publicação continuam protegidas por HTTPS, hash e verificação de licença; **nenhum pagamento ou hospedagem nova foi contratado pelo processo de desenvolvimento**.
 - Logs: `%LOCALAPPDATA%\\CreativeTools\\Updater\\updater.log`.
 
