@@ -28,6 +28,28 @@
   let posterFile = null;
   let customCover = false;
   let titleEdited = false;
+  let positionEdited = false;
+  let qualityScore = null;
+  let suggestedPosition = null;
+  const rankingSelect=$('auto-ranking-mode');
+  const rankingStatus=$('auto-ranking-status');
+  const positionField=$('auto-position');
+  const setRankingStatus=(message)=>{rankingStatus.textContent=message;};
+  positionField.addEventListener('input',()=>{
+    positionEdited=true;rankingSelect.value='manual';
+    setRankingStatus('Posição definida manualmente. A IA não irá substituir sua escolha.');
+  });
+  rankingSelect.addEventListener('change',()=>{
+    if(rankingSelect.value==='auto' && qualityScore===null){
+      rankingSelect.value='manual';
+      setRankingStatus('Sem avaliação visual válida. Escolha a posição manualmente ou tente analisar novamente.');
+    }else if(rankingSelect.value==='auto' && suggestedPosition!==null){
+      positionEdited=false;positionField.value=String(suggestedPosition+1);
+      setRankingStatus('Ordem automática por análise visual: '+qualityScore+'/100 (estimativa; sem áudio ou movimento).');
+    }else{
+      positionEdited=true;setRankingStatus('Posição manual ativa.');
+    }
+  });
   let coverReady = false;
   let frames = [];
   let previewUrl = null;
@@ -73,6 +95,11 @@
     posterFile = null;
     customCover = false;
     titleEdited = false;
+    positionEdited = false;
+    qualityScore = null;
+    suggestedPosition = null;
+    rankingSelect.value='manual';
+    setRankingStatus('Aguardando avaliação visual. Sem IA, o novo trabalho fica ao final.');
     frames = [];
     aiTitleStatus.textContent = 'Aguardando vídeo.';
     aiTitleStatus.dataset.mode = '';
@@ -297,7 +324,7 @@
     cancel.hidden = false;
     titleInput.value = chosen.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').slice(0,90);
     $('auto-category').value = 'cinematics';
-    $('auto-position').value = String(totalProjects+1);
+    positionField.value = String(totalProjects+1);
     $('auto-description').value = '';
     $('auto-reason').textContent = 'Extraindo quadros para analisar visualmente o vídeo...';
     aiTitleStatus.textContent = 'Preparando imagens do vídeo...';
@@ -334,7 +361,13 @@
         if (!titleEdited && result.title) titleInput.value = result.title;
         if (['cs2','cinematics','motion','youtube','outros'].includes(result.category))
           $('auto-category').value = result.category;
-        $('auto-position').value = String(Math.max(1,Math.min(totalProjects+1,(result.position||0)+1)));
+        qualityScore=Number.isInteger(result.qualityScore)&&result.qualityScore>=0&&result.qualityScore<=100?result.qualityScore:null;
+        suggestedPosition=qualityScore===null?null:Math.max(0,Math.min(totalProjects,Number.isInteger(result.position)?result.position:totalProjects));
+        if(!positionEdited){
+          if(suggestedPosition!==null){positionField.value=String(suggestedPosition+1);rankingSelect.value='auto';}
+          else {positionField.value=String(totalProjects+1);rankingSelect.value='manual';}
+        }
+        setRankingStatus(qualityScore===null?'Título criado pela IA, mas não houve nota visual válida. Posição manual/ao final.':'IA visual: '+qualityScore+'/100, confiança '+(result.qualityConfidence||'baixa')+'. Ordem '+(rankingSelect.value==='auto'?'automática':'manual')+'.');
         $('auto-description').value = result.description || '';
         aiTitleStatus.textContent = titleEdited ? 'Título gerado. Sua edição foi preservada.' : 'Título criado pela IA visual ✓';
         aiTitleStatus.dataset.mode = 'success';
@@ -342,6 +375,10 @@
           (result.explanation || 'Revise o título antes de publicar.');
         tell(storageReady ? 'Título criado pela IA. Revise e publique.' : 'Título criado pela IA. Falta habilitar o armazenamento para publicar.');
       } else {
+        qualityScore=null;suggestedPosition=null;
+        rankingSelect.value='manual';
+        if(!positionEdited)positionField.value=String(totalProjects+1);
+        setRankingStatus('Sem nota de qualidade: o novo trabalho ficará ao final, salvo posição manual.');
         const reason = result.explanation || 'A IA não conseguiu analisar este vídeo.';
         aiTitleStatus.textContent = 'IA não gerou título.';
         aiTitleStatus.dataset.mode = 'error';
@@ -350,6 +387,9 @@
       }
     } catch (error) {
       if (file !== chosen) return;
+      qualityScore=null;suggestedPosition=null;rankingSelect.value='manual';
+      if(!positionEdited)positionField.value=String(totalProjects+1);
+      setRankingStatus('Sem nota de qualidade por falha de conexão. Posição manual/ao final.');
       const message = 'Erro de conexão ao analisar o vídeo. Verifique a sessão ou tente novamente.';
       aiTitleStatus.textContent = 'Falha ao gerar título por IA.';
       aiTitleStatus.dataset.mode = 'error';
@@ -371,7 +411,8 @@
     if (publish.disabled || !file || !posterFile) return;
     const title = titleInput.value.trim();
     const category = $('auto-category').value;
-    const position = Number($('auto-position').value)-1;
+    const position = Number(positionField.value)-1;
+    const rankingMode=rankingSelect.value==='auto'&&qualityScore!==null?'auto':positionEdited?'manual':'unrated';
     if (!title || title.length>90 || !Number.isInteger(position) || position<0 || position>150) {
       tell('Revise título e posição da galeria.',true); return;
     }
@@ -405,7 +446,7 @@
       await safeJson(await fetch('/api/admin-publish',{
         method:'POST',credentials:'same-origin',headers,
         body:JSON.stringify({
-          uploadId:pending.id,title,category,position,src:uploadedVideo.url,poster:uploadedCover.url,
+          uploadId:pending.id,title,category,position,qualityScore,rankingMode,src:uploadedVideo.url,poster:uploadedCover.url,
           description:$('auto-description').value.trim()
         })
       }));
@@ -414,7 +455,7 @@
       uploading = false;
       clearSelection();
       try {await reloadManaged();} catch (_) { /* Publication succeeded; list refresh can be retried independently. */ }
-      tell('Publicado! O vídeo foi adicionado à galeria. Atualize o portfólio para conferir.');
+      tell(rankingMode==='auto'?'Publicado! O vídeo entrará na posição sugerida pela IA, sem alterar a ordem relativa dos trabalhos originais.':'Publicado! A galeria respeitará a posição escolhida ou adicionará ao final.');
     } catch(error) {
       tell(error.message || 'Não foi possível publicar. Confira sua sessão e tente novamente.',true);
     } finally {
@@ -439,7 +480,8 @@
       const title = document.createElement('b');
       title.textContent = item.title || 'Projeto';
       const meta = document.createElement('span');
-      meta.textContent = (item.category || 'outros') + ' · posição ' + (Number(item.position)+1);
+      meta.textContent = (item.category || 'outros') + ' · posição sugerida ' + (Number(item.position)+1) +
+        (item.rankingMode==='auto'&&Number.isInteger(item.qualityScore)?' · IA visual '+item.qualityScore+'/100':' · posição manual/sem nota');
       text.append(title,meta);
       const remove = document.createElement('button');
       remove.className = 'btn danger';

@@ -615,6 +615,7 @@ body{
 
 <div class="pack-toast" id="pack-toast" role="status" aria-live="polite" hidden>Conheça o próximo lançamento na loja.</div>
 <script src="/player.js?v=5"></script>
+<script src="/portfolio-order.js?v=1"></script>
 <script>
 (()=>{'use strict';
 const ROOT=location.origin+'/';
@@ -720,15 +721,17 @@ function paint(){stopPreview();document.getElementById('catalog-total').textCont
  const result=await response.json();if(!Array.isArray(result.projects))return;
  const existing=new Set(projects.map(p=>projectVideo(p)));
  const goodMedia=url=>{try{const u=new URL(url);return u.protocol==='https:'&&u.hostname.endsWith('.public.blob.vercel-storage.com')&&!u.username&&!u.password;}catch{return false}};
- const list=result.projects.slice(0,150).sort((a,b)=>(a.position||0)-(b.position||0));let added=0,treino=null;
+ const list=result.projects.slice(0,150);let added=0,treino=null;
+ const ranked=[];
  const normalizedTitle=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
  for(const p of list){
   if(!p||typeof p.title!=='string'||!labels[p.category]||!goodMedia(p.src)||!goodMedia(p.poster)||existing.has(p.src))continue;
   if(normalizedTitle(p.title)==='keydrop awp product cinematic')continue; // Pedido: não exibir este vídeo.
   const slug='upload-'+String(added+1).padStart(3,'0');
   const entry=[p.title.slice(0,90),p.category,slug,String(p.description||'').slice(0,220),p.src,p.poster];
-  if(normalizedTitle(p.title)==='abertura keydrop treino'&&!treino)treino=entry;
-  else projects.push(entry);
+  const isTreino=normalizedTitle(p.title)==='abertura keydrop treino'&&!treino;
+  if(isTreino)treino=entry;
+  ranked.push({entry,position:isTreino?2:p.position,qualityScore:p.qualityScore,rankingMode:p.rankingMode,publishedAt:p.publishedAt});
   existing.add(p.src);added++;
  }
  if(treino){
@@ -745,8 +748,8 @@ function paint(){stopPreview();document.getElementById('catalog-total').textCont
     }
    }
   }catch(_){/* Keep original video when renditions are unavailable. */}
-  projects.splice(2,0,treino);
-  featuredTreino.dataset.open='2';
+  // Featured remains linked to the right video even after other uploads shift indexes.
+  featuredTreino.dataset.open='0';
   featuredTreino.querySelector('img').src=treino[5];
   featuredTreino.querySelector('img').dataset.coverId=treino[2];
   featuredTreino.querySelector('img').dataset.managedPoster='1';
@@ -754,7 +757,17 @@ function paint(){stopPreview();document.getElementById('catalog-total').textCont
   featuredTreino.hidden=false;
   initializeCovers(featuredTreino);
  }
- if(added)paint();
+ if(added){
+   const next=window.GustavoPortfolioOrder?window.GustavoPortfolioOrder.merge(projects,ranked):projects.concat(ranked.map(p=>p.entry));
+   projects.splice(0,projects.length,...next);
+   const first=projects.findIndex(p=>p[2]==='awp-the-prince');
+   const second=projects.findIndex(p=>p[2]==='butterfly-gamma-dark');
+   const features=document.querySelectorAll('.feature-grid .feature[data-open]');
+   if(first>=0&&features[0])features[0].dataset.open=String(first);
+   if(second>=0&&features[1])features[1].dataset.open=String(second);
+   if(treino)featuredTreino.dataset.open=String(projects.indexOf(treino));
+   paint();
+ }
  }catch(err){console.warn('Catálogo adicional temporariamente indisponível.',err);}})();
 filters.forEach(btn=>btn.addEventListener('click',()=>{filter=btn.dataset.filter;limit=6;filters.forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));paint()}));more.addEventListener('click',()=>{limit+=6;paint()});paint();
 const modal=document.getElementById('video-modal'),player=document.getElementById('modal-player'),close=document.getElementById('modal-close'),previousProject=document.getElementById('modal-prev'),nextProject=document.getElementById('modal-next');let playerUI=null,activeProjectIndex=-1;
