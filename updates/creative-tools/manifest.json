@@ -5,6 +5,20 @@
   "latest": null,
   "releases": [
     {
+      "version": "1.4.23",
+      "date": "2026-10-20",
+      "status": "preview",
+      "changes": [
+        "Correção dos nove controles de âncora em lote, sem limite arbitrário de camadas 2D selecionadas.",
+        "Compensação da posição visual ao reposicionar a âncora; suporte a Position com keyframes e dimensões X/Y separadas.",
+        "Ao separar texto por palavras, letras ou linhas, as novas camadas recebem automaticamente a âncora centralizada nos limites visíveis de seu próprio conteúdo.",
+        "Cada camada de texto separada passa a ter como nome exatamente a palavra, letra ou linha gerada.",
+        "A separação captura a seleção original antes de duplicar, evitando processar duplicatas novamente.",
+        "Pacote Alpha de teste 1.4.23 com instalador v1.7.3; dez testes automatizados de lógica simulada aprovados."
+      ],
+      "sha256": "cb94ca52a9cc66f25462bf8e739041c46c1db43292d1e2cf32ff1a92bfec9eb7"
+    },
+    {
       "version": "1.4.22",
       "date": "2026-10-20",
       "status": "preview",
@@ -45,6 +59,6 @@
       "sha256": "77f99e89ecfcdd239d4c372629163eb14c436b0431099e8320470281ff19c2b2"
     }
   ],
-  "message": "Creative Tools Alpha 1.4.22 em prévia de teste: melhorias de compactação vertical para painéis baixos. Downloads comerciais automáticos permanecem desativados até validação real e assinatura confiável.",
+  "message": "Creative Tools Alpha 1.4.23 em teste: correções de âncora em lote e separação/renomeação de texto. Distribuição comercial permanece desativada até assinatura e testes reais.",
   "updatedAt": "2026-10-20"
 }
