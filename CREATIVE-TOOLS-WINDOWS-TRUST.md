@@ -8,7 +8,7 @@ O ZXP assinado para Adobe **não** autentica o instalador EXE do Windows.
 ## Critérios de saída para lançamento comercial
 1. Obter assinatura Authenticode reconhecida pelo Windows, após **validação da identidade legal do editor**. Não falsificar emissor, não criar certificado autoassinado como solução comercial.
 2. Assinar **cada build final** do instalador `.exe`, com timestamp de autoridade confiável. Modificar o EXE depois da assinatura invalida a prova.
-3. Rodar `powershell -ExecutionPolicy Bypass -File scripts/verify-creative-tools-authenticode.ps1 -InstallerPath caminho\\Creative_Tools_Installer.exe -ExpectedPublisher "IDENTIDADE LEGAL VERIFICADA" -ReportPath comprovante.json`. Em distribuições automatizadas, executar com política confiável definida pelo administrador, sem exigir ao usuário alterar as proteções do Windows.
+3. Rodar `powershell -File scripts/verify-creative-tools-authenticode.ps1 -InstallerPath caminho\\Creative_Tools_Installer.exe -ExpectedPublisher "IDENTIDADE LEGAL VERIFICADA" -ReportPath comprovante.json`. Em automação, executar com política de scripts definida pelo administrador; não exigir que o usuário altere as proteções do Windows.
 4. Instalar em uma máquina Windows limpa de teste, verificar o fabricante nos detalhes do executável, a cadeia de confiança e, separadamente, testar o SmartScreen com download HTTPS do domínio oficial.
 5. Distribuir o mesmo EXE imutável e seu SHA-256 pelo site oficial. Não liberar links comerciais sem controle de licença.
 6. Manter uma identidade de assinatura consistente entre versões para criar reputação. **A assinatura não garante o desaparecimento imediato do SmartScreen.**
