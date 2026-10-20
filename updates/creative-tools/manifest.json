@@ -5,6 +5,19 @@
   "latest": null,
   "releases": [
     {
+      "version": "1.4.21",
+      "date": "2026-10-20",
+      "status": "preview",
+      "changes": [
+        "Interface responsiva para painéis estreitos e baixos do After Effects, com rolagem acessível em vez de comprimir controles.",
+        "Botões separados de nulo individual e nulo coletivo agora visíveis ao lado do gráfico de curvas.",
+        "Grade de âncoras redesenhada com nove pontos claros e seleção destacada.",
+        "Bounce mais preciso, com edição numérica, frequência e decaimento limitados a 9 e Shift para passos inteiros.",
+        "Biblioteca de presets com busca, lista e botões maiores; nomes completos em múltiplas linhas."
+      ],
+      "sha256": "c7003dbce122ddfbd73841bb586c0169a53ec71aa53ed77e7a78260b64aa5969"
+    },
+    {
       "version": "1.4.20",
       "date": "2026-10-20",
       "status": "preview",
@@ -18,6 +31,6 @@
       "sha256": "77f99e89ecfcdd239d4c372629163eb14c436b0431099e8320470281ff19c2b2"
     }
   ],
-  "message": "Creative Tools Alpha 1.4.20 em validação privada. Atualizações para clientes serão disponibilizadas aqui após ativação do download protegido.",
+  "message": "Creative Tools Alpha 1.4.21 em teste. Histórico atualizado; downloads comerciais automáticos permanecem desativados até validar o instalador e a assinatura.",
   "updatedAt": "2026-10-20"
 }
