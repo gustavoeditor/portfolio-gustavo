@@ -303,3 +303,6 @@ button,input{font:inherit}a{color:inherit}button,a,input{-webkit-tap-highlight-c
 .pack-launch-link{flex:none;display:inline-flex;gap:12px;align-items:center;justify-content:center;min-height:50px;padding:12px 19px;border:1px solid #ffffff82;border-radius:15px;background:#d5c2fb;color:#1b1527;font-size:13px;font-weight:750;text-decoration:none}
 .pack-launch-link:hover{background:#eee2ff}
 @media(max-width:750px){.pack-launch{display:block;margin-bottom:55px}.pack-launch-link{margin-top:25px;width:100%}}
+
+/* Acesso dos clientes, mantido separado do painel /admin. */
+.customer-link{display:block;text-align:center;margin:14px 0 5px;color:#d9c4ff;text-decoration:underline;text-underline-offset:4px;font-size:12px;font-weight:750}.customer-link:hover{color:#fff}
