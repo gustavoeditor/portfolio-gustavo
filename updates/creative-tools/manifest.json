@@ -14,7 +14,8 @@
         "Ao separar texto por palavras, letras ou linhas, as novas camadas recebem automaticamente a âncora centralizada nos limites visíveis de seu próprio conteúdo.",
         "Cada camada de texto separada passa a ter como nome exatamente a palavra, letra ou linha gerada.",
         "A separação captura a seleção original antes de duplicar, evitando processar duplicatas novamente.",
-        "Pacote Alpha de teste 1.4.23 com instalador v1.7.3; dez testes automatizados de lógica simulada aprovados."
+        "Pacote Alpha de teste 1.4.23; dez testes automatizados de lógica simulada aprovados.",
+        "Hotfix do instalador Windows v1.7.4: corrigido travamento da janela causado por regressão do loop Win32, com Adobe UPIA em segundo plano, timeout de quatro minutos, diagnóstico e bloqueio de instalações simultâneas."
       ],
       "sha256": "cb94ca52a9cc66f25462bf8e739041c46c1db43292d1e2cf32ff1a92bfec9eb7"
     },
@@ -59,6 +60,6 @@
       "sha256": "77f99e89ecfcdd239d4c372629163eb14c436b0431099e8320470281ff19c2b2"
     }
   ],
-  "message": "Creative Tools Alpha 1.4.23 em teste: correções de âncora em lote e separação/renomeação de texto. Distribuição comercial permanece desativada até assinatura e testes reais.",
+  "message": "Creative Tools Alpha 1.4.23 em teste. Instalador de desenvolvimento v1.7.4 com correção de travamento; downloads comerciais seguem desativados até validação Windows real e assinatura confiável.",
   "updatedAt": "2026-10-20"
 }
