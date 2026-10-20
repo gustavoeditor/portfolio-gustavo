@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/creative-tools-update",
+      "destination": "/api/managed-projects?ct_update=download"
+    },
+    {
       "source": "/api/store/download",
       "destination": "/api/managed-projects?store=download"
     },
