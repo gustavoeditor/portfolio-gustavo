@@ -5,6 +5,19 @@
   "latest": null,
   "releases": [
     {
+      "version": "1.4.24",
+      "date": "2026-10-20",
+      "status": "preview",
+      "changes": [
+        "Corrigido o erro «Âncora incompatível [linha 635]» que interrompia a separação de texto no After Effects 2026.",
+        "Camadas 2D com ponto âncora retornado como [x,y,z] agora são processadas sem perder a coordenada Z.",
+        "Separação de letras, palavras e linhas mantém nomes iguais ao conteúdo gerado e âncoras centralizadas.",
+        "Proteção transacional: se a separação falhar, o Creative Tools remove todas as duplicatas parciais e restaura as camadas originais.",
+        "Instalador Windows de teste v1.7.5 mantém os ajustes antitravamento e incorpora 14 testes automatizados, incluindo o caso do vídeo."
+      ],
+      "sha256": "d7869da1b209eb3fc2bef3167d480ef886ea977922cb063e6ad6b524f364c877"
+    },
+    {
       "version": "1.4.23",
       "date": "2026-10-20",
       "status": "preview",
@@ -60,6 +73,6 @@
       "sha256": "77f99e89ecfcdd239d4c372629163eb14c436b0431099e8320470281ff19c2b2"
     }
   ],
-  "message": "Creative Tools Alpha 1.4.23 em teste. Instalador de desenvolvimento v1.7.4 com correção de travamento; downloads comerciais seguem desativados até validação Windows real e assinatura confiável.",
+  "message": "Creative Tools Alpha 1.4.24 disponível para validação privada: correção da separação de texto e âncora. Download comercial automático desativado até teste no Windows e assinatura confiável.",
   "updatedAt": "2026-10-20"
 }
