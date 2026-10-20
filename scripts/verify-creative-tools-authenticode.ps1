@@ -37,9 +37,6 @@ try {
     throw ('Publicador diferente do esperado. Encontrado: ' + $subject)
   }
   if (-not $sig.TimeStamperCertificate) { throw 'Assinatura sem carimbo do tempo confiavel.' }
-  if ($sig.SignerCertificate.Thumbprint -eq $sig.SignerCertificate.Issuer) {
-    throw 'Certificado autoassinado nao pode ser utilizado para distribuicao.'
-  }
   $chain = New-Object System.Security.Cryptography.X509Certificates.X509Chain
   $chain.ChainPolicy.RevocationMode = [System.Security.Cryptography.X509Certificates.X509RevocationMode]::Online
   $chain.ChainPolicy.RevocationFlag = [System.Security.Cryptography.X509Certificates.X509RevocationFlag]::ExcludeRoot
