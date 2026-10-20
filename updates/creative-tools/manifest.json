@@ -5,6 +5,20 @@
   "latest": null,
   "releases": [
     {
+      "version": "1.4.22",
+      "date": "2026-10-20",
+      "status": "preview",
+      "changes": [
+        "Compactação vertical automática com quatro densidades de painel, inclusive 330×245 e 280×220 no After Effects.",
+        "Gráfico Velocity Designer adapta sua altura no eixo Y e preserva o painel de nove âncoras e os dois comandos de nulo.",
+        "Controles de Bounce em três linhas reduzidas para exibir força, frequência, decaimento e Aplicar em espaços baixos.",
+        "Shift + seta do Bounce agora varia exatamente 1,0 a partir do valor atual; frequência e decaimento continuam limitados a 9.",
+        "Presets com roleta e estados vazios mais compactos, reduzindo a altura necessária para busca, navegação e lista.",
+        "Testes responsivos em sete resoluções sem rolagem horizontal; entrega como teste com assinatura ZXP de desenvolvimento."
+      ],
+      "sha256": "57f0dd28946404edc61ed088fa8313be2b009d6295435d4a40ae9cca1931877e"
+    },
+    {
       "version": "1.4.21",
       "date": "2026-10-20",
       "status": "preview",
@@ -31,6 +45,6 @@
       "sha256": "77f99e89ecfcdd239d4c372629163eb14c436b0431099e8320470281ff19c2b2"
     }
   ],
-  "message": "Creative Tools Alpha 1.4.21 em teste. Histórico atualizado; downloads comerciais automáticos permanecem desativados até validar o instalador e a assinatura.",
+  "message": "Creative Tools Alpha 1.4.22 em prévia de teste: melhorias de compactação vertical para painéis baixos. Downloads comerciais automáticos permanecem desativados até validação real e assinatura confiável.",
   "updatedAt": "2026-10-20"
 }
