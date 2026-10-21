@@ -5,6 +5,20 @@
   "latest": null,
   "releases": [
     {
+      "version": "1.4.25",
+      "date": "2026-10-21",
+      "status": "preview",
+      "changes": [
+        "Menu rápido de presets de curvas, acionável por Shift+C após atribuir o script nativo nos atalhos do After Effects.",
+        "Salvamento de curvas personalizadas com nome e captura de influência a partir de pares de keyframes selecionados compatíveis.",
+        "Busca, aplicação e exclusão de até 48 presets de velocidade persistidos nas preferências do After Effects.",
+        "Menu rápido funciona com o painel CEP sem foco graças ao script 00_Creative_Tools_Shift_C.jsx, instalado separadamente.",
+        "Preserva Curvas, Bounce, Texto, Nulos, Âncoras e Presets FFX da Alpha 1.4.24.",
+        "Instalador Windows v1.7.6 de desenvolvimento; atualização comercial automática ainda não liberada."
+      ],
+      "sha256": "334c7cda5c590913755513147b4fec0c88607c9a8f571ec97eaa52ae4c936758"
+    },
+    {
       "version": "1.4.24",
       "date": "2026-10-20",
       "status": "preview",
@@ -73,6 +87,6 @@
       "sha256": "77f99e89ecfcdd239d4c372629163eb14c436b0431099e8320470281ff19c2b2"
     }
   ],
-  "message": "Creative Tools Alpha 1.4.24 disponível para validação privada: correção da separação de texto e âncora. Download comercial automático desativado até teste no Windows e assinatura confiável.",
-  "updatedAt": "2026-10-20"
+  "message": "Creative Tools Alpha 1.4.25 em validação privada. Menu rápido Shift+C disponível no pacote de teste. Download comercial automático desativado até validação real e assinatura definitiva.",
+  "updatedAt": "2026-10-21"
 }
