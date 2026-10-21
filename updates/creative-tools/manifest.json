@@ -5,6 +5,21 @@
   "latest": null,
   "releases": [
     {
+      "version": "1.4.26",
+      "date": "2026-10-21",
+      "status": "preview",
+      "changes": [
+        "Menu rápido Shift+C redesenhado com cinco miniaturas horizontais de curvas salvas por página e aplicação da curva em um clique, sem seleção em lista.",
+        "Miniaturas calculadas usando o mesmo perfil de velocidade Bézier da interface principal; paginação para até 48 presets personalizados.",
+        "Bounce Overshoot e Elastic logo abaixo das curvas, com Força, Frequência e Caimento, reutilizando a lógica original do Creative Tools em propriedades animáveis compatíveis.",
+        "Menu rápido disponível também na interface CEP com cartões de curvas em miniatura e Bounce compacto.",
+        "Instalador Windows v1.7.8 incorpora o script JSX Shift+C e tenta copiá-lo na pasta Scripts do After Effects; se o Windows negar permissão, informa como instalar manualmente.",
+        "Para funcionar na Timeline, Shift+C deve ser associado ao script nativo no editor de atalhos do After Effects, sem sobrescrever atalhos existentes.",
+        "Testes locais de regressão aprovados: 26 verificações do painel, curvas, Bounce, texto e âncoras. O pacote permanece em homologação privada."
+      ],
+      "sha256": "659f010ba8d171f4f79bf42d3409a174afa726e8b4936184ab5b2e4967c3cd9a"
+    },
+    {
       "version": "1.4.25",
       "date": "2026-10-21",
       "status": "preview",
@@ -87,6 +102,6 @@
       "sha256": "77f99e89ecfcdd239d4c372629163eb14c436b0431099e8320470281ff19c2b2"
     }
   ],
-  "message": "Creative Tools Alpha 1.4.25 em validação privada. Menu rápido Shift+C disponível no pacote de teste. Download comercial automático desativado até validação real e assinatura definitiva.",
+  "message": "Creative Tools Alpha 1.4.26: menu Shift+C de miniaturas e Bounce rápido em prévia de teste. A ativação da distribuição comercial continua dependente de homologação no After Effects e assinatura confiável.",
   "updatedAt": "2026-10-21"
 }
