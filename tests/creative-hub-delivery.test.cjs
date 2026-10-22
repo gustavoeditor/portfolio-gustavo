@@ -93,3 +93,15 @@ test('feed real do Hub: release licenciada, relativa ao site e sem binário no r
   assert.ok(Number.isSafeInteger(r.size)&&r.size>0);
   assert.equal(r.rangeChunkSize,CHUNK);
 });
+
+test('diagnóstico lista só nomes inválidos e nunca em produção',async()=>{
+  const bad={...env,CT_HUB_SIZE:'abc',CT_HUB_PRIVATE_BLOB_PATH:'https://x.private.blob.vercel-storage.com/a.exe'};
+  const pre=response();
+  await handler({method:'GET',query,headers:{}},pre,{env:{...bad,VERCEL_ENV:'preview'},feed});
+  assert.equal(pre.code,503);
+  assert.deepEqual(pre.value.invalid,['CT_HUB_PRIVATE_BLOB_PATH','CT_HUB_SIZE']);
+  assert.ok(!JSON.stringify(pre.value).includes('blob.vercel-storage'),'sem valores');
+  const prod=response();
+  await handler({method:'GET',query,headers:{}},prod,{env:{...bad,VERCEL_ENV:'production'},feed});
+  assert.equal(prod.value.invalid,undefined);
+});
