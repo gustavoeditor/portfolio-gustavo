@@ -1,54 +1,61 @@
-# Creative Hub · distribuição privada do Creative Tools
+# Creative Hub · vendas, licenças e atualizações
 
-**Estado: beta privada para testes.** O instalador do Creative Tools 1.5.1 (artefato do PR #7 do
-repositório `creative-tools`, SHA-256 `41a3aca985cc6dd5eb2fcc8737f9a7a05adda0af288441f3529e9c94431b14ca`,
-5.742.091 bytes) é entregue **somente** pelo endpoint protegido abaixo. Nenhum binário entra neste
-repositório (que é público) nem em pastas estáticas do site.
+**Estado: construído e testado para prévia. Não vender antes de mover o site para um plano que
+permita uso comercial** (o Vercel Hobby não permite — ver `LOJA-LANCAMENTO.md`).
+
+## Modelo
+
+1. O cliente **compra o Creative Hub na Cakto** e baixa o instalador do Hub pela entrega da Cakto.
+2. A Cakto avisa o site (`purchase_approved`) → o site gera uma **chave de licença** e guarda no
+   **Blob privado**. Reembolso ou chargeback **revoga** a chave.
+3. O cliente pega a chave em **`/licenca.html`** (e-mail da compra + código do pedido) e cola uma vez
+   no Hub (Configurações → Chave de licença). A chave fica cifrada no Windows (DPAPI).
+4. **Notas de versão são públicas** em `/novidades.html`. Os **instaladores não**: só saem pelo
+   endpoint protegido, com licença ativa e SHA-256 conferido.
+5. Ao abrir, o Hub consulta os feeds; havendo versão nova, mostra o que mudou e pergunta se o
+   cliente quer **atualizar agora ou depois**. Uma licença libera Creative Tools, as atualizações do
+   próprio Hub e as próximas ferramentas.
 
 ## Peças
 
 | Arquivo | Função |
 |---|---|
-| `creative-hub/catalog.json` | Catálogo lido pelo Creative Hub (≥ 0.1.1). Creative Tools com `access: "license"`. |
-| `updates/creative-tools/hub-manifest.json` | Feed exclusivo do Hub (o `manifest.json` do Updater v1.x não muda). |
-| `lib/creative-hub-delivery.js` | `GET /api/creative-hub/download?product=creative-tools&version=1.5.1` |
-| `scripts/upload-creative-hub-package.mjs` | Envia o `.exe` aprovado ao Blob privado, após conferir hash e tamanho. |
+| `creative-hub/catalog.json` | Catálogo do Hub (produtos, feeds, detecção). |
+| `updates/creative-tools/hub-manifest.json` | Feed do Creative Tools para o Hub (o `manifest.json` do Updater v1.x não muda). |
+| `updates/creative-hub/manifest.json` | Feed de atualizações do próprio Hub. |
+| `lib/creative-hub-licenses.js` | `POST /api/cakto/webhook` e `POST /api/creative-hub/license`. |
+| `lib/creative-hub-delivery.js` | `GET /api/creative-hub/download?product=…&version=…` (licença + Range + SHA-256). |
+| `scripts/upload-creative-hub-package.mjs` | Envia o `.exe` aprovado ao Blob privado, conferindo hash e tamanho do feed. |
+| `novidades.html`, `licenca.html` | Páginas públicas. |
 
-O endpoint exige `Authorization: Bearer <licença>` (hash SHA-256 comparado em tempo constante),
-versão `published` no feed com o mesmo SHA-256/tamanho, e confere o SHA-256 do blob inteiro antes
-de liberar cada parte. Entrega em partes de 3 MiB (`Range`), porque Vercel Functions limitam a
-resposta a ~4,5 MB. Sem configuração, responde 503; sem licença válida, 403 sem tocar no storage.
+## Variáveis (definidas uma vez; Preview primeiro, Production só com aprovação)
 
-## Ativar a beta privada (passos do proprietário)
+| Variável | Uso |
+|---|---|
+| `CREATIVE_HUB_DELIVERY_ENABLED` | `true` liga as entregas. |
+| `CREATIVE_HUB_BLOB_TOKEN` | Token do Blob **privado** `creative-tools-private-preview` (Sensitive). |
+| `CAKTO_WEBHOOK_SECRET` | Secret do webhook configurado na Cakto (Sensitive). |
+| `CAKTO_PRODUCT_IDS` | IDs (ou short_id) dos produtos Cakto que dão licença, separados por vírgula. |
+| `CREATIVE_HUB_TEST_LICENSE_SHA256` | Opcional: hashes de chaves de teste internas. |
 
-1. Criar (ou reutilizar) um **Blob Store privado** na Vercel e copiar o token de leitura/escrita.
-2. Baixar o artefato aprovado do PR #7 e enviar:
-   ```powershell
-   $env:CT_HUB_PRIVATE_BLOB_TOKEN = "<token>"
-   node scripts/upload-creative-hub-package.mjs .\Creative_Tools_BETA_PREMIUM_MENU_WINDOWS.exe
-   ```
-3. Gerar uma ou mais **chaves de teste** (20–128 caracteres `A-Z a-z 0-9 _ -`) e calcular o SHA-256 de cada uma:
-   ```powershell
-   $k = -join ((48..57)+(65..90)+(97..122) | Get-Random -Count 40 | % {[char]$_}); $k
-   [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($k))).Replace('-','').ToLower()
-   ```
-   Guarde a chave; na Vercel vai somente o hash.
-4. Em **Settings → Environment Variables**, somente no ambiente **Preview** (ou só para a branch
-   `feature/creative-hub-licensed-installer`): `CT_HUB_ENABLED`, `CT_HUB_VERSION`,
-   `CT_HUB_PRIVATE_BLOB_PATH`, `CT_HUB_SHA256`, `CT_HUB_SIZE`, `CT_HUB_PRIVATE_BLOB_TOKEN` (Sensitive),
-   `CT_HUB_LICENSE_SHA256`. Fazer redeploy da prévia.
-5. Testar no Creative Hub 0.1.1: Configurações → Licença → colar a chave de teste. Para apontar o Hub à
-   prévia: `$env:CREATIVE_HUB_CATALOG_URL = "https://<url-da-previa>/creative-hub/catalog.json"` antes de abrir.
-   Se a prévia tiver *Deployment Protection*, use um link de bypass ou desative a proteção apenas
-   para esta prévia.
-6. **Produção** somente após aprovação: merge do PR + as mesmas variáveis no ambiente Production.
+Versão, SHA-256, tamanho e caminho privado **não** são variáveis: vêm do feed.
+
+## Publicar uma nova versão (Creative Tools ou Hub)
+
+1. CI gera o instalador; você aprova o build.
+2. No feed do produto, adicione a release: `version`, `date`, `changes` (vira a nota pública),
+   `status: "published"`, `sha256`, `size`, `privatePath`, `downloadUrl` relativo e `installer`
+   (com `silentArgs` se o build tiver modo silencioso); aponte `latest` para ela.
+3. Envie o arquivo: `node scripts/upload-creative-hub-package.mjs <exe> <produto>`.
+4. PR → prévia → teste no Hub → aprovação → produção. Os clientes veem a atualização ao abrir o Hub.
+
+## Configurar a Cakto
+
+Em Integrações → Webhooks: URL `https://<domínio>/api/cakto/webhook`, eventos `purchase_approved`,
+`refund` e `chargeback`. Copie o secret para `CAKTO_WEBHOOK_SECRET`. Use **Enviar teste** na prévia
+antes da produção. Na entrega do produto (área de membros/arquivo), disponibilize o instalador do
+Creative Hub e o link `/licenca.html`.
 
 ## Revogar
 
-Remover o hash da chave de `CT_HUB_LICENSE_SHA256`, ou `CT_HUB_ENABLED=false`, ou `latest: null` no feed.
-
-## Cakto (fase seguinte)
-
-O endpoint já separa licença de distribuição: hoje a lista de hashes vem da variável de ambiente.
-Próximo passo: webhook da Cakto grava a compra → emissão de chave individual → o endpoint consulta o
-registro (Blob privado/banco) em vez da variável. Nenhuma credencial da Cakto vai para o cliente.
+Reembolso/chargeback revogam automaticamente. Para desligar tudo: `CREATIVE_HUB_DELIVERY_ENABLED=false`.

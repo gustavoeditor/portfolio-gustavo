@@ -1,28 +1,39 @@
-// Envia o instalador APROVADO do Creative Tools para o Vercel Blob PRIVADO usado pelo Creative Hub.
-// Uso (PowerShell):
-//   $env:CT_HUB_PRIVATE_BLOB_TOKEN = "<token do Blob privado>"   # nunca commitar
-//   node scripts/upload-creative-hub-package.mjs <caminho\Creative_Tools_BETA_PREMIUM_MENU_WINDOWS.exe>
-// O script confere SHA-256 e tamanho contra updates/creative-tools/hub-manifest.json antes de enviar
-// e imprime as variáveis CT_HUB_* que devem ser configuradas na Vercel (Preview primeiro).
+// Envia um instalador APROVADO para o Vercel Blob PRIVADO usado pelo Creative Hub.
+// Uso (PowerShell aberto pelo menu Iniciar, fora de apps empacotados):
+//   $t = Read-Host "Token do Blob privado" -AsSecureString
+//   $env:CREATIVE_HUB_BLOB_TOKEN = [Net.NetworkCredential]::new('', $t).Password
+//   node scripts/upload-creative-hub-package.mjs <instalador.exe> [creative-tools|creative-hub]
+// Confere SHA-256 e tamanho contra a release em "latest" do feed do produto e envia para o
+// `privatePath` declarado nela. Publicar uma versão = editar o feed + enviar o arquivo.
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { put } from '@vercel/blob';
 
+const FEEDS = {
+  'creative-tools': '../updates/creative-tools/hub-manifest.json',
+  'creative-hub': '../updates/creative-hub/manifest.json',
+};
 const file = process.argv[2];
-const token = process.env.CT_HUB_PRIVATE_BLOB_TOKEN || '';
+const product = process.argv[3] || 'creative-tools';
+const token = process.env.CREATIVE_HUB_BLOB_TOKEN || process.env.CT_HUB_PRIVATE_BLOB_TOKEN || '';
 if (!file) throw new Error('Informe o caminho do instalador .exe aprovado.');
-if (token.length < 30) throw new Error('Defina CT_HUB_PRIVATE_BLOB_TOKEN com o token do Blob privado.');
+if (!FEEDS[product]) throw new Error('Produto desconhecido: ' + product);
+if (token.length < 30) throw new Error('Defina CREATIVE_HUB_BLOB_TOKEN com o token do Blob privado.');
+if (!token.startsWith('vercel_blob_rw_')) throw new Error('O token não parece ser de um Blob store (vercel_blob_rw_...).');
 
-const feed = JSON.parse(readFileSync(new URL('../updates/creative-tools/hub-manifest.json', import.meta.url), 'utf8'));
+const feed = JSON.parse(readFileSync(new URL(FEEDS[product], import.meta.url), 'utf8'));
 const release = feed.releases.find((r) => r.version === feed.latest);
-if (!release) throw new Error('hub-manifest.json sem release em "latest".');
+if (!release) throw new Error('O feed não tem release em "latest".');
+const pathname = release.privatePath || '';
+if (!new RegExp('^creative-hub/packages/' + product + '/[A-Za-z0-9._-]+\\.exe$').test(pathname)) {
+  throw new Error('Release sem privatePath válido no feed.');
+}
 
 const bytes = readFileSync(file);
 const sha256 = createHash('sha256').update(bytes).digest('hex');
 if (sha256 !== release.sha256 || bytes.length !== release.size) {
   throw new Error(`Arquivo diferente do aprovado: sha256=${sha256} size=${bytes.length}; esperado ${release.sha256} / ${release.size}`);
 }
-const pathname = `creative-hub/packages/creative-tools/Creative_Tools_Setup_${release.version}.exe`;
 const result = await put(pathname, bytes, {
   access: 'private',
   token,
@@ -30,12 +41,5 @@ const result = await put(pathname, bytes, {
   allowOverwrite: false,
   contentType: 'application/octet-stream',
 });
-console.log('Enviado para o Blob privado:', result.pathname);
-console.log('\nConfigure na Vercel (ambiente Preview; Production só após aprovação):');
-console.log('CT_HUB_ENABLED=true');
-console.log(`CT_HUB_VERSION=${release.version}`);
-console.log(`CT_HUB_PRIVATE_BLOB_PATH=${pathname}`);
-console.log(`CT_HUB_SHA256=${sha256}`);
-console.log(`CT_HUB_SIZE=${bytes.length}`);
-console.log('CT_HUB_PRIVATE_BLOB_TOKEN=<o mesmo token, como variável Sensitive>');
-console.log('CT_HUB_LICENSE_SHA256=<SHA-256 das chaves de teste, separadas por vírgula>');
+console.log(`Enviado para o Blob privado: ${result.pathname} (${bytes.length} bytes, SHA-256 conferido)`);
+console.log('Na Vercel (uma vez só; Preview primeiro): CREATIVE_HUB_DELIVERY_ENABLED=true e CREATIVE_HUB_BLOB_TOKEN (Sensitive).');

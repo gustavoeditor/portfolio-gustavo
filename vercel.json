@@ -5,6 +5,14 @@
       "destination": "/api/managed-projects?ct_update=download"
     },
     {
+      "source": "/api/creative-hub/license",
+      "destination": "/api/managed-projects?hub=license"
+    },
+    {
+      "source": "/api/cakto/webhook",
+      "destination": "/api/managed-projects?cakto=webhook"
+    },
+    {
       "source": "/api/creative-hub/download",
       "destination": "/api/managed-projects?hub=download"
     },

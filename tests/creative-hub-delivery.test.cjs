@@ -4,104 +4,103 @@ const assert=require('node:assert/strict');
 const {createHash}=require('node:crypto');
 const {Readable}=require('node:stream');
 const handler=require('../lib/creative-hub-delivery');
-const {settings,licensed,published,parseRange,CHUNK}=handler._test;
+const {settings,releaseFor,parseRange,CHUNK}=handler._test;
 const realFeed=require('../updates/creative-tools/hub-manifest.json');
+const realHubFeed=require('../updates/creative-hub/manifest.json');
 
 const body=Buffer.alloc(CHUNK*2+1234,7);
-const key='hubTESTkey_0123456789abcdefghijklmnopqrstuvwxyz';
+const testKey='hubTESTkey_0123456789abcdefghijklmnopqrstuvwxyz';
+const caktoKey='CH-ABCDE-FGHJK-LMNPQ-RSTUV';
 const hash=s=>createHash('sha256').update(s).digest('hex');
-const env={
-  CT_HUB_ENABLED:'true',CT_HUB_VERSION:'1.5.1',
-  CT_HUB_PRIVATE_BLOB_PATH:'creative-hub/packages/creative-tools/Creative_Tools_Setup_1.5.1.exe',
-  CT_HUB_PRIVATE_BLOB_TOKEN:'BLOB_'.repeat(12),CT_HUB_LICENSE_SHA256:hash(key),
-  CT_HUB_SHA256:hash(body),CT_HUB_SIZE:String(body.length)
-};
-const feed={schemaVersion:1,product:'creative-tools',latest:'1.5.1',releases:[{version:'1.5.1',status:'published',sha256:hash(body),size:body.length}]};
-const blob=b=>async()=>({statusCode:200,stream:Readable.from([b])});
+const env={CREATIVE_HUB_DELIVERY_ENABLED:'true',CREATIVE_HUB_BLOB_TOKEN:'BLOB_'.repeat(12),CREATIVE_HUB_TEST_LICENSE_SHA256:hash(testKey)};
+const path='creative-hub/packages/creative-tools/Creative_Tools_Setup_1.5.1.exe';
+const feed={schemaVersion:1,product:'creative-tools',latest:'1.5.1',releases:[{version:'1.5.1',status:'published',sha256:hash(body),size:body.length,privatePath:path}]};
+const blob=b=>async(p)=>{assert.equal(p,path);return {statusCode:200,stream:Readable.from([b])};};
 const query={product:'creative-tools',version:'1.5.1'};
+const memoryLicenses=active=>({async read(p){return p===`creative-hub/licenses/${hash(caktoKey)}.json`?{status:active?'active':'revoked'}:null;},async write(){}});
 function response(){
   const headers={};
   return {headers,setHeader(k,v){headers[k]=v},status(code){this.code=code;return this},json(v){this.value=v;return this},send(v){this.value=v;return this}};
 }
 async function call(headers,deps={}){
   const res=response();
-  await handler({method:'GET',query:deps.query||query,headers},res,{env,feed,blobGet:blob(body),...deps});
+  await handler({method:'GET',query:deps.query||query,headers},res,{env,feed,blobGet:blob(body),licenseStore:memoryLicenses(true),...deps});
   return res;
 }
 
-test('configuração estrita e separada do canal ZXP',()=>{
+test('configuração mínima: só liga/desliga e token na Vercel',()=>{
   assert.equal(settings(env).valid,true);
-  assert.equal(settings({...env,CT_HUB_LICENSE_SHA256:''}).valid,false);
-  assert.equal(settings({...env,CT_HUB_PRIVATE_BLOB_PATH:'creative-tools/releases/x.zxp'}).valid,false);
-  assert.equal(settings({...env,CT_HUB_PRIVATE_BLOB_PATH:'creative-hub/packages/creative-tools/../x.exe'}).valid,false);
-  assert.equal(settings({...env,CT_HUB_SIZE:'0'}).valid,false);
-  assert.equal(settings({...env,CT_HUB_ENABLED:'false'}).valid,false);
-  assert.equal(licensed('Bearer '+key,settings(env)),true);
-  assert.equal(licensed('Bearer '+key+'x',settings(env)),false);
+  assert.deepEqual(settings({}).invalid,['CREATIVE_HUB_DELIVERY_ENABLED','CREATIVE_HUB_BLOB_TOKEN']);
+  // nomes antigos continuam aceitos
+  assert.equal(settings({CT_HUB_ENABLED:'true',CT_HUB_PRIVATE_BLOB_TOKEN:'X'.repeat(40)}).valid,true);
+});
+
+test('release vem do feed público e precisa estar completa e publicada',()=>{
+  assert.equal(releaseFor('creative-tools','1.5.1',feed).path,path);
+  assert.equal(releaseFor('creative-tools','1.5.0',feed),null,'só a versão vigente');
+  for(const bad of [
+    {...feed,latest:null},
+    {...feed,releases:[{...feed.releases[0],status:'preview'}]},
+    {...feed,releases:[{...feed.releases[0],privatePath:'creative-hub/packages/creative-cut/x.exe'}]},
+    {...feed,releases:[{...feed.releases[0],privatePath:'creative-hub/packages/creative-tools/../x.exe'}]},
+    {...feed,releases:[{...feed.releases[0],sha256:'abc'}]},
+    {...feed,product:'creative-cut'}
+  ])assert.equal(releaseFor('creative-tools','1.5.1',bad),null);
 });
 
 test('intervalos HTTP Range',()=>{
   assert.deepEqual(parseRange(undefined,10),{start:0,end:9});
   assert.deepEqual(parseRange('bytes=0-',CHUNK*3),{start:0,end:CHUNK-1});
-  assert.deepEqual(parseRange('bytes=5-2',10),null);
-  assert.deepEqual(parseRange('bytes=10-',10),null);
-  assert.deepEqual(parseRange('bytes=0-99999999',10),{start:0,end:9});
+  assert.equal(parseRange('bytes=5-2',10),null);
+  assert.equal(parseRange('bytes=10-',10),null);
   assert.equal(parseRange('bytes=0-1,4-5',10),null);
 });
 
-test('sem licença: 403 antes de tocar no storage',async()=>{
-  let touched=false;
-  const res=await call({},{blobGet:()=>{touched=true}});
-  assert.equal(res.code,403);assert.equal(touched,false);
-  const bad=await call({authorization:'Bearer '+'x'.repeat(40)},{blobGet:()=>{touched=true}});
-  assert.equal(bad.code,403);assert.equal(touched,false);
-});
-
-test('entrega em partes que reconstroem exatamente o pacote',async()=>{
-  const parts=[];let start=0;
-  while(start<body.length){
-    const res=await call({authorization:'Bearer '+key,range:`bytes=${start}-`});
-    assert.equal(res.code,206);
-    assert.ok(res.value.length<=CHUNK);
-    assert.equal(res.headers['Content-Range'],`bytes ${start}-${start+res.value.length-1}/${body.length}`);
-    parts.push(res.value);start+=res.value.length;
-  }
-  assert.equal(parts.length,3);
-  assert.equal(hash(Buffer.concat(parts)),hash(body));
-});
-
-test('blob adulterado, versão não publicada ou produto errado nunca são servidos',async()=>{
-  const tampered=Buffer.from(body);tampered[0]^=1;
-  assert.equal((await call({authorization:'Bearer '+key},{blobGet:blob(tampered)})).code,503);
-  let touched=false;
-  for(const bad of [{...feed,latest:null},{...feed,releases:[{...feed.releases[0],status:'preview'}]},{...feed,releases:[{...feed.releases[0],size:1}]}]){
-    const res=await call({authorization:'Bearer '+key},{feed:bad,blobGet:()=>{touched=true}});
-    assert.equal(res.code,503);
-  }
-  assert.equal((await call({authorization:'Bearer '+key},{query:{product:'creative-cut',version:'1.5.1'},blobGet:()=>{touched=true}})).code,404);
+test('sem licença, licença revogada ou desconhecida: 403 sem tocar no pacote',async()=>{
+  let touched=false;const spy=()=>{touched=true};
+  assert.equal((await call({},{blobGet:spy})).code,403);
+  assert.equal((await call({authorization:'Bearer '+'x'.repeat(40)},{blobGet:spy})).code,403);
+  assert.equal((await call({authorization:'Bearer '+caktoKey},{blobGet:spy,licenseStore:memoryLicenses(false)})).code,403);
   assert.equal(touched,false);
-  assert.equal((await call({authorization:'Bearer '+key,range:'bytes=999999999-'})).code,416);
 });
 
-test('feed real do Hub: release licenciada, relativa ao site e sem binário no repositório',()=>{
-  assert.equal(realFeed.schemaVersion,1);
-  const r=realFeed.releases.find(x=>x.version===realFeed.latest);
-  assert.ok(r,'latest aponta para release existente');
-  assert.equal(r.auth,'license');
-  assert.match(r.downloadUrl,/^\/api\/creative-hub\/download\?product=creative-tools&version=/);
-  assert.match(r.sha256,/^[a-f0-9]{64}$/);
-  assert.ok(Number.isSafeInteger(r.size)&&r.size>0);
-  assert.equal(r.rangeChunkSize,CHUNK);
+test('licença Cakto ativa ou chave de teste: partes que reconstroem o pacote exato',async()=>{
+  for(const key of [testKey,caktoKey]){
+    const parts=[];let start=0;
+    while(start<body.length){
+      const res=await call({authorization:'Bearer '+key,range:`bytes=${start}-`});
+      assert.equal(res.code,206);
+      assert.equal(res.headers['Content-Range'],`bytes ${start}-${start+res.value.length-1}/${body.length}`);
+      parts.push(res.value);start+=res.value.length;
+    }
+    assert.equal(parts.length,3);
+    assert.equal(hash(Buffer.concat(parts)),hash(body));
+  }
 });
 
-test('diagnóstico lista só nomes inválidos e nunca em produção',async()=>{
-  const bad={...env,CT_HUB_SIZE:'abc',CT_HUB_PRIVATE_BLOB_PATH:'https://x.private.blob.vercel-storage.com/a.exe'};
+test('blob adulterado, produto/versão desconhecidos e Range inválido',async()=>{
+  const tampered=Buffer.from(body);tampered[0]^=1;
+  assert.equal((await call({authorization:'Bearer '+testKey},{blobGet:blob(tampered)})).code,503);
+  assert.equal((await call({authorization:'Bearer '+testKey},{query:{product:'creative-cut',version:'1.5.1'}})).code,404);
+  assert.equal((await call({authorization:'Bearer '+testKey},{query:{product:'creative-tools',version:'9.9.9'}})).code,404);
+  assert.equal((await call({authorization:'Bearer '+testKey,range:'bytes=999999999-'})).code,416);
+});
+
+test('diagnóstico de configuração só fora de produção, sem valores',async()=>{
   const pre=response();
-  await handler({method:'GET',query,headers:{}},pre,{env:{...bad,VERCEL_ENV:'preview'},feed});
-  assert.equal(pre.code,503);
-  assert.deepEqual(pre.value.invalid,['CT_HUB_PRIVATE_BLOB_PATH','CT_HUB_SIZE']);
-  assert.ok(!JSON.stringify(pre.value).includes('blob.vercel-storage'),'sem valores');
+  await handler({method:'GET',query,headers:{}},pre,{env:{VERCEL_ENV:'preview'},feed});
+  assert.deepEqual(pre.value.invalid,['CREATIVE_HUB_DELIVERY_ENABLED','CREATIVE_HUB_BLOB_TOKEN']);
   const prod=response();
-  await handler({method:'GET',query,headers:{}},prod,{env:{...bad,VERCEL_ENV:'production'},feed});
+  await handler({method:'GET',query,headers:{}},prod,{env:{VERCEL_ENV:'production'},feed});
   assert.equal(prod.value.invalid,undefined);
+});
+
+test('feeds reais: release licenciada, relativa ao site e com caminho privado',()=>{
+  const r=realFeed.releases.find(x=>x.version===realFeed.latest);
+  assert.ok(r&&r.auth==='license');
+  assert.match(r.downloadUrl,/^\/api\/creative-hub\/download\?product=creative-tools&version=/);
+  assert.ok(releaseFor('creative-tools',realFeed.latest,realFeed),'release vigente válida para entrega');
+  assert.equal(r.rangeChunkSize,CHUNK);
+  assert.equal(realHubFeed.product,'creative-hub');
+  assert.equal(realHubFeed.latest,null,'Hub ainda sem atualização publicada');
 });

@@ -3,7 +3,7 @@
   "product": "creative-tools",
   "channel": "private-beta",
   "latest": "1.5.1",
-  "message": "Beta privada: download somente com licença de teste, pelo Creative Hub. Não é uma liberação comercial.",
+  "message": "Beta privada: download pelo Creative Hub com a licença da compra. Notas de versão públicas em /novidades.html.",
   "updatedAt": "2026-10-22",
   "releases": [
     {
@@ -26,11 +26,20 @@
       "detectVersion": "1.5.1",
       "installer": {
         "args": [],
-        "repairArgs": ["--repair-menu"],
-        "uninstallArgs": ["--uninstall-menu"],
+        "repairArgs": [
+          "--repair-menu"
+        ],
+        "uninstallArgs": [
+          "--uninstall-menu"
+        ],
         "interactive": true
       },
-      "compatibility": { "windows": "10", "host": "AEFT", "hostMin": "16.0" }
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      },
+      "privatePath": "creative-hub/packages/creative-tools/Creative_Tools_Setup_1.5.1.exe"
     }
   ]
 }
