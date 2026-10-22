@@ -1,0 +1,90 @@
+{
+  "schema": "creative-hub.catalog/1",
+  "updatedAt": "2026-10-22",
+  "apps": [
+    {
+      "id": "creative-tools",
+      "name": "Creative Tools",
+      "tagline": "Curvas, Bounce e atalhos de animação para o After Effects.",
+      "description": "Painel de animação para Adobe After Effects com editor de curvas de velocidade, presets pessoais, Bounce Overshoot/Elastic, separação de texto, âncoras em lote e o menu rápido Ctrl+B junto ao cursor.",
+      "category": "Plugin · After Effects",
+      "host": "o Adobe After Effects",
+      "status": "available",
+      "icon": "creative-tools",
+      "accent": "#a78bfa",
+      "access": "license",
+      "feed": "/updates/creative-tools/hub-manifest.json",
+      "website": "https://portfolio-gustavo-chi.vercel.app/atualizacoes.html",
+      "hostProcesses": [
+        "AfterFX.exe"
+      ],
+      "detector": {
+        "type": "cep-extension",
+        "bundleId": "com.gustavo.trio",
+        "bundleName": "Creative Tools",
+        "nativeScripts": [
+          {
+            "label": "Menu Ctrl+B",
+            "hostDirPattern": "Adobe After Effects *",
+            "relativeDir": "Support Files/Scripts",
+            "file": "00_Creative_Tools_Ctrl_B.jsx",
+            "versionPattern": "Ctrl\\+B\\s+v(\\d+\\.\\d+\\.\\d+)"
+          }
+        ]
+      },
+      "features": [
+        {
+          "title": "Velocity Designer",
+          "text": "Edite curvas de easing com precisão e salve presets pessoais em um clique."
+        },
+        {
+          "title": "Menu rápido Ctrl+B",
+          "text": "Suas curvas salvas e o Bounce junto ao cursor, sem aplicativo residente."
+        },
+        {
+          "title": "Bounce",
+          "text": "Overshoot e Elastic com força, frequência e caimento ajustáveis."
+        },
+        {
+          "title": "Texto e âncoras",
+          "text": "Separe letras, palavras ou linhas e reposicione âncoras em lote."
+        }
+      ],
+      "requirements": [
+        "Windows 10 ou 11 (64 bits)",
+        "Adobe After Effects 2019 (16.0) ou superior",
+        "Adobe Creative Cloud instalado (instalador de extensões da Adobe)",
+        "Permissão de administrador para copiar o menu Ctrl+B na pasta do After Effects"
+      ],
+      "screenshots": []
+    },
+    {
+      "id": "creative-cut",
+      "name": "Creative Cut",
+      "tagline": "Edição automática com IA para o Premiere Pro.",
+      "description": "Plugin para Adobe Premiere Pro dedicado à edição automática com inteligência artificial. Em desenvolvimento.",
+      "category": "Plugin · Premiere Pro",
+      "host": "o Adobe Premiere Pro",
+      "status": "in-development",
+      "icon": "creative-cut",
+      "accent": "#f0abfc",
+      "access": "public",
+      "hostProcesses": [
+        "Adobe Premiere Pro.exe"
+      ]
+    },
+    {
+      "id": "creative-hub",
+      "name": "Creative Hub",
+      "tagline": "Central de aplicativos da família Creative.",
+      "description": "O próprio Creative Hub.",
+      "status": "available",
+      "icon": "creative-hub",
+      "hidden": true,
+      "feed": "/updates/creative-hub/manifest.json",
+      "detector": {
+        "type": "self-app"
+      }
+    }
+  ]
+}
