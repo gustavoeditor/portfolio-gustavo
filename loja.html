@@ -148,7 +148,7 @@
   if(data&&data.available===true&&typeof data.priceLabel==='string'&&data.priceLabel){
    button.disabled=false;button.innerHTML='Comprar agora <span aria-hidden="true">↗</span>';
    price.textContent=data.priceLabel;badge.textContent='DISPONÍVEL';
-   status.textContent='Pagamento em plataforma externa. Confira as informações da compra antes de concluir.';
+   status.textContent=data.provider==='cakto'?'Pagamento realizado na Cakto. Confira o preço e a forma de entrega antes de concluir.':'Pagamento em plataforma externa. Confira as informações da compra antes de concluir.';
   }else{
    button.disabled=true;button.textContent='Em preparação';badge.textContent='PRÉ-LANÇAMENTO';
    status.textContent='As vendas ainda não estão ativas. Nenhuma cobrança será realizada.';
