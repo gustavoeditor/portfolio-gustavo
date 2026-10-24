@@ -1,12 +1,12 @@
 /* GUSTAVO 3D knives for the homepage vortex (ES module, loaded on demand).
    Textured knife models (/knives/models/*.glb, exported from the editor's FBX in Blender)
-   rendered with a metallic physical material, environment reflections and rim lights. */
+   rendered with their own authored material, lit by environment reflections and rim lights. */
 import * as THREE from './vendor/three/three.module.min.js';
 import {RoomEnvironment} from './vendor/three/RoomEnvironment.js';
 import {GLTFLoader} from './vendor/three/GLTFLoader.js';
 
 const KNIVES=[
-  {file:'butterfly-emerald',label:'★ Butterfly Knife | Gamma Doppler Emerald',glow:'#2fe08a',tint:0x5fd98c}
+  {file:'butterfly-emerald',label:'★ Butterfly Knife | Gamma Doppler Emerald',glow:'#2fe08a'}
 ];
 
 // Centre the mesh, lay its long axis on X and scale it to length 1.
@@ -22,11 +22,10 @@ async function loadKnife(def,maxAnisotropy){
   if(long===size.z)geometry.rotateY(Math.PI/2);else if(long===size.y)geometry.rotateZ(-Math.PI/2);
   geometry.scale(1/long,1/long,1/long);
   geometry.computeBoundingSphere();
-  const map=mesh.material.map;
-  if(map){map.colorSpace=THREE.SRGBColorSpace;map.anisotropy=maxAnisotropy;}
-  // The exported material carries an unwanted specular texture; use a clean physical material.
-  // A green tint deepens the mint atlas towards the saturated in-game Emerald.
-  const material=new THREE.MeshPhysicalMaterial({map,color:def.tint||0xffffff,metalness:.8,roughness:.22,clearcoat:.55,clearcoatRoughness:.08,envMapIntensity:1.1,side:THREE.DoubleSide,transparent:true});
+  // Use the model's own material exactly as authored; only enable fading.
+  const material=mesh.material;
+  if(material.map)material.map.anisotropy=maxAnisotropy;
+  material.transparent=true;
   return {def,geometry,material};
 }
 const smooth=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};

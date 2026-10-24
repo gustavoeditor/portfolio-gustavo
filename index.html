@@ -1128,7 +1128,7 @@ const vortex=(()=>{
   const near=new IntersectionObserver(entries=>{
    if(!entries.some(en=>en.isIntersecting))return;
    near.disconnect();
-   import('/knives-3d.js?v=2').then(m=>m.mount(sticky,{small:innerWidth<=700})).then(api=>{
+   import('/knives-3d.js?v=3').then(m=>m.mount(sticky,{small:innerWidth<=700})).then(api=>{
     if(!api)return;knives3d=api;section.classList.add('has-3d');current=-1;request();
    }).catch(err=>console.warn('Facas 3D indisponíveis; mantendo imagens.',err));
   },{rootMargin:'900px 0px'});
