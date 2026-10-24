@@ -348,17 +348,14 @@ test('home portfolio ranks by quality, fills featured slots and rotates the hero
  assert.match(uploader,/positionField\.addEventListener\('input'/);
 });
 
-test('CS knife loadout covers every knife before repeating and renders valid Doppler SVG',()=>{
+test('CS knife loadout uses every cut-out render before repeating',()=>{
  const K=require('../cs-knives');
  let n=0;const seq=()=>((n=(n*9301+49297)%233280)/233280);
- const set=K.loadout(9,seq);
- assert.equal(set.length,9);
- assert.equal(new Set(set.slice(0,5).map(k=>k.type)).size,5);
- for(const k of set){
-  assert.ok(K.FINISHES[k.finish]);
-  const svg=K.svg(k.type,k.finish,k.seed);
-  assert.match(svg,/^<svg[\s\S]*<feTurbulence[\s\S]*<\/svg>$/);
-  assert.equal(svg,K.svg(k.type,k.finish,k.seed));
+ const set=K.loadout(K.RENDERS.length+3,seq);
+ assert.equal(new Set(set.slice(0,K.RENDERS.length).map(k=>k.file)).size,K.RENDERS.length);
+ for(const k of K.RENDERS){
+  assert.ok(fs.existsSync(path.join(root,'knives',k.file+'.webp')),'render ausente: '+k.file);
+  assert.match(K.src(k),/^\/knives\/[a-z0-9-]+\.webp$/);
+  assert.ok(k.model&&k.finish&&/^#[0-9a-f]{6}$/.test(k.glow));
  }
- assert.throws(()=>K.svg('awp','phase1',1));
 });
