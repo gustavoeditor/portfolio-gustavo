@@ -1101,7 +1101,9 @@ const vortex=(()=>{
  const still=matchMedia('(prefers-reduced-motion: reduce)');
  const PHASES=['ROLE PARA MERGULHAR','01 — CORTE: O RITMO NASCE','02 — RITMO: CADA BATIDA CONTA','03 — LUZ: A IMAGEM GANHA ALMA','04 — MOVIMENTO: TUDO SE CONECTA','FIM DO TAKE'];
  const STEP=40; // 9 cards per turn
- let cards=[],radius=420,rise=120,progress=-1,mouseX=0,mouseY=0,queued=false;
+ // Damped camera: the drawn progress chases the scroll position, so each wheel notch glides instead of jumping.
+ const TAU=.16,TILT_TAU=.22;
+ let cards=[],radius=420,rise=120,target=0,current=-1,mouseX=0,mouseY=0,mx=0,my=0,running=false,lastT=0;
  const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
  const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t);};
  function layout(){
@@ -1123,21 +1125,30 @@ const vortex=(()=>{
    b.append(img,tag,title);return b;
   }));
   cards=[...helix.children];
-  progress=-1;render();
+  current=-1;request();
  }
- function render(){
-  queued=false;
+ function frame(t){
+  const dt=lastT?Math.min(.05,(t-lastT)/1000):1/60;lastT=t;
   const r=section.getBoundingClientRect();
-  const p=still.matches?.42:clamp(-r.top/Math.max(1,r.height-innerHeight));
-  if(Math.abs(p-progress)<.0004&&!render.force)return;
-  render.force=false;progress=p;
+  target=still.matches?.42:clamp(-r.top/Math.max(1,r.height-innerHeight));
+  const offscreen=r.bottom<-50||r.top>innerHeight+50;
+  // Snap on first paint, anchor jumps or while the section is out of view.
+  if(current<0||offscreen||still.matches||Math.abs(target-current)>.35){current=target;mx=mouseX;my=mouseY;}
+  else{current+=(target-current)*(1-Math.exp(-dt/TAU));mx+=(mouseX-mx)*(1-Math.exp(-dt/TILT_TAU));my+=(mouseY-my)*(1-Math.exp(-dt/TILT_TAU));}
+  const settled=Math.abs(target-current)<.00012&&Math.abs(mouseX-mx)<.0008&&Math.abs(mouseY-my)<.0008;
+  if(settled){current=target;mx=mouseX;my=mouseY;}
+  if(!offscreen||settled)draw(current);
+  if(settled||offscreen){running=false;lastT=0;return;}
+  requestAnimationFrame(frame);
+ }
+ function draw(p){
   const dive=smooth(0,.78,p),e=smooth(.78,.95,p),n=cards.length;
   const rot=-p*720,total=(n-1)*rise,camY=-total/2+dive*total;
   const z=-380+dive*(radius*.95)+e*320;
-  helix.style.transform=`translate3d(0,0,${z}px) rotateX(${-10+mouseY*6-e*8}deg) rotateZ(${mouseX*-3}deg) rotateY(${rot+mouseX*10}deg) translateY(${-camY}px)`;
+  helix.style.transform=`translate3d(0,0,${z}px) rotateX(${-10+my*6-e*8}deg) rotateZ(${mx*-3}deg) rotateY(${rot+mx*10}deg) translateY(${-camY}px)`;
   for(let i=0;i<n;i++){
    const angle=i*STEP,y=i*rise-total/2;
-   const facing=Math.cos((angle+rot+mouseX*10)*Math.PI/180); // 1 = facing camera
+   const facing=Math.cos((angle+rot+mx*10)*Math.PI/180); // 1 = facing camera
    const burst=e*(900+(i%3)*260);
    const c=cards[i];
    c.style.transform=`rotateY(${angle}deg) translateZ(${radius+burst}px) translateY(${y}px) rotateX(${e*(i%2?40:-40)}deg)`;
@@ -1150,7 +1161,7 @@ const vortex=(()=>{
    w.style.opacity=String(o);
    w.style.transform=`scale(${.7+local*.45}) translateY(${(local-.5)*-6}vh)`;
   });
-  stars.forEach((s,k)=>{s.style.transform=`translate3d(${mouseX*-(k+1)*8}px,${-p*(k+1)*35}%,0)`;});
+  stars.forEach((s,k)=>{s.style.transform=`translate3d(${mx*-(k+1)*8}px,${-p*(k+1)*35}%,0)`;});
   sticky.style.setProperty('--p',p.toFixed(4));
   sticky.style.setProperty('--e',e.toFixed(4));
   section.classList.toggle('is-final',e>.6);
@@ -1158,12 +1169,12 @@ const vortex=(()=>{
   tc.textContent=['00',String(Math.floor(s/60)).padStart(2,'0'),String(s%60).padStart(2,'0'),String(ff).padStart(2,'0')].join(':');
   phase.textContent=e>.5?PHASES[5]:p<.03?PHASES[0]:PHASES[1+Math.min(3,Math.floor(p/.78*4))];
  }
- const request=()=>{if(!queued){queued=true;requestAnimationFrame(render);}};
+ const request=()=>{if(!running){running=true;requestAnimationFrame(frame);}};
  addEventListener('scroll',request,{passive:true});
- addEventListener('resize',()=>{layout();render.force=true;request();});
+ addEventListener('resize',()=>{layout();current=-1;request();});
  if(!still.matches&&matchMedia('(hover:hover) and (pointer:fine)').matches){
-  sticky.addEventListener('pointermove',e=>{mouseX=e.clientX/innerWidth-.5;mouseY=e.clientY/innerHeight-.5;render.force=true;request();});
-  sticky.addEventListener('pointerleave',()=>{mouseX=0;mouseY=0;render.force=true;request();});
+  sticky.addEventListener('pointermove',e=>{mouseX=e.clientX/innerWidth-.5;mouseY=e.clientY/innerHeight-.5;request();});
+  sticky.addEventListener('pointerleave',()=>{mouseX=0;mouseY=0;request();});
  }
  if(still.matches)section.classList.add('is-static');
  layout();build();
@@ -1174,17 +1185,19 @@ const vortex=(()=>{
  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const hero=document.getElementById('inicio');if(!hero)return;
  const copy=hero.querySelector('.hero-grid>div:first-child'),side=hero.querySelector('.hero-side'),scroll=hero.querySelector('.hero-scroll');
- let queued=false;
- function render(){
-  queued=false;
-  const y=Math.min(scrollY,hero.offsetHeight);
+ let running=false,lastT=0,y=-1;
+ function frame(t){
+  const dt=lastT?Math.min(.05,(t-lastT)/1000):1/60;lastT=t;
+  const goal=Math.min(scrollY,hero.offsetHeight);
+  y=y<0||Math.abs(goal-y)>hero.offsetHeight*.6?goal:y+(goal-y)*(1-Math.exp(-dt/.14));
+  if(Math.abs(goal-y)<.3){y=goal;running=false;lastT=0;}else requestAnimationFrame(frame);
   const k=y/hero.offsetHeight;
   if(copy)copy.style.transform=`translate3d(0,${y*.32}px,0)`,copy.style.opacity=String(1-k*.9);
   if(side)side.style.transform=`translate3d(0,${y*-.14}px,0) rotate(${k*-7}deg) scale(${1-k*.12})`;
   if(scroll)scroll.style.opacity=String(1-k*4);
  }
- addEventListener('scroll',()=>{if(!queued){queued=true;requestAnimationFrame(render);}},{passive:true});
- render();
+ addEventListener('scroll',()=>{if(!running){running=true;requestAnimationFrame(frame);}},{passive:true});
+ running=true;requestAnimationFrame(frame);
 })();
 const modal=document.getElementById('video-modal'),player=document.getElementById('modal-player'),close=document.getElementById('modal-close'),previousProject=document.getElementById('modal-prev'),nextProject=document.getElementById('modal-next');let playerUI=null,activeProjectIndex=-1;
 function projectVideo(data){return data[4]||ROOT+'videos/'+data[2]+'.mp4'}
