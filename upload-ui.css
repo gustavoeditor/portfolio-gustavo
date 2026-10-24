@@ -37,3 +37,27 @@
 .title-ai-status[data-mode="error"]{color:#ffc0c6}
 .title-ai-status[data-mode="success"]{color:#c5f3d6}
 @media(max-width:520px){.title-ai-actions .btn{width:100%}}
+
+/* Controle de qualidade automático no upload. */
+.qc-panel{grid-column:1/-1;margin:4px 0 6px;padding:16px;border:1px solid #3a3148;border-radius:12px;background:linear-gradient(135deg,#1a1524,#100f16);display:grid;gap:14px;animation:qcIn .5s cubic-bezier(.2,.84,.22,1)}
+.qc-panel[data-tier="flagship"]{border-color:#c8a6ff88;box-shadow:0 0 40px #9b6cff22}
+.qc-panel[data-tier="premium"]{border-color:#9f86d066}
+.qc-head{display:flex;align-items:center;gap:14px}
+.qc-head small{display:block;color:#a99cbf;font-size:9px;letter-spacing:.16em;font-weight:700}
+.qc-head strong{display:block;color:#f4eeff;font-size:15px;margin-top:4px}
+.qc-ring{--qc:0;flex:none;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:16px;color:#f4eeff;background:radial-gradient(closest-side,#15121d 78%,transparent 80% 100%),conic-gradient(#c6a8ff calc(var(--qc)*1%),#2c2537 0)}
+.qc-bars{display:grid;gap:8px}
+.qc-bar{display:grid;grid-template-columns:118px 1fr 30px;align-items:center;gap:10px;font-size:11px;color:#c9bedb}
+.qc-bar i{--v:0;height:6px;border-radius:9px;background:#2a2433;position:relative;overflow:hidden}
+.qc-bar i:after{content:"";position:absolute;inset:0;width:calc(var(--v)*1%);border-radius:inherit;background:linear-gradient(90deg,#7e5bd6,#d5c2ff);transition:width .9s cubic-bezier(.2,.84,.22,1)}
+.qc-bar b{text-align:right;color:#efe7ff}
+.qc-checks{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.qc-checks li{font-size:10.5px;padding:5px 9px;border-radius:20px;border:1px solid #3c3448;color:#d7cde6}
+.qc-checks li:before{content:"●";margin-right:6px;font-size:8px;vertical-align:1px}
+.qc-checks li[data-status="pass"]:before{color:#9fe8b9}
+.qc-checks li[data-status="warn"]:before{color:#f3cf7a}
+.qc-checks li[data-status="fail"]{border-color:#7a3a46}.qc-checks li[data-status="fail"]:before{color:#ff8f9e}
+.qc-checks li[data-status="info"]:before{color:#8f86a0}
+@keyframes qcIn{from{opacity:0;transform:translateY(8px)}}
+@media(max-width:520px){.qc-bar{grid-template-columns:96px 1fr 26px}}
+@media(prefers-reduced-motion:reduce){.qc-panel{animation:none}.qc-bar i:after{transition:none}}

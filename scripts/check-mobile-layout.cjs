@@ -240,8 +240,9 @@ async function run(){
     body:JSON.stringify({projects:[{title:'Abertura Keydrop Treino',src:manifest.source,
       poster:new URL('/gustavo/capas/preview.webp',manifest.source).href,category:'cs2',position:0}]})}));
    await page.goto(base,{waitUntil:'domcontentloaded'});
-   await page.locator('#featured-keydrop-treino:not([hidden])').waitFor({timeout:10000});
-   await page.locator('#featured-keydrop-treino').click();
+   const treinoCard=page.locator('.feature-grid .feature[aria-label="Assistir Abertura Keydrop Treino"]');
+   await treinoCard.waitFor({timeout:10000});
+   await treinoCard.click();
    await page.locator('.vip-quality').waitFor({timeout:5000});
    const src=await page.locator('#modal-player').getAttribute('src');
    assert.equal(src,'/videos-360/abertura-keydrop-treino.mp4','Mobile Auto should initially load 360p');

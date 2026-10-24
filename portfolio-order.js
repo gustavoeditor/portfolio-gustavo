@@ -1,5 +1,6 @@
-/* GUSTAVO portfolio ranking: preserve original editorial order, then insert managed projects
-   at visually recommended or manually chosen positions. Quality applies only to ties. */
+/* GUSTAVO portfolio ranking: every work, original or uploaded, is ordered by its overall
+   quality score (see quality-control.js). A manual position chosen in the admin is a pin
+   and always wins. Works without a valid score follow the rated ones in their original order. */
 (function(root,factory){
   'use strict';
   const api=factory();
@@ -7,30 +8,25 @@
   else root.GustavoPortfolioOrder=api;
 })(typeof globalThis==='object'?globalThis:this,function(){
   'use strict';
-  function merge(originals,managed){
-    const items=Array.isArray(originals)?originals.slice():[];
-    if(!Array.isArray(managed))return items;
-    const staged=managed.map((row,index)=>{
-      const position=Number.isInteger(row.position)&&row.position>=0&&row.position<=150?row.position:items.length;
-      const quality=Number.isInteger(row.qualityScore)&&row.qualityScore>=0&&row.qualityScore<=100?row.qualityScore:null;
-      return {row,index,position,quality,mode:row.rankingMode};
-    }).filter(x=>Array.isArray(x.row.entry));
-    staged.sort((a,b)=>{
-      if(a.position!==b.position)return a.position-b.position;
-      // An explicit human override wins a tie.
-      if((a.mode==='manual')!==(b.mode==='manual'))return a.mode==='manual'?-1:1;
-      if(a.mode==='auto'&&b.mode==='auto'&&a.quality!==null&&b.quality!==null&&a.quality!==b.quality)return b.quality-a.quality;
-      const ad=typeof a.row.publishedAt==='string'?a.row.publishedAt:'';
-      const bd=typeof b.row.publishedAt==='string'?b.row.publishedAt:'';
-      if(ad&&bd&&ad!==bd)return ad<bd?-1:1;
-      return a.index-b.index;
+  const validScore=n=>Number.isInteger(n)&&n>=0&&n<=100;
+  // items: [{entry, quality:0-100|null, pin:index|null, publishedAt?}]
+  function rank(items){
+    if(!Array.isArray(items))return [];
+    const staged=items.filter(x=>x&&x.entry!==undefined).map((x,order)=>({...x,order,quality:validScore(x.quality)?x.quality:null}));
+    const pinned=staged.filter(x=>Number.isInteger(x.pin)&&x.pin>=0&&x.pin<=150);
+    const free=staged.filter(x=>!pinned.includes(x));
+    free.sort((a,b)=>{
+      if((a.quality===null)!==(b.quality===null))return a.quality===null?1:-1;
+      if(a.quality!==b.quality)return b.quality-a.quality;
+      // Same score: the newer upload first, then the original order.
+      const ad=typeof a.publishedAt==='string'?a.publishedAt:'',bd=typeof b.publishedAt==='string'?b.publishedAt:'';
+      if(ad!==bd)return ad>bd?-1:1;
+      return a.order-b.order;
     });
-    let inserted=0;
-    for(const item of staged){
-      items.splice(Math.min(items.length,item.position+inserted),0,item.row.entry);
-      inserted++;
-    }
-    return items;
+    pinned.sort((a,b)=>a.pin-b.pin||a.order-b.order);
+    const out=free.map(x=>x.entry);
+    for(const item of pinned)out.splice(Math.min(out.length,item.pin),0,item.entry);
+    return out;
   }
-  return {merge};
+  return {rank};
 });
