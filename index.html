@@ -533,6 +533,81 @@ body{
 /* Hero card: real image stays above the offline placeholder. */
 .hero-side .tile img[data-cover-source]{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:cover}
 .hero-side .tile .offline-art{z-index:0}
+/* =====================================================
+   EXPERIENCE LAB 05 | VISUAL UPGRADE
+   Luz viva no hero, revelações cinematográficas, navegação
+   com indicador ativo e microinterações mais ricas.
+   Sem imagens extras: tudo vetorial/CSS.
+   ===================================================== */
+/* Aurora lenta atrás do título */
+.hero .hero-grid>div:first-child{position:relative}
+.hero .hero-grid>div:first-child:before{content:"";position:absolute;z-index:-1;left:-12%;top:8%;width:78%;height:72%;pointer-events:none;background:radial-gradient(ellipse 50% 45% at 30% 40%,rgba(140,96,240,.20),transparent 70%),radial-gradient(ellipse 40% 40% at 70% 70%,rgba(88,120,230,.12),transparent 70%);filter:blur(40px);animation:aurora 14s ease-in-out infinite alternate}
+@keyframes aurora{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(6%,-4%,0) scale(1.08)}100%{transform:translate3d(-4%,5%,0) scale(.96)}}
+/* "EM MOVIMENTO." com brilho que percorre o degradê */
+.hero-title .purple-text{background-image:linear-gradient(100deg,#f0e9ff 0%,#bca5ff 30%,#8e66ea 50%,#bca5ff 70%,#f0e9ff 100%);background-size:220% 100%;animation:titleRise 1.2s var(--ease) .25s both,textSheen 7s ease-in-out 1.6s infinite}
+@keyframes textSheen{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hero-title .stroke{transition:-webkit-text-stroke-color .5s,color .6s}
+.hero-title:hover .stroke{color:rgba(196,168,255,.08);-webkit-text-stroke-color:#d9c8ff}
+.hero-eyebrow .index{padding:5px 9px;border:1px solid rgba(190,160,255,.28);border-radius:30px;background:rgba(150,112,238,.08);color:#d7c6ff}
+.hero-eyebrow .dash{background:linear-gradient(90deg,#6c6680,#b597ff)}
+/* Botões: brilho, profundidade e ímã suave (JS só em ponteiro fino) */
+.btn-primary,.nav-btn{position:relative;overflow:hidden;isolation:isolate}
+.btn-primary:before,.nav-btn:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.55) 50%,transparent 75%);transform:translateX(-120%);transition:transform .8s var(--ease)}
+.btn-primary:hover:before,.nav-btn:hover:before{transform:translateX(120%)}
+.btn-primary{background:linear-gradient(135deg,#d9c9ff,#b392ff);border-color:#cdb7ff}
+.magnetic{transition:transform .35s var(--ease)}
+.link-line .arrow{background:rgba(190,160,255,.04)}
+/* Navegação: indicador da seção ativa */
+.nav-links a{position:relative;padding:8px 2px}
+.nav-links a:after{content:"";position:absolute;left:50%;right:50%;bottom:0;height:1px;background:linear-gradient(90deg,transparent,#c9b2ff,transparent);transition:left .45s var(--ease),right .45s var(--ease)}
+.nav-links a:hover:after,.nav-links a[aria-current=true]:after{left:0;right:0}
+.nav-links a[aria-current=true]{color:#fff;text-shadow:0 0 18px rgba(190,160,255,.55)}
+/* Revelação cinematográfica: sobe, desfoca e foca */
+.reveal{filter:blur(8px);transition:opacity 1.1s var(--ease),transform 1.1s var(--ease),filter 1.1s var(--ease)}
+.reveal.visible{filter:none}
+/* Títulos de seção com brilho lento */
+.section-title .gradient{background-size:200% 100%;animation:textSheen 9s ease-in-out infinite}
+.section-kicker span{display:inline-flex;align-items:center;gap:10px}
+.section-kicker span:before{content:"";width:6px;height:6px;border-radius:50%;background:#b596ff;box-shadow:0 0 12px #a47dff}
+/* Ticker com bordas que se dissolvem */
+.ticker{-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
+.ticker-track .asterisk{display:inline-block;animation:spinSlow 9s linear infinite}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+/* Métricas com número em degradê */
+.metric strong{background:linear-gradient(180deg,#fff,#b9a3ef);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* Destaques: vinheta e título com profundidade */
+.feature:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),inset 0 -120px 120px -60px rgba(80,40,160,.25);opacity:0;transition:opacity .6s}
+.feature:hover:before{opacity:1}
+.feature-content h3{text-shadow:0 6px 30px rgba(0,0,0,.45)}
+.feature .go-icon{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);background:rgba(20,14,34,.25)}
+/* Serviços: varredura de luz e número aceso */
+.service-row{position:relative;overflow:hidden}
+.service-row:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(185,147,255,.09),transparent);transform:translateX(-100%);transition:transform .9s var(--ease);pointer-events:none}
+.service-row:hover:before{transform:translateX(100%)}
+.service-row:hover .number{color:#e6d9ff;text-shadow:0 0 16px #a47dff}
+.service-row h3{transition:transform .5s var(--ease),color .3s}
+.service-row:hover h3{transform:translateX(8px);color:#f3ecff}
+.service-row:hover .service-arrow{background:#c1a0ff;color:#140d22;border-color:#c1a0ff}
+/* Método: marcador vivo em cada etapa */
+.step .number{display:inline-flex;align-items:flex-start;gap:8px}
+.step.visible .number:before{content:"";width:6px;height:6px;margin-top:4px;border-radius:50%;background:#b596ff;box-shadow:0 0 12px #a47dff}
+/* Histórico: borda luminosa que segue o cursor */
+.trust-card{--mx:50%;--my:50%}
+.trust-card:after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(260px circle at var(--mx) var(--my),rgba(190,155,255,.16),transparent 70%);opacity:0;transition:opacity .4s}
+.trust-card:hover:after{opacity:1}
+/* Contato: G gigante respirando e formulário com vidro mais nítido */
+.contact-inner:after{animation:gBreath 10s ease-in-out infinite}
+@keyframes gBreath{50%{-webkit-text-stroke-color:rgba(190,160,255,.22);transform:translateY(-10px)}}
+.contact h2 .accent{background:linear-gradient(100deg,#e6dbff,#a985ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mini-form{box-shadow:0 30px 80px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.05)}
+/* Barra de progresso de leitura com brilho */
+.progress{height:2px;background:linear-gradient(90deg,#7b55e0,#c9b2ff,#f3ecff)}
+@media(prefers-reduced-motion:reduce){
+ .hero .hero-grid>div:first-child:before,.section-title .gradient,.ticker-track .asterisk,.contact-inner:after{animation:none}
+ .hero-title .purple-text{animation:none}
+ .reveal{filter:none}
+}
+@media(max-width:700px){.hero .hero-grid>div:first-child:before{left:-20%;width:120%}}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -937,6 +1012,27 @@ const heroCarousel=(()=>{
  refresh();
  requestAnimationFrame(tick);
  return {refresh};
+})();
+// Visual upgrade: active nav section, magnetic buttons and cursor-lit trust cards.
+(()=>{
+ const links=[...document.querySelectorAll('.nav-links a[href^="#"]')];
+ const sections=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+ if('IntersectionObserver' in window&&sections.length){
+  const seen=new Map();
+  const io=new IntersectionObserver(entries=>{
+   entries.forEach(e=>seen.set(e.target,e.isIntersecting?e.intersectionRatio:0));
+   let best=null,ratio=0;for(const [el,r] of seen)if(r>ratio){best=el;ratio=r;}
+   links.forEach(a=>a.setAttribute('aria-current',String(Boolean(best)&&a.getAttribute('href')==='#'+best.id)));
+  },{threshold:[0,.15,.35,.6],rootMargin:'-20% 0px -40% 0px'});
+  sections.forEach(s=>io.observe(s));
+ }
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches||!matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+ document.querySelectorAll('.btn-primary,.nav-btn,.hero-caption .play-icon').forEach(btn=>{
+  btn.classList.add('magnetic');
+  btn.addEventListener('pointermove',e=>{const r=btn.getBoundingClientRect();btn.style.transform=`translate(${((e.clientX-r.left)/r.width-.5)*10}px,${((e.clientY-r.top)/r.height-.5)*8-2}px)`;});
+  btn.addEventListener('pointerleave',()=>{btn.style.transform='';});
+ });
+ document.querySelectorAll('.trust-card').forEach(card=>card.addEventListener('pointermove',e=>{const r=card.getBoundingClientRect();card.style.setProperty('--mx',(e.clientX-r.left)+'px');card.style.setProperty('--my',(e.clientY-r.top)+'px');}));
 })();
 const modal=document.getElementById('video-modal'),player=document.getElementById('modal-player'),close=document.getElementById('modal-close'),previousProject=document.getElementById('modal-prev'),nextProject=document.getElementById('modal-next');let playerUI=null,activeProjectIndex=-1;
 function projectVideo(data){return data[4]||ROOT+'videos/'+data[2]+'.mp4'}
