@@ -534,6 +534,53 @@ body{
 .hero-side .tile img[data-cover-source]{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:cover}
 .hero-side .tile .offline-art{z-index:0}
 /* =====================================================
+   VORTEX 3D | o arquivo vira um túnel em hélice guiado pelo scroll.
+   CSS 3D puro + um único loop de scroll: sem WebGL, sem bibliotecas.
+   ===================================================== */
+.vortex{position:relative;z-index:2;height:420vh;background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(84,48,160,.16),transparent 75%)}
+.vortex-sticky{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;isolation:isolate;--p:0;--e:0}
+.vortex-stage{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 50%;z-index:2}
+.vortex-helix{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;will-change:transform}
+.vortex-card{--w:280px;--d:0;position:absolute;left:calc(var(--w)/-2);top:calc(var(--w)*-.28);width:var(--w);aspect-ratio:16/9;padding:0;border:1px solid rgba(220,200,255,.28);border-radius:10px;overflow:hidden;background:#15111f;color:#fff;transform-style:preserve-3d;backface-visibility:visible;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(160,120,255,.08);will-change:transform,opacity;cursor:pointer;text-align:left}
+.vortex-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vortex-card:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(6,4,14,.85),transparent 55%),rgba(6,4,14,calc(var(--d)*.78));pointer-events:none}
+.vortex-card b{position:absolute;z-index:2;left:10px;right:10px;bottom:8px;font:600 11px/1.25 var(--font);letter-spacing:-.01em;text-shadow:0 2px 10px #000}
+.vortex-card small{position:absolute;z-index:2;top:8px;left:9px;padding:3px 7px;border-radius:20px;background:rgba(14,10,24,.7);border:1px solid rgba(255,255,255,.18);font:700 8px var(--font);letter-spacing:.12em}
+.vortex-card:hover,.vortex-card:focus-visible{border-color:#d4bfff;box-shadow:0 0 40px rgba(170,120,255,.55)}
+.vortex-words{position:absolute;inset:0;z-index:1;display:grid;place-items:center;pointer-events:none}
+.vortex-words span{grid-area:1/1;font:700 clamp(70px,17vw,300px)/1 var(--font);letter-spacing:-.08em;color:transparent;-webkit-text-stroke:1.5px rgba(214,192,255,.5);text-shadow:0 0 80px rgba(150,100,255,.35);opacity:0;will-change:transform,opacity;white-space:nowrap}
+.vortex-stars{position:absolute;inset:-50% 0;z-index:0;pointer-events:none}
+.vortex-stars i{position:absolute;inset:0;will-change:transform;background-repeat:repeat}
+.vortex-stars i:nth-child(1){background-image:radial-gradient(1px 1px at 20px 30px,#cbb8ff,transparent),radial-gradient(1px 1px at 140px 90px,#fff,transparent),radial-gradient(1px 1px at 80px 160px,#a98cf0,transparent);background-size:200px 200px;opacity:.45}
+.vortex-stars i:nth-child(2){background-image:radial-gradient(1.5px 1.5px at 60px 50px,#e8dcff,transparent),radial-gradient(1.5px 1.5px at 230px 170px,#b597ff,transparent);background-size:300px 260px;opacity:.55}
+.vortex-stars i:nth-child(3){background-image:radial-gradient(2px 2px at 120px 80px,#fff,transparent),radial-gradient(2.5px 2.5px at 330px 300px,#c9afff,transparent);background-size:460px 420px;opacity:.7;filter:drop-shadow(0 0 4px #a47dff)}
+.vortex-hud{position:absolute;z-index:4;left:max(20px,4vw);right:max(20px,4vw);display:flex;justify-content:space-between;align-items:center;gap:16px;color:#b8a8d6;pointer-events:none}
+.vortex-hud-top{top:110px}
+.vortex-hud-bottom{bottom:40px;flex-direction:column;justify-content:center;gap:12px;text-align:center}
+.vortex-rec{display:inline-block;width:7px;height:7px;margin-right:8px;border-radius:50%;background:#ff5a77;box-shadow:0 0 10px #ff5a77;animation:statusPulse 1.4s infinite;vertical-align:1px}
+#vortex-tc{font-variant-numeric:tabular-nums;color:#e7dcff}
+.vortex-bar{flex:none;width:min(260px,50vw);height:2px;border-radius:2px;background:rgba(220,205,250,.15);overflow:hidden}
+.vortex-bar i{display:block;height:100%;background:linear-gradient(90deg,#7b55e0,#f0e7ff);transform-origin:left;transform:scaleX(var(--p))}
+.vortex-final{position:absolute;z-index:5;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;padding:0 20px;opacity:var(--e);transform:translateY(calc((1 - var(--e))*40px)) scale(calc(.9 + var(--e)*.1));pointer-events:none}
+.vortex-final h2{margin:0;font:600 clamp(42px,7vw,112px)/.95 var(--font);letter-spacing:-.075em}
+.vortex-final .gradient{background:linear-gradient(105deg,#fff 0%,#d4c0ff 46%,#906ddd 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.vortex.is-final .vortex-final{pointer-events:auto}
+.vortex.is-final .vortex-card{pointer-events:none}
+/* Paralaxe do hero */
+.hero .hero-grid>div:first-child,.hero-side{will-change:transform}
+@media(max-width:700px){
+ .vortex{height:340vh}
+ .vortex-card{--w:160px;border-radius:8px}
+ .vortex-card b{font-size:9px}
+ .vortex-hud-top{top:84px}
+ .vortex-hud-bottom{bottom:88px}
+}
+/* Movimento reduzido: um quadro fixo do vórtice, sem scroll longo. */
+.vortex.is-static{height:auto}
+.vortex.is-static .vortex-sticky{position:relative;height:720px}
+.vortex.is-static .vortex-final{position:absolute;inset:auto 0 60px;opacity:1;transform:none;pointer-events:auto}
+@media(prefers-reduced-motion:reduce){.vortex-rec{animation:none}}
+/* =====================================================
    EXPERIENCE LAB 05 | VISUAL UPGRADE
    Luz viva no hero, revelações cinematográficas, navegação
    com indicador ativo e microinterações mais ricas.
@@ -679,6 +726,16 @@ body{
   <div id="galeria" class="work-index reveal"><h3>Arquivo criativo <span aria-hidden="true">↗</span></h3><span class="sort-note"><i aria-hidden="true">◆</i> Ordenado por controle de qualidade</span><span id="results-count" aria-live="polite">16 projetos no catálogo</span></div>
   <div class="filters reveal" role="group" aria-label="Filtrar projetos"><button type="button" class="filter-btn" data-filter="all" aria-pressed="true">Todos <span>(16)</span></button><button type="button" class="filter-btn" data-filter="cinematics" aria-pressed="false">Cinematics</button><button type="button" class="filter-btn" data-filter="cs2" aria-pressed="false">CS2 / Edits</button><button type="button" class="filter-btn" data-filter="motion" aria-pressed="false">Motion Design</button><button type="button" class="filter-btn" data-filter="youtube" aria-pressed="false">YouTube</button></div>
   <div class="portfolio-grid" id="portfolio-grid" aria-live="off"></div><div class="more-row"><button type="button" class="btn-more" id="load-more" hidden>Explorar mais projetos ↓</button></div>
+ </div>
+</section>
+<section class="vortex" id="vortex" aria-labelledby="vortex-title">
+ <div class="vortex-sticky">
+  <div class="vortex-stars" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="vortex-words" aria-hidden="true"><span>CORTE</span><span>RITMO</span><span>LUZ</span><span>MOVIMENTO</span></div>
+  <div class="vortex-stage"><div class="vortex-helix" id="vortex-helix"></div></div>
+  <div class="vortex-hud vortex-hud-top mono"><span><i class="vortex-rec" aria-hidden="true"></i> ✳ / ARQUIVO EM 3D</span><span id="vortex-tc" aria-hidden="true">00:00:00:00</span></div>
+  <div class="vortex-hud vortex-hud-bottom mono" aria-hidden="true"><span id="vortex-phase">ROLE PARA MERGULHAR</span><span class="vortex-bar"><i id="vortex-bar"></i></span></div>
+  <div class="vortex-final"><span class="eyebrow mono">FIM DO TAKE</span><h2 id="vortex-title">CADA FRAME<br><span class="gradient">TEM UM PORQUÊ.</span></h2><a class="btn-primary" href="#contato">Vamos criar algo <span aria-hidden="true">↗</span></a></div>
  </div>
 </section>
 <section class="services section" id="especialidades" aria-labelledby="services-title">
@@ -917,7 +974,7 @@ function paint(){stopPreview();document.getElementById('catalog-total').textCont
    }
   }catch(_){/* Keep original video when renditions are unavailable. */}
  }
- if(added){applyRanking();paint();paintFeatured();heroCarousel.refresh();}
+ if(added){applyRanking();paint();paintFeatured();heroCarousel.refresh();vortex.refresh();}
  }catch(err){console.warn('Catálogo adicional temporariamente indisponível.',err);}})();
 filters.forEach(btn=>btn.addEventListener('click',()=>{filter=btn.dataset.filter;limit=6;filters.forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));paint()}));more.addEventListener('click',()=>{limit+=6;paint()});paint();paintFeatured();
 // Hero carousel: the best-ranked works rotate every 5 s. Pauses on hover, off-screen,
@@ -1033,6 +1090,101 @@ const heroCarousel=(()=>{
   btn.addEventListener('pointerleave',()=>{btn.style.transform='';});
  });
  document.querySelectorAll('.trust-card').forEach(card=>card.addEventListener('pointermove',e=>{const r=card.getBoundingClientRect();card.style.setProperty('--mx',(e.clientX-r.left)+'px');card.style.setProperty('--my',(e.clientY-r.top)+'px');}));
+})();
+// VORTEX 3D: scroll drives a camera through a helix of the best-ranked covers.
+// 0 → .78 rotate + dive through the tunnel; .78 → .95 the helix explodes outwards; then the final CTA.
+const vortex=(()=>{
+ const section=document.getElementById('vortex'),helix=document.getElementById('vortex-helix');
+ if(!section||!helix)return {refresh(){}};
+ const sticky=section.querySelector('.vortex-sticky'),words=[...section.querySelectorAll('.vortex-words span')],stars=[...section.querySelectorAll('.vortex-stars i')];
+ const tc=document.getElementById('vortex-tc'),phase=document.getElementById('vortex-phase');
+ const still=matchMedia('(prefers-reduced-motion: reduce)');
+ const PHASES=['ROLE PARA MERGULHAR','01 — CORTE: O RITMO NASCE','02 — RITMO: CADA BATIDA CONTA','03 — LUZ: A IMAGEM GANHA ALMA','04 — MOVIMENTO: TUDO SE CONECTA','FIM DO TAKE'];
+ const STEP=40; // 9 cards per turn
+ let cards=[],radius=420,rise=120,progress=-1,mouseX=0,mouseY=0,queued=false;
+ const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
+ const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t);};
+ function layout(){
+  const small=innerWidth<=700;
+  radius=small?Math.min(innerWidth*.5,210):Math.min(innerWidth*.29,410);
+  rise=small?34:50;
+ }
+ function build(){
+  // The helix repeats the ranking from the top so the tunnel stays dense.
+  const pool=projects.slice(0,18),count=innerWidth<=700?18:27;
+  const list=Array.from({length:Math.min(count,pool.length*3)},(_,i)=>pool[i%pool.length]);
+  helix.replaceChildren(...list.map((data,i)=>{
+   const q=qualityOf.get(data),b=document.createElement('button');
+   b.type='button';b.className='vortex-card';b.dataset.open=String(projects.indexOf(data));
+   b.setAttribute('aria-label','Assistir '+data[0]);
+   const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.alt='';img.src=coverOf(data);
+   const tag=document.createElement('small');tag.textContent='#'+String(projects.indexOf(data)+1).padStart(2,'0')+(q?' · '+q.overall:'');
+   const title=document.createElement('b');title.textContent=data[0];
+   b.append(img,tag,title);return b;
+  }));
+  cards=[...helix.children];
+  progress=-1;render();
+ }
+ function render(){
+  queued=false;
+  const r=section.getBoundingClientRect();
+  const p=still.matches?.42:clamp(-r.top/Math.max(1,r.height-innerHeight));
+  if(Math.abs(p-progress)<.0004&&!render.force)return;
+  render.force=false;progress=p;
+  const dive=smooth(0,.78,p),e=smooth(.78,.95,p),n=cards.length;
+  const rot=-p*720,total=(n-1)*rise,camY=-total/2+dive*total;
+  const z=-380+dive*(radius*.95)+e*320;
+  helix.style.transform=`translate3d(0,0,${z}px) rotateX(${-10+mouseY*6-e*8}deg) rotateZ(${mouseX*-3}deg) rotateY(${rot+mouseX*10}deg) translateY(${-camY}px)`;
+  for(let i=0;i<n;i++){
+   const angle=i*STEP,y=i*rise-total/2;
+   const facing=Math.cos((angle+rot+mouseX*10)*Math.PI/180); // 1 = facing camera
+   const burst=e*(900+(i%3)*260);
+   const c=cards[i];
+   c.style.transform=`rotateY(${angle}deg) translateZ(${radius+burst}px) translateY(${y}px) rotateX(${e*(i%2?40:-40)}deg)`;
+   c.style.opacity=String((.18+.82*(facing+1)/2)*(1-e));
+   c.style.setProperty('--d',String(((1-facing)/2).toFixed(3)));
+  }
+  // Giant words: one per quarter of the dive, scaling through the camera.
+  words.forEach((w,k)=>{
+   const local=p/.78*words.length-k,o=clamp(1-Math.abs(local-.5)*1.7)*(1-e);
+   w.style.opacity=String(o);
+   w.style.transform=`scale(${.7+local*.45}) translateY(${(local-.5)*-6}vh)`;
+  });
+  stars.forEach((s,k)=>{s.style.transform=`translate3d(${mouseX*-(k+1)*8}px,${-p*(k+1)*35}%,0)`;});
+  sticky.style.setProperty('--p',p.toFixed(4));
+  sticky.style.setProperty('--e',e.toFixed(4));
+  section.classList.toggle('is-final',e>.6);
+  const frames=Math.round(p*2400),ff=frames%24,s=Math.floor(frames/24);
+  tc.textContent=['00',String(Math.floor(s/60)).padStart(2,'0'),String(s%60).padStart(2,'0'),String(ff).padStart(2,'0')].join(':');
+  phase.textContent=e>.5?PHASES[5]:p<.03?PHASES[0]:PHASES[1+Math.min(3,Math.floor(p/.78*4))];
+ }
+ const request=()=>{if(!queued){queued=true;requestAnimationFrame(render);}};
+ addEventListener('scroll',request,{passive:true});
+ addEventListener('resize',()=>{layout();render.force=true;request();});
+ if(!still.matches&&matchMedia('(hover:hover) and (pointer:fine)').matches){
+  sticky.addEventListener('pointermove',e=>{mouseX=e.clientX/innerWidth-.5;mouseY=e.clientY/innerHeight-.5;render.force=true;request();});
+  sticky.addEventListener('pointerleave',()=>{mouseX=0;mouseY=0;render.force=true;request();});
+ }
+ if(still.matches)section.classList.add('is-static');
+ layout();build();
+ return {refresh:build};
+})();
+// Hero parallax: title, poster and orbit drift at different depths while leaving the hero.
+(()=>{
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const hero=document.getElementById('inicio');if(!hero)return;
+ const copy=hero.querySelector('.hero-grid>div:first-child'),side=hero.querySelector('.hero-side'),scroll=hero.querySelector('.hero-scroll');
+ let queued=false;
+ function render(){
+  queued=false;
+  const y=Math.min(scrollY,hero.offsetHeight);
+  const k=y/hero.offsetHeight;
+  if(copy)copy.style.transform=`translate3d(0,${y*.32}px,0)`,copy.style.opacity=String(1-k*.9);
+  if(side)side.style.transform=`translate3d(0,${y*-.14}px,0) rotate(${k*-7}deg) scale(${1-k*.12})`;
+  if(scroll)scroll.style.opacity=String(1-k*4);
+ }
+ addEventListener('scroll',()=>{if(!queued){queued=true;requestAnimationFrame(render);}},{passive:true});
+ render();
 })();
 const modal=document.getElementById('video-modal'),player=document.getElementById('modal-player'),close=document.getElementById('modal-close'),previousProject=document.getElementById('modal-prev'),nextProject=document.getElementById('modal-next');let playerUI=null,activeProjectIndex=-1;
 function projectVideo(data){return data[4]||ROOT+'videos/'+data[2]+'.mp4'}
