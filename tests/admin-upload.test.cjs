@@ -164,8 +164,8 @@ test('admin title generator offers a retry with transparent status',()=>{
  const html=JSON.parse(encoded[1]);
  assert.ok(html.includes('id="auto-regenerate-title"'));
  assert.ok(html.includes('id="auto-title-ai-status"'));
- assert.ok(html.includes('/admin-smart-upload.js?v=6'));
- assert.ok(html.includes('/upload-ui.css?v=4'));
+ assert.ok(html.includes('/admin-smart-upload.js?v=7'));
+ assert.ok(html.includes('/upload-ui.css?v=5'));
  const uploader=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
  assert.doesNotThrow(()=>new vm.Script(uploader));
  assert.match(uploader,/aiRetry\.addEventListener\('click'/);
@@ -199,8 +199,8 @@ test('video thumbnail picker has an accessible timeline and never publishes with
  assert.match(html,/id="auto-cover-range"[^>]*type="range"/);
  assert.match(html,/id="auto-cover-confirm" disabled/);
  assert.match(html,/id="auto-change-cover">Enviar imagem/);
- assert.ok(html.includes('/admin-smart-upload.js?v=6'));
- assert.ok(html.includes('/upload-ui.css?v=4'));
+ assert.ok(html.includes('/admin-smart-upload.js?v=7'));
+ assert.ok(html.includes('/upload-ui.css?v=5'));
  const uploader=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
  assert.doesNotThrow(()=>new vm.Script(uploader));
  assert.match(uploader,/coverVideo\.addEventListener\('seeked',readyFrame\)/);
@@ -252,7 +252,7 @@ test('authenticated panel permits the upload SDK control API and serves its own 
  env();const handler=require('../api/admin-panel'),res=response();handler(request({},'GET'),res);
  assert.equal(res.code,200);assert.match(res.headers['Content-Security-Policy'],/https:\/\/vercel\.com\/api\/blob\//);
  assert.ok(!res.headers['Content-Security-Policy'].includes('https://esm.sh'));
- assert.ok(res.body.includes('/admin-smart-upload.js?v=6'));
+ assert.ok(res.body.includes('/admin-smart-upload.js?v=7'));
  assert.ok(fs.existsSync(path.join(root,'vendor/blob-client.js')));
 });
 
@@ -275,21 +275,38 @@ test('configured OIDC bindings work without an env token because runtime credent
  process.env.VERCEL='1';assert.equal(require('../lib/visual-ai').visualAIConfig().provider,'gateway');
 });
 
-test('quality ranking inserts new projects while keeping the existing curated catalog in sequence',()=>{
- const {merge}=require('../portfolio-order');
- const originals=Array.from({length:16},(_,i)=>['original-'+i]);
- const incoming=[
-  {entry:['weak'],position:3,qualityScore:35,rankingMode:'auto',publishedAt:'2026-10-19T00:00:00Z'},
-  {entry:['strong'],position:3,qualityScore:93,rankingMode:'auto',publishedAt:'2026-10-20T00:00:00Z'},
-  {entry:['manual'],position:3,qualityScore:null,rankingMode:'manual'},
-  {entry:['unrated'],position:16,qualityScore:null,rankingMode:'unrated'}
- ];
- const mixed=merge(originals,incoming).map(x=>x[0]);
- assert.equal(mixed.length,20);
- assert.deepEqual(mixed.slice(3,6),['manual','strong','weak']);
- assert.equal(mixed.at(-1),'unrated');
- assert.deepEqual(mixed.filter(x=>x.startsWith('original-')),originals.map(x=>x[0]));
- assert.deepEqual(merge(originals,[]),originals);
+test('every work is ranked by quality score, manual pins win and unrated works go last',()=>{
+ const {rank}=require('../portfolio-order');
+ const order=rank([
+  {entry:'mid',quality:75},
+  {entry:'unrated-a',quality:null},
+  {entry:'top',quality:91},
+  {entry:'pinned',quality:40,pin:0},
+  {entry:'tie-old',quality:75,publishedAt:'2026-10-01T00:00:00Z'},
+  {entry:'tie-new',quality:75,publishedAt:'2026-10-20T00:00:00Z'},
+  {entry:'unrated-b',quality:999}
+ ]);
+ assert.deepEqual(order,['pinned','top','tie-new','tie-old','mid','unrated-a','unrated-b']);
+ assert.deepEqual(rank([]),[]);
+});
+
+test('quality control combines visual criteria with measured technical checks',()=>{
+ const Q=require('../quality-control');
+ const tech=Q.technical({width:1920,height:1080,fps:60,duration:30,bytes:20e6});
+ assert.ok(tech.score>=90);
+ assert.deepEqual(tech.checks.map(c=>c.status),['pass','pass','pass','pass','pass']);
+ const weak=Q.technical({width:640,height:360,duration:1,bytes:50e3});
+ assert.ok(weak.score<tech.score-25);
+ assert.ok(weak.checks.some(c=>c.status==='fail'));
+ const q=Q.clean({production:80,complexity:70,professionalism:90,technical:100,overall:5,source:'ai'});
+ assert.equal(q.overall,Math.round(80*.3+70*.25+90*.25+100*.2));
+ assert.equal(q.tier,'premium');
+ assert.equal(Q.clean({technical:100}),null);
+ assert.equal(Q.tier(86).label,'Flagship');
+ global.GustavoQuality=Q;
+ const baseline=require('../portfolio-quality');
+ for(const key of Object.keys(baseline.reviews))assert.ok(baseline.lookup(key).overall>0,key);
+ delete global.GustavoQuality;
 });
 
 test('only valid visual AI scores are considered automatic ranking, with manual override preserved',async()=>{
@@ -297,29 +314,35 @@ test('only valid visual AI scores are considered automatic ranking, with manual 
  const {cleanProject}=load('lib/managed-projects.js',{'@vercel/blob':{}});
  const base={title:'Take',category:'cs2',src:'video',poster:'cover',position:2};
  assert.deepEqual({s:cleanProject({...base,rankingMode:'auto',qualityScore:86}).qualityScore,m:cleanProject({...base,rankingMode:'auto',qualityScore:86}).rankingMode},{s:86,m:'auto'});
+ const qc=cleanProject({...base,rankingMode:'auto',qualityScore:99,quality:{production:80,complexity:80,professionalism:80,technical:80,overall:100}});
+ assert.equal(qc.qualityScore,80);assert.equal(qc.quality.tier,'premium');
  assert.equal(cleanProject({...base,rankingMode:'auto',qualityScore:120}).rankingMode,'unrated');
  assert.equal(cleanProject({...base,rankingMode:'manual',qualityScore:90}).rankingMode,'manual');
  const handler=load('api/admin-analyze.js',{'../lib/visual-ai':{visualAIConfig:()=>({url:'https://ai.test',model:'fixture'}),visualAIToken:async()=> 'fixture'}});
  global.fetch=async()=>new Response(JSON.stringify({choices:[{message:{content:JSON.stringify({title:'Take cinematográfico',category:'cinematics',position:1,qualityScore:92,qualityConfidence:'alta'})}}]}));
  const result=response();await handler(request({name:'take.mp4',total:17,frames:['data:image/jpeg;base64,YWJj']}),result);
- assert.equal(result.body.qualityScore,92);assert.equal(result.body.rankingMode,'auto');assert.equal(result.body.position,1);
+ assert.ok(result.body.qualityScore>=85);assert.equal(result.body.rankingMode,'auto');assert.equal(result.body.position,1);
+ global.fetch=async()=>new Response(JSON.stringify({choices:[{message:{content:JSON.stringify({title:'Take cinematográfico',category:'cinematics',position:1,production:90,complexity:80,professionalism:85,qualityConfidence:'media'})}}]}));
+ const split=response();await handler(request({name:'take.mp4',total:17,frames:['data:image/jpeg;base64,YWJj'],meta:{width:1920,height:1080,duration:20,bytes:12e6}}),split);
+ assert.equal(split.body.quality.production,90);assert.equal(split.body.qualityScore,split.body.quality.overall);
+ assert.ok(split.body.technicalChecks.some(c=>c.id==='resolution'&&c.status==='pass'));
  global.fetch=async()=>new Response(JSON.stringify({choices:[{message:{content:JSON.stringify({title:'Outro vídeo',category:'cs2',position:0,qualityScore:999})}}]}));
  const bad=response();await handler(request({name:'take.mp4',total:17,frames:['data:image/jpeg;base64,YWJj']}),bad);
  assert.equal(bad.body.qualityScore,null);assert.equal(bad.body.rankingMode,'unrated');assert.equal(bad.body.position,17);
 });
 
-test('home portfolio uses ranked insertion and recalculates featured video indexes',()=>{
+test('home portfolio ranks by quality, fills featured slots and rotates the hero',()=>{
  const page=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const admin=fs.readFileSync(path.join(root,'api/admin-panel.js'),'utf8');
  const encoded=/^const PANEL_HTML = (".*");$/m.exec(admin);
  const html=JSON.parse(encoded[1]);
- assert.match(page,/GustavoPortfolioOrder\.merge\(projects,ranked\)/);
- assert.match(page,/features\[0\]\.dataset\.open=String\(first\)/);
- assert.match(page,/featuredTreino\.dataset\.open=String\(projects\.indexOf\(treino\)\)/);
- assert.match(page,/portfolio-order\.js\?v=1/);
+ assert.match(page,/GustavoPortfolioOrder\.rank\(/);
+ assert.match(page,/btn\.dataset\.open=String\(i\)/);
+ assert.match(page,/const DURATION=5000/);
+ assert.match(page,/quality-control\.js\?v=1[\s\S]*portfolio-quality\.js\?v=1[\s\S]*portfolio-order\.js\?v=2/);
  assert.match(html,/id="auto-ranking-mode"/);
  assert.match(html,/id="auto-ranking-status"/);
- assert.match(html,/admin-smart-upload\.js\?v=6/);
+ assert.match(html,/quality-control\.js\?v=1"[^>]*><\/script><script src="\/admin-smart-upload\.js\?v=7/);
  const uploader=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
  assert.match(uploader,/rankingMode,src:uploadedVideo\.url/);
  assert.match(uploader,/positionField\.addEventListener\('input'/);

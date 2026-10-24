@@ -30,7 +30,62 @@
   let titleEdited = false;
   let positionEdited = false;
   let qualityScore = null;
+  let quality = null;
+  let videoMeta = null;
   let suggestedPosition = null;
+  const Q = window.GustavoQuality;
+  // Automatic quality control panel, filled as soon as a video is chosen.
+  const qcPanel = document.createElement('section');
+  qcPanel.className = 'qc-panel';
+  qcPanel.id = 'auto-qc';
+  qcPanel.hidden = true;
+  qcPanel.setAttribute('aria-live','polite');
+  $('auto-ranking-status').closest('.field').after(qcPanel);
+  const QC_LABELS = {production:'Produção',complexity:'Complexidade',professionalism:'Profissionalismo',technical:'Técnica'};
+  function renderQC(checks, state) {
+    qcPanel.hidden = false;
+    qcPanel.replaceChildren();
+    const head = document.createElement('div');
+    head.className = 'qc-head';
+    const ring = document.createElement('div');
+    ring.className = 'qc-ring';
+    const score = quality ? quality.overall : null;
+    ring.style.setProperty('--qc', String(score ?? 0));
+    ring.textContent = score === null ? '—' : String(score);
+    const titles = document.createElement('div');
+    const kicker = document.createElement('small');
+    kicker.textContent = 'CONTROLE DE QUALIDADE';
+    const verdict = document.createElement('strong');
+    const tier = score === null ? null : Q.tier(score);
+    verdict.textContent = tier ? tier.label + ' · ' + score + '/100' : state;
+    if (tier) qcPanel.dataset.tier = tier.id; else delete qcPanel.dataset.tier;
+    titles.append(kicker, verdict);
+    head.append(ring, titles);
+    const bars = document.createElement('div');
+    bars.className = 'qc-bars';
+    for (const key of Object.keys(QC_LABELS)) {
+      const value = quality ? quality[key] : key === 'technical' && checks ? Q.technical(videoMeta).score : null;
+      const row = document.createElement('div');
+      row.className = 'qc-bar';
+      const label = document.createElement('span');
+      label.textContent = QC_LABELS[key];
+      const track = document.createElement('i');
+      track.style.setProperty('--v', String(value ?? 0));
+      const num = document.createElement('b');
+      num.textContent = value ?? '…';
+      row.append(label, track, num);
+      bars.append(row);
+    }
+    const list = document.createElement('ul');
+    list.className = 'qc-checks';
+    for (const check of checks || []) {
+      const li = document.createElement('li');
+      li.dataset.status = check.status;
+      li.textContent = check.label + ': ' + check.detail;
+      list.append(li);
+    }
+    qcPanel.append(head, bars, list);
+  }
   const rankingSelect=$('auto-ranking-mode');
   const rankingStatus=$('auto-ranking-status');
   const positionField=$('auto-position');
@@ -45,7 +100,7 @@
       setRankingStatus('Sem avaliação visual válida. Escolha a posição manualmente ou tente analisar novamente.');
     }else if(rankingSelect.value==='auto' && suggestedPosition!==null){
       positionEdited=false;positionField.value=String(suggestedPosition+1);
-      setRankingStatus('Ordem automática por análise visual: '+qualityScore+'/100 (estimativa; sem áudio ou movimento).');
+      setRankingStatus('Ordem automática pelo controle de qualidade: '+qualityScore+'/100.');
     }else{
       positionEdited=true;setRankingStatus('Posição manual ativa.');
     }
@@ -97,9 +152,12 @@
     titleEdited = false;
     positionEdited = false;
     qualityScore = null;
+    quality = null;
+    videoMeta = null;
+    qcPanel.hidden = true;
     suggestedPosition = null;
     rankingSelect.value='manual';
-    setRankingStatus('Aguardando avaliação visual. Sem IA, o novo trabalho fica ao final.');
+    setRankingStatus('Aguardando controle de qualidade. Sem nota, o novo trabalho fica ao final.');
     frames = [];
     aiTitleStatus.textContent = 'Aguardando vídeo.';
     aiTitleStatus.dataset.mode = '';
@@ -134,6 +192,7 @@
     });
     const out = [];
     let thumbnail = null;
+    let metaWidth, metaHeight, metaDuration;
     try {
       const meta = waitFor('loadedmetadata',10000);
       element.src = source;
@@ -141,6 +200,7 @@
       if (!element.videoWidth || !element.videoHeight || !Number.isFinite(element.duration) || element.duration<=0) {
         throw new Error('Não foi possível identificar o vídeo.');
       }
+      metaWidth = element.videoWidth; metaHeight = element.videoHeight; metaDuration = element.duration;
       const canvas = document.createElement('canvas');
       const scale=Math.min(560/element.videoWidth,560/element.videoHeight,1);
       canvas.width = Math.max(1,Math.round(element.videoWidth*scale));
@@ -176,7 +236,7 @@
       element.load();
       URL.revokeObjectURL(source);
     }
-    return {frames:out,thumbnail};
+    return {frames:out,thumbnail,meta:{width:metaWidth,height:metaHeight,duration:metaDuration}};
   }
 
   // A capa selecionada permanece local até o usuário clicar em Publicar.
@@ -336,12 +396,15 @@
       const samples = await takeFrames(chosen);
       if (file !== chosen) return;
       frames = samples.frames;
+      videoMeta = {...samples.meta, bytes:chosen.size};
       if (!customCover) setCover(samples.thumbnail, false);
     } catch (_) {
       if (file !== chosen) return;
       tell('Não foi possível extrair quadros automaticamente. Você pode enviar uma capa e verificar a compatibilidade do vídeo.',true);
     }
     if (file !== chosen) return;
+    if (!videoMeta) videoMeta = {bytes:chosen.size};
+    renderQC(Q.technical(videoMeta).checks, 'Checagem técnica concluída · aguardando análise visual');
     await requestAnalysis(chosen);
   }
 
@@ -354,20 +417,22 @@
     try {
       const result = await safeJson(await fetch('/api/admin-analyze',{
         method:'POST',credentials:'same-origin',headers,
-        body:JSON.stringify({name:chosen.name,frames,total:totalProjects})
+        body:JSON.stringify({name:chosen.name,frames,total:totalProjects,meta:videoMeta})
       }));
       if (file !== chosen) return;
       if (result.source === 'ai') {
         if (!titleEdited && result.title) titleInput.value = result.title;
         if (['cs2','cinematics','motion','youtube','outros'].includes(result.category))
           $('auto-category').value = result.category;
-        qualityScore=Number.isInteger(result.qualityScore)&&result.qualityScore>=0&&result.qualityScore<=100?result.qualityScore:null;
+        quality=Q.clean(result.quality);
+        qualityScore=quality?quality.overall:null;
+        renderQC(result.technicalChecks||Q.technical(videoMeta).checks, 'Sem nota visual válida');
         suggestedPosition=qualityScore===null?null:Math.max(0,Math.min(totalProjects,Number.isInteger(result.position)?result.position:totalProjects));
         if(!positionEdited){
           if(suggestedPosition!==null){positionField.value=String(suggestedPosition+1);rankingSelect.value='auto';}
           else {positionField.value=String(totalProjects+1);rankingSelect.value='manual';}
         }
-        setRankingStatus(qualityScore===null?'Título criado pela IA, mas não houve nota visual válida. Posição manual/ao final.':'IA visual: '+qualityScore+'/100, confiança '+(result.qualityConfidence||'baixa')+'. Ordem '+(rankingSelect.value==='auto'?'automática':'manual')+'.');
+        setRankingStatus(qualityScore===null?'Título criado pela IA, mas não houve nota visual válida. Posição manual/ao final.':'Controle de qualidade: '+qualityScore+'/100, confiança '+(quality.confidence||'baixa')+'. Ordem '+(rankingSelect.value==='auto'?'automática pela nota':'manual')+'.');
         $('auto-description').value = result.description || '';
         aiTitleStatus.textContent = titleEdited ? 'Título gerado. Sua edição foi preservada.' : 'Título criado pela IA visual ✓';
         aiTitleStatus.dataset.mode = 'success';
@@ -375,7 +440,8 @@
           (result.explanation || 'Revise o título antes de publicar.');
         tell(storageReady ? 'Título criado pela IA. Revise e publique.' : 'Título criado pela IA. Falta habilitar o armazenamento para publicar.');
       } else {
-        qualityScore=null;suggestedPosition=null;
+        qualityScore=null;quality=null;suggestedPosition=null;
+        renderQC(result.technicalChecks||Q.technical(videoMeta).checks, 'Sem análise visual · só checagem técnica');
         rankingSelect.value='manual';
         if(!positionEdited)positionField.value=String(totalProjects+1);
         setRankingStatus('Sem nota de qualidade: o novo trabalho ficará ao final, salvo posição manual.');
@@ -387,7 +453,8 @@
       }
     } catch (error) {
       if (file !== chosen) return;
-      qualityScore=null;suggestedPosition=null;rankingSelect.value='manual';
+      qualityScore=null;quality=null;suggestedPosition=null;rankingSelect.value='manual';
+      renderQC(Q.technical(videoMeta).checks, 'Sem análise visual · só checagem técnica');
       if(!positionEdited)positionField.value=String(totalProjects+1);
       setRankingStatus('Sem nota de qualidade por falha de conexão. Posição manual/ao final.');
       const message = 'Erro de conexão ao analisar o vídeo. Verifique a sessão ou tente novamente.';
@@ -446,7 +513,7 @@
       await safeJson(await fetch('/api/admin-publish',{
         method:'POST',credentials:'same-origin',headers,
         body:JSON.stringify({
-          uploadId:pending.id,title,category,position,qualityScore,rankingMode,src:uploadedVideo.url,poster:uploadedCover.url,
+          uploadId:pending.id,title,category,position,qualityScore,quality:rankingMode==='auto'?quality:null,rankingMode,src:uploadedVideo.url,poster:uploadedCover.url,
           description:$('auto-description').value.trim()
         })
       }));
@@ -455,7 +522,7 @@
       uploading = false;
       clearSelection();
       try {await reloadManaged();} catch (_) { /* Publication succeeded; list refresh can be retried independently. */ }
-      tell(rankingMode==='auto'?'Publicado! O vídeo entrará na posição sugerida pela IA, sem alterar a ordem relativa dos trabalhos originais.':'Publicado! A galeria respeitará a posição escolhida ou adicionará ao final.');
+      tell(rankingMode==='auto'?'Publicado! A galeria se reorganiza sozinha: o vídeo entra na posição da nota '+qualityScore+'/100.':'Publicado! A galeria respeitará a posição escolhida ou adicionará ao final.');
     } catch(error) {
       tell(error.message || 'Não foi possível publicar. Confira sua sessão e tente novamente.',true);
     } finally {
