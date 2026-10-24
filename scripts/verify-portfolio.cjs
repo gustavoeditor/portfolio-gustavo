@@ -33,7 +33,7 @@ const playerCode=read('player.js');
 for(const token of ['mobileSource','verifiedExternalVariants',"mobile:'360p'",'matchMedia(\'(max-width:700px)\')'])assert.ok(playerCode.includes(token),'Player sem seleção móvel: '+token);
 
 assert.ok(!projects.some(p=>p.title==='KeyDrop | AWP Product Cinematic'),'O vídeo substituído não deve continuar no catálogo');
-assert.ok(html.includes('id="featured-keydrop-treino"')&&html.includes("normalizedTitle(p.title)==='abertura keydrop treino'"),'Novo destaque precisa usar o vídeo enviado pelo painel');
+assert.ok(html.includes('function paintFeatured()')&&html.includes("normalizedTitle(p.title)==='abertura keydrop treino'"),'Destaques precisam vir do ranking de qualidade, incluindo vídeos enviados pelo painel');
 const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(new Set(ids).size,ids.length,'IDs duplicados');
 for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(ids.includes(id),'Link interno quebrado: '+id);
