@@ -360,15 +360,13 @@ test('CS knife loadout uses every cut-out render before repeating',()=>{
  }
 });
 
-test('3D knife models are valid GKM binaries split into blade and handle',()=>{
- for(const name of ['butterfly','m9-bayonet','bayonet']){
-  const buf=fs.readFileSync(path.join(root,'knives/models',name+'.gkm'));
-  assert.equal(buf.toString('latin1',0,4),'GKM1');
-  const head=JSON.parse(buf.toString('utf8',8,8+buf.readUInt32LE(4)));
-  assert.deepEqual(head.parts.map(p=>p.name).sort(),['blade','handle']);
-  for(const p of head.parts){assert.ok(p.vertices>0&&p.indices%3===0);assert.ok(8+buf.readUInt32LE(4)+p.index<=buf.length);}
- }
+test('3D knife model is a textured GLB loaded through the vendored three.js',()=>{
+ const buf=fs.readFileSync(path.join(root,'knives/models/butterfly-emerald.glb'));
+ assert.equal(buf.toString('latin1',0,4),'glTF');
+ const gltf=JSON.parse(buf.toString('utf8',20,20+buf.readUInt32LE(12)));
+ assert.ok(gltf.meshes[0].primitives[0].attributes.TEXCOORD_0!==undefined);
+ assert.ok(gltf.materials[0].pbrMetallicRoughness.baseColorTexture,'textura de cor ausente');
  const src=fs.readFileSync(path.join(root,'knives-3d.js'),'utf8');
- assert.match(src,/from '\.\/vendor\/three\/three\.module\.min\.js'/);
- assert.ok(fs.existsSync(path.join(root,'vendor/three/three.core.min.js')));
+ assert.match(src,/from '\.\/vendor\/three\/GLTFLoader\.js'/);
+ for(const f of ['three.module.min.js','three.core.min.js','GLTFLoader.js','BufferGeometryUtils.js','RoomEnvironment.js'])assert.ok(fs.existsSync(path.join(root,'vendor/three',f)),f);
 });

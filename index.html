@@ -542,7 +542,7 @@ body{
 .vortex-stage{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 50%;z-index:2;transform-style:preserve-3d}
 /* Facas de CS flutuando: renders recortados em /knives, sorteados a cada carregamento. */
 .vortex-knives{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;pointer-events:none}
-.vortex-knife{position:absolute;left:-150px;top:-125px;width:300px;opacity:0;will-change:transform,opacity;transform-style:preserve-3d}
+.vortex-knife{position:absolute;left:-125px;top:-105px;width:250px;opacity:0;will-change:transform,opacity;transform-style:preserve-3d}
 .vortex-knife-bob{animation:knifeBob var(--bob,6s) ease-in-out var(--delay,0s) infinite}
 .vortex-knife img{display:block;width:100%;height:auto;filter:drop-shadow(0 0 16px var(--glow)) drop-shadow(0 22px 26px rgba(0,0,0,.65))}
 .vortex-knife span{display:block;margin-top:2px;text-align:center;font:700 9px var(--font);letter-spacing:.14em;text-transform:uppercase;color:#efe6ff;opacity:.8;text-shadow:0 0 12px var(--glow);white-space:nowrap}
@@ -554,7 +554,7 @@ body{
 .vortex-3d-tag{position:absolute;left:0;top:0;font:700 9px var(--font);letter-spacing:.14em;text-transform:uppercase;color:#efe6ff;text-shadow:0 0 12px var(--glow),0 1px 3px #000;white-space:nowrap;opacity:0;will-change:transform,opacity}
 @media(max-width:700px){.vortex-3d-tag{font-size:7px}}
 @keyframes knifeBob{0%,100%{transform:translateY(-12px) rotate(-3deg)}50%{transform:translateY(12px) rotate(3deg)}}
-@media(max-width:700px){.vortex-knife{left:-85px;top:-72px;width:170px}.vortex-knife span{font-size:7px}}
+@media(max-width:700px){.vortex-knife{left:-70px;top:-60px;width:140px}.vortex-knife span{font-size:7px}}
 @media(prefers-reduced-motion:reduce){.vortex-knife-bob{animation:none}}
 .vortex-helix{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;will-change:transform}
 .vortex-card{--w:280px;--d:0;position:absolute;left:calc(var(--w)/-2);top:calc(var(--w)*-.28);width:var(--w);aspect-ratio:16/9;padding:0;border:1px solid rgba(220,200,255,.28);border-radius:10px;overflow:hidden;background:#15111f;color:#fff;transform-style:preserve-3d;backface-visibility:visible;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(160,120,255,.08);will-change:transform,opacity;cursor:pointer;text-align:left}
@@ -816,7 +816,7 @@ body{
 <script src="/quality-control.js?v=1"></script>
 <script src="/portfolio-quality.js?v=1"></script>
 <script src="/portfolio-order.js?v=2"></script>
-<script src="/cs-knives.js?v=2"></script>
+<script src="/cs-knives.js?v=3"></script>
 <script>
 (()=>{'use strict';
 const ROOT=location.origin+'/';
@@ -1128,7 +1128,7 @@ const vortex=(()=>{
   const near=new IntersectionObserver(entries=>{
    if(!entries.some(en=>en.isIntersecting))return;
    near.disconnect();
-   import('/knives-3d.js?v=1').then(m=>m.mount(sticky,{small:innerWidth<=700})).then(api=>{
+   import('/knives-3d.js?v=2').then(m=>m.mount(sticky,{small:innerWidth<=700})).then(api=>{
     if(!api)return;knives3d=api;section.classList.add('has-3d');current=-1;request();
    }).catch(err=>console.warn('Facas 3D indisponíveis; mantendo imagens.',err));
   },{rootMargin:'900px 0px'});
