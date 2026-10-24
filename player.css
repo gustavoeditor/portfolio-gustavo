@@ -100,3 +100,17 @@
 @media(prefers-reduced-motion:reduce){
  .vip-player .vip-controls,.vip-player .vip-player-caption,.vip-player::after{transition:none!important}
 }
+
+/* Loop: botão liga/desliga com estado visível. */
+.vip-loop{position:relative}
+.vip-loop[aria-pressed="true"]{color:#e4d6ff;background:linear-gradient(135deg,rgba(170,128,255,.34),rgba(110,70,210,.24));box-shadow:inset 0 0 0 1px rgba(214,192,255,.45),0 0 18px rgba(160,110,255,.35)}
+.vip-loop[aria-pressed="true"] svg{animation:vipLoopSpin 3.2s linear infinite}
+.vip-loop-dot{position:absolute;right:5px;top:5px;width:5px;height:5px;border-radius:50%;background:#bfa9ff;box-shadow:0 0 8px #bfa9ff;opacity:0;transform:scale(.4);transition:opacity .25s,transform .25s}
+.vip-loop[aria-pressed="true"] .vip-loop-dot{opacity:1;transform:none}
+.vip-loop-badge{position:absolute;z-index:6;top:16px;left:50%;padding:8px 14px;border-radius:30px;border:1px solid rgba(214,192,255,.4);background:rgba(16,12,26,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#efe6ff;font:800 10px/1 'Space Grotesk',system-ui,sans-serif;letter-spacing:.16em;white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,-8px)}
+.vip-loop-badge:empty{display:none}
+.vip-loop-badge.show{animation:vipBadge 1.4s cubic-bezier(.2,.84,.22,1) both}
+@keyframes vipBadge{12%,75%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
+@keyframes vipLoopSpin{to{transform:rotate(360deg)}}
+@media(max-width:380px){.vip-loop{width:30px;height:30px;flex-basis:30px}}
+@media(prefers-reduced-motion:reduce){.vip-loop[aria-pressed="true"] svg,.vip-loop-badge.show{animation:none}.vip-loop-badge.show{opacity:1;transform:translate(-50%,0)}}

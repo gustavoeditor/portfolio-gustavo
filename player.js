@@ -7,7 +7,8 @@ const SVG = {
  mute:'<path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="m17 9 5 6m0-6-5 6"/>',
  full:'<path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/>',
  shrink:'<path d="M4 9h5V4m11 5h-5V4M4 15h5v5m11-5h-5v5"/>',
- restart:'<path d="M20 11a8 8 0 1 1-3-6.3M20 4v5h-5"/>'
+ restart:'<path d="M20 11a8 8 0 1 1-3-6.3M20 4v5h-5"/>',
+ loop:'<path d="m17 2 3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="m7 22-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/>'
 };
 const icon=(name)=>'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+SVG[name]+'</svg>';
 const time=(seconds)=>{
@@ -30,6 +31,7 @@ function mount(video,options={}){
  // cannot force a heavy original on a phone when mobile encodes are available.
  const qualityPreferenceKey=options.verifiedExternalVariants===true?'gustavo-video-quality-managed-v1':'gustavo-video-quality-v1';
  const audioPreferenceKey='gustavo-video-audio-v1';
+ const loopPreferenceKey='gustavo-video-loop-v1';
  const validQualities=['auto','mobile','low','high','full'];
  let qualityChoice='auto';
  try{
@@ -51,6 +53,8 @@ function mount(video,options={}){
      if(typeof stored.muted==='boolean')video.muted=stored.muted;
    }
  }catch(_){}
+ // Loop is a viewer preference: it stays on for the next videos until turned off.
+ try{video.loop=localStorage.getItem(loopPreferenceKey)==='1';}catch(_){video.loop=false;}
  video.controls=false;
  video.classList.add('vip-native-video');
  const root=document.createElement('div');root.className='vip-player';root.dataset.playing='false';
@@ -71,6 +75,8 @@ function mount(video,options={}){
  const volumeBox=document.createElement('div');volumeBox.className='vip-volume-box';
  volumeBox.append(volumeToggle,volume);
  const fullscreen=document.createElement('button');fullscreen.type='button';fullscreen.className='vip-control vip-fullscreen';fullscreen.setAttribute('aria-label','Entrar em tela cheia');fullscreen.innerHTML=icon('full');
+ const loopButton=document.createElement('button');loopButton.type='button';loopButton.className='vip-control vip-loop';loopButton.innerHTML=icon('loop')+'<i class="vip-loop-dot" aria-hidden="true"></i>';
+ const loopBadge=document.createElement('span');loopBadge.className='vip-loop-badge';loopBadge.setAttribute('role','status');loopBadge.setAttribute('aria-live','polite');
  const brand=document.createElement('span');brand.className='vip-player-brand';brand.textContent='G / PLAYER';
  const qualityBox=document.createElement('div');qualityBox.className='vip-quality-box';
  const qualityLabel=document.createElement('label');qualityLabel.className='vip-quality-label';qualityLabel.textContent='QUALIDADE';
@@ -78,10 +84,10 @@ function mount(video,options={}){
  const qualityMenu=document.createElement('div');qualityMenu.className='vip-quality-menu';qualityMenu.setAttribute('role','group');qualityMenu.setAttribute('aria-label','Resoluções disponíveis');qualityMenu.hidden=true;
  qualityLabel.append(qualitySelect);qualityBox.append(qualityLabel,qualityMenu);qualityBox.hidden=true;
  left.append(playButton,clock,volumeBox);
- bottom.append(left,brand,qualityBox,fullscreen);
+ bottom.append(left,brand,qualityBox,loopButton,fullscreen);
  controls.append(timeline,bottom);
  const caption=document.createElement('span');caption.className='vip-player-caption';caption.textContent=title;
- root.append(video,caption,center,controls);
+ root.append(video,caption,loopBadge,center,controls);
  let disposed=false,dragging=false,frame=0,hideTimer=0,touchRevealOnly=false;
  const CONTROL_IDLE_MS=3200;
  // The player must not stay visible just because the mouse is motionless over it.
@@ -373,6 +379,25 @@ function mount(video,options={}){
      if(open?.catch)open.catch(()=>{if(video.webkitEnterFullscreen)video.webkitEnterFullscreen();});
    }else if(video.webkitEnterFullscreen)video.webkitEnterFullscreen();
  }
+ function syncLoop(){
+   loopButton.setAttribute('aria-pressed',String(video.loop));
+   const label=video.loop?'Desativar repetição (L)':'Ativar repetição (L)';
+   loopButton.setAttribute('aria-label',label);loopButton.title=label;
+   root.dataset.loop=String(video.loop);
+ }
+ let badgeTimer=0;
+ function toggleLoop(){
+   video.loop=!video.loop;
+   try{localStorage.setItem(loopPreferenceKey,video.loop?'1':'0');}catch(_){}
+   syncLoop();
+   loopBadge.textContent=video.loop?'↻  LOOP ATIVADO':'LOOP DESATIVADO';
+   loopBadge.classList.remove('show');void loopBadge.offsetWidth;loopBadge.classList.add('show');
+   clearTimeout(badgeTimer);badgeTimer=setTimeout(()=>loopBadge.classList.remove('show'),1400);
+   // Turning loop on after the end restarts the take right away.
+   if(video.loop&&video.ended){video.currentTime=0;const p=video.play();if(p?.catch)p.catch(()=>{});}
+ }
+ on(loopButton,'click',toggleLoop);
+ syncLoop();
  on(fullscreen,'click',toggleFullscreen);
  on(document,'fullscreenchange',draw);
  for(const e of ['loadedmetadata','durationchange','timeupdate','progress','play','pause','ended','volumechange','seeking','seeked','waiting','playing'])on(video,e,raf);
@@ -381,11 +406,12 @@ function mount(video,options={}){
    if(event.key===' '||event.key==='k'){event.preventDefault();toggle();}
    if(event.key==='f'){event.preventDefault();toggleFullscreen();}
    if(event.key==='m'){event.preventDefault();volumeToggle.click();}
+   if(event.key==='l'||event.key==='L'){event.preventDefault();toggleLoop();}
  });
  // Paused/ended controls remain visible. During playback the idle timer owns the UI.
  draw();onPlaybackState();
  return {element:root,destroy(){
-   disposed=true;clearHideTimer();
+   disposed=true;clearHideTimer();clearTimeout(badgeTimer);
    if(frame)cancelAnimationFrame(frame);
    for(const unsubscribe of subscriptions)unsubscribe();
    if(document.fullscreenElement===root&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
