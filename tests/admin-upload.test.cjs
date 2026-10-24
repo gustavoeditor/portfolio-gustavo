@@ -347,3 +347,18 @@ test('home portfolio ranks by quality, fills featured slots and rotates the hero
  assert.match(uploader,/rankingMode,src:uploadedVideo\.url/);
  assert.match(uploader,/positionField\.addEventListener\('input'/);
 });
+
+test('CS knife loadout covers every knife before repeating and renders valid Doppler SVG',()=>{
+ const K=require('../cs-knives');
+ let n=0;const seq=()=>((n=(n*9301+49297)%233280)/233280);
+ const set=K.loadout(9,seq);
+ assert.equal(set.length,9);
+ assert.equal(new Set(set.slice(0,5).map(k=>k.type)).size,5);
+ for(const k of set){
+  assert.ok(K.FINISHES[k.finish]);
+  const svg=K.svg(k.type,k.finish,k.seed);
+  assert.match(svg,/^<svg[\s\S]*<feTurbulence[\s\S]*<\/svg>$/);
+  assert.equal(svg,K.svg(k.type,k.finish,k.seed));
+ }
+ assert.throws(()=>K.svg('awp','phase1',1));
+});

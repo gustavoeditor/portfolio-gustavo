@@ -539,7 +539,16 @@ body{
    ===================================================== */
 .vortex{position:relative;z-index:2;height:420vh;background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(84,48,160,.16),transparent 75%)}
 .vortex-sticky{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;isolation:isolate;--p:0;--e:0}
-.vortex-stage{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 50%;z-index:2}
+.vortex-stage{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 50%;z-index:2;transform-style:preserve-3d}
+/* Facas de CS flutuando: desenho vetorial próprio, acabamento Doppler procedural. */
+.vortex-knives{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;pointer-events:none}
+.vortex-knife{position:absolute;left:-160px;top:-60px;width:320px;opacity:0;will-change:transform,opacity;transform-style:preserve-3d}
+.vortex-knife-bob{animation:knifeBob var(--bob,6s) ease-in-out var(--delay,0s) infinite}
+.vortex-knife img{display:block;width:100%;height:auto;filter:drop-shadow(0 0 16px var(--glow)) drop-shadow(0 22px 26px rgba(0,0,0,.65))}
+.vortex-knife span{display:block;margin-top:2px;text-align:center;font:700 9px var(--font);letter-spacing:.14em;text-transform:uppercase;color:#efe6ff;opacity:.8;text-shadow:0 0 12px var(--glow);white-space:nowrap}
+@keyframes knifeBob{0%,100%{transform:translateY(-12px) rotate(-3deg)}50%{transform:translateY(12px) rotate(3deg)}}
+@media(max-width:700px){.vortex-knife{left:-95px;top:-36px;width:190px}.vortex-knife span{font-size:7px}}
+@media(prefers-reduced-motion:reduce){.vortex-knife-bob{animation:none}}
 .vortex-helix{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;will-change:transform}
 .vortex-card{--w:280px;--d:0;position:absolute;left:calc(var(--w)/-2);top:calc(var(--w)*-.28);width:var(--w);aspect-ratio:16/9;padding:0;border:1px solid rgba(220,200,255,.28);border-radius:10px;overflow:hidden;background:#15111f;color:#fff;transform-style:preserve-3d;backface-visibility:visible;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(160,120,255,.08);will-change:transform,opacity;cursor:pointer;text-align:left}
 .vortex-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -800,6 +809,7 @@ body{
 <script src="/quality-control.js?v=1"></script>
 <script src="/portfolio-quality.js?v=1"></script>
 <script src="/portfolio-order.js?v=2"></script>
+<script src="/cs-knives.js?v=1"></script>
 <script>
 (()=>{'use strict';
 const ROOT=location.origin+'/';
@@ -1104,6 +1114,26 @@ const vortex=(()=>{
   radius=small?Math.min(innerWidth*.5,210):Math.min(innerWidth*.29,410);
   rise=small?34:50;
  }
+ // CS knives: a new random loadout (type, Doppler finish, pattern seed) on every page load.
+ const knifeLayer=document.createElement('div');knifeLayer.className='vortex-knives';knifeLayer.setAttribute('aria-hidden','true');
+ section.querySelector('.vortex-stage').append(knifeLayer);
+ let knives=[];
+ function buildKnives(){
+  const K=window.GustavoKnives;if(!K)return;
+  const set=K.loadout(innerWidth<=700?5:9);
+  knives=set.map((pick,i)=>{
+   const finish=K.FINISHES[pick.finish],el=document.createElement('div'),bob=document.createElement('div'),img=new Image(),tag=document.createElement('span');
+   el.className='vortex-knife';bob.className='vortex-knife-bob';
+   img.decoding='async';img.alt='';img.src=K.uri(pick.type,pick.finish,pick.seed);
+   tag.textContent='★ '+K.KNIVES[pick.type].label+' | '+finish.label;
+   el.style.setProperty('--glow',finish.glow);
+   bob.style.setProperty('--bob',(5+Math.random()*4).toFixed(2)+'s');bob.style.setProperty('--delay',(-Math.random()*8).toFixed(2)+'s');
+   bob.append(img,tag);el.append(bob);
+   // Alternate sides so the knives frame the tunnel instead of covering the covers.
+   return {el,x:(i%2?1:-1)*(.17+Math.random()*.25),y:(Math.random()-.5)*.75,z0:i/set.length*2500+Math.random()*180,rot:(Math.random()-.5)*70,spin:(Math.random()-.5)*260,tilt:(Math.random()-.5)*50};
+  });
+  knifeLayer.replaceChildren(...knives.map(k=>k.el));
+ }
  function build(){
   // The helix repeats the ranking from the top so the tunnel stays dense.
   const pool=projects.slice(0,18),count=innerWidth<=700?18:27;
@@ -1154,6 +1184,13 @@ const vortex=(()=>{
    w.style.opacity=String(o);
    w.style.transform=`scale(${.7+local*.45}) translateY(${(local-.5)*-6}vh)`;
   });
+  // Knives stream towards the camera and wrap around, so the dive feels endless.
+  for(const k of knives){
+   const z=((k.z0+p*3600)%2500+2500)%2500-1500;
+   const fade=Math.min(smooth(-1500,-1050,z),1-smooth(620,940,z))*(1-e*.7);
+   k.el.style.transform=`translate3d(${k.x*innerWidth+mx*z*.06}px,${k.y*innerHeight+my*z*.04}px,${z}px) rotateZ(${k.rot+p*k.spin}deg) rotateY(${k.tilt+Math.sin(p*6+k.z0)*25}deg)`;
+   k.el.style.opacity=fade.toFixed(3);
+  }
   stars.forEach((s,k)=>{s.style.transform=`translate3d(${mx*-(k+1)*8}px,${-p*(k+1)*35}%,0)`;});
   sticky.style.setProperty('--p',p.toFixed(4));
   sticky.style.setProperty('--e',e.toFixed(4));
@@ -1170,7 +1207,7 @@ const vortex=(()=>{
   sticky.addEventListener('pointerleave',()=>{mouseX=0;mouseY=0;request();});
  }
  if(still.matches)section.classList.add('is-static');
- layout();build();
+ layout();buildKnives();build();
  return {refresh:build};
 })();
 // Hero parallax: title, poster and orbit drift at different depths while leaving the hero.
