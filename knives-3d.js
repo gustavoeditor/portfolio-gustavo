@@ -34,9 +34,11 @@ export async function mount(host,{small=false}={}){
   const probe=document.createElement('canvas');
   if(!(probe.getContext('webgl2')||probe.getContext('webgl')))return null;
 
-  const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'high-performance'});
+  // Pixel ratio capped: the canvas covers the whole screen, so resolution is the main GPU cost.
+  const dpr=Math.min(devicePixelRatio||1,small?1:1.25);
+  const renderer=new THREE.WebGLRenderer({alpha:true,antialias:dpr<1.5,powerPreference:'high-performance'});
   const models=await Promise.all(KNIVES.map(def=>loadKnife(def,renderer.capabilities.getMaxAnisotropy())));
-  renderer.setPixelRatio(Math.min(devicePixelRatio||1,small?1.5:1.75));
+  renderer.setPixelRatio(dpr);
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
   const wrap=document.createElement('div');wrap.className='vortex-3d';wrap.setAttribute('aria-hidden','true');
@@ -50,22 +52,21 @@ export async function mount(host,{small=false}={}){
   const rimB=new THREE.PointLight(0x40e0ff,1.0e6,0,2);rimB.position.set(700,-300,300);scene.add(rimB);
   const camera=new THREE.PerspectiveCamera(50,1,1,6000);
 
-  const count=small?4:6;
+  const count=small?3:5;
   const knives=Array.from({length:count},(_,i)=>{
     const model=models[i%models.length],material=model.material.clone();
     const mesh=new THREE.Mesh(model.geometry,material);
     mesh.scale.setScalar(small?190:340);
     scene.add(mesh);
-    const tag=document.createElement('span');tag.className='vortex-3d-tag';tag.textContent=model.def.label;tag.style.setProperty('--glow',model.def.glow);
-    wrap.append(tag);
-    return {mesh,material,tag,
+    return {mesh,material,
       x:(i%2?1:-1)*(.17+Math.random()*.25),y:(Math.random()-.5)*.72,z0:i/count*2500+Math.random()*180,
       rot:(Math.random()-.5)*1.2,spin:(Math.random()-.5)*4.4,yaw:Math.random()*Math.PI*2,yawSpeed:(.35+Math.random()*.5)*(Math.random()<.5?-1:1),
       tilt:(Math.random()-.5)*.8,bob:Math.random()*Math.PI*2};
   });
 
-  let state={p:0,e:0,mx:0,my:0},visible=true,raf=0,width=0,height=0,disposed=false;
-  const v=new THREE.Vector3();
+  let state={p:0,e:0,mx:0,my:0},visible=true,raf=0,width=0,height=0,disposed=false,dirty=true,lastDraw=0;
+  // Idle floating renders at ~30 fps; scrolling or resizing draws on the next frame.
+  const IDLE_MS=1000/30;
   function resize(){
     const r=host.getBoundingClientRect();width=r.width;height=r.height;
     renderer.setSize(width,height,false);
@@ -75,6 +76,8 @@ export async function mount(host,{small=false}={}){
   }
   function frame(t){
     raf=0;if(disposed)return;
+    if(!dirty&&t-lastDraw<IDLE_MS){if(visible&&!document.hidden)raf=requestAnimationFrame(frame);return;}
+    dirty=false;lastDraw=t;
     const time=t/1000,{p,e,mx,my}=state;
     for(const k of knives){
       const z=((k.z0+p*3600)%2500+2500)%2500-1500;
@@ -83,22 +86,22 @@ export async function mount(host,{small=false}={}){
       k.mesh.position.set(k.x*width+mx*z*.06,-(k.y*height+my*z*.04)+Math.sin(time*.9+k.bob)*12,z);
       k.mesh.rotation.set(k.tilt+Math.sin(time*.6+k.bob)*.15,k.yaw+time*k.yawSpeed+p*5,k.rot+p*k.spin);
       k.material.opacity=fade;
-      if(k.mesh.visible){
-        v.copy(k.mesh.position);v.y-=(small?55:85);v.project(camera);
-        k.tag.style.transform=`translate(${(v.x*.5+.5)*width}px,${(-v.y*.5+.5)*height}px) translate(-50%,0)`;
-        k.tag.style.opacity=String(fade*Math.max(0,Math.min(1,(z+600)/900)));
-      }else k.tag.style.opacity='0';
     }
     renderer.render(scene,camera);
     if(visible&&!document.hidden)raf=requestAnimationFrame(frame);
   }
   const kick=()=>{if(!raf&&visible&&!disposed)raf=requestAnimationFrame(frame);};
   const io=new IntersectionObserver(([en])=>{visible=en.isIntersecting;kick();});io.observe(host);
-  const onResize=()=>{resize();kick();};
+  const onResize=()=>{resize();dirty=true;kick();};
   addEventListener('resize',onResize);document.addEventListener('visibilitychange',kick);
-  resize();kick();
+  resize();
+  // Compile shaders off the critical path (parallel compile where supported) before the first draw.
+  try{await renderer.compileAsync(scene,camera);}catch(_){/* Falls back to compiling on first render. */}
+  // Upload textures to the GPU now, not during the first frame the visitor scrolls into.
+  for(const m of models)for(const key of ['map','normalMap','roughnessMap','metalnessMap'])if(m.material[key])renderer.initTexture(m.material[key]);
+  kick();
   return {
-    update(p,e,mx,my){state={p,e,mx,my};kick();},
+    update(p,e,mx,my){state={p,e,mx,my};dirty=true;kick();},
     dispose(){disposed=true;io.disconnect();removeEventListener('resize',onResize);renderer.dispose();wrap.remove();}
   };
 }
