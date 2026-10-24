@@ -359,3 +359,16 @@ test('CS knife loadout uses every cut-out render before repeating',()=>{
   assert.ok(k.model&&k.finish&&/^#[0-9a-f]{6}$/.test(k.glow));
  }
 });
+
+test('3D knife models are valid GKM binaries split into blade and handle',()=>{
+ for(const name of ['butterfly','m9-bayonet','bayonet']){
+  const buf=fs.readFileSync(path.join(root,'knives/models',name+'.gkm'));
+  assert.equal(buf.toString('latin1',0,4),'GKM1');
+  const head=JSON.parse(buf.toString('utf8',8,8+buf.readUInt32LE(4)));
+  assert.deepEqual(head.parts.map(p=>p.name).sort(),['blade','handle']);
+  for(const p of head.parts){assert.ok(p.vertices>0&&p.indices%3===0);assert.ok(8+buf.readUInt32LE(4)+p.index<=buf.length);}
+ }
+ const src=fs.readFileSync(path.join(root,'knives-3d.js'),'utf8');
+ assert.match(src,/from '\.\/vendor\/three\/three\.module\.min\.js'/);
+ assert.ok(fs.existsSync(path.join(root,'vendor/three/three.core.min.js')));
+});

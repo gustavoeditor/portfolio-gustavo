@@ -546,6 +546,13 @@ body{
 .vortex-knife-bob{animation:knifeBob var(--bob,6s) ease-in-out var(--delay,0s) infinite}
 .vortex-knife img{display:block;width:100%;height:auto;filter:drop-shadow(0 0 16px var(--glow)) drop-shadow(0 22px 26px rgba(0,0,0,.65))}
 .vortex-knife span{display:block;margin-top:2px;text-align:center;font:700 9px var(--font);letter-spacing:.14em;text-transform:uppercase;color:#efe6ff;opacity:.8;text-shadow:0 0 12px var(--glow);white-space:nowrap}
+/* Facas em 3D real (three.js): substituem as imagens quando o WebGL carrega. */
+.vortex-3d{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity 1.2s var(--ease)}
+.vortex-3d canvas{display:block;width:100%;height:100%}
+.vortex.has-3d .vortex-3d{opacity:1}
+.vortex.has-3d .vortex-knives{opacity:0;transition:opacity .8s}
+.vortex-3d-tag{position:absolute;left:0;top:0;font:700 9px var(--font);letter-spacing:.14em;text-transform:uppercase;color:#efe6ff;text-shadow:0 0 12px var(--glow),0 1px 3px #000;white-space:nowrap;opacity:0;will-change:transform,opacity}
+@media(max-width:700px){.vortex-3d-tag{font-size:7px}}
 @keyframes knifeBob{0%,100%{transform:translateY(-12px) rotate(-3deg)}50%{transform:translateY(12px) rotate(3deg)}}
 @media(max-width:700px){.vortex-knife{left:-85px;top:-72px;width:170px}.vortex-knife span{font-size:7px}}
 @media(prefers-reduced-motion:reduce){.vortex-knife-bob{animation:none}}
@@ -1115,6 +1122,18 @@ const vortex=(()=>{
   rise=small?34:50;
  }
  // CS knives: a new random loadout of real renders on every page load.
+ // Real 3D knives load only when the vortex gets close; the image knives stay as fallback.
+ let knives3d=null;
+ if(!still.matches&&'IntersectionObserver' in window){
+  const near=new IntersectionObserver(entries=>{
+   if(!entries.some(en=>en.isIntersecting))return;
+   near.disconnect();
+   import('/knives-3d.js?v=1').then(m=>m.mount(sticky,{small:innerWidth<=700})).then(api=>{
+    if(!api)return;knives3d=api;section.classList.add('has-3d');current=-1;request();
+   }).catch(err=>console.warn('Facas 3D indisponíveis; mantendo imagens.',err));
+  },{rootMargin:'900px 0px'});
+  near.observe(section);
+ }
  const knifeLayer=document.createElement('div');knifeLayer.className='vortex-knives';knifeLayer.setAttribute('aria-hidden','true');
  section.querySelector('.vortex-stage').append(knifeLayer);
  let knives=[];
@@ -1191,6 +1210,7 @@ const vortex=(()=>{
    k.el.style.transform=`translate3d(${k.x*innerWidth+mx*z*.06}px,${k.y*innerHeight+my*z*.04}px,${z}px) rotateZ(${k.rot+p*k.spin}deg) rotateY(${k.tilt+Math.sin(p*6+k.z0)*25}deg)`;
    k.el.style.opacity=fade.toFixed(3);
   }
+  knives3d?.update(p,e,mx,my);
   stars.forEach((s,k)=>{s.style.transform=`translate3d(${mx*-(k+1)*8}px,${-p*(k+1)*35}%,0)`;});
   sticky.style.setProperty('--p',p.toFixed(4));
   sticky.style.setProperty('--e',e.toFixed(4));

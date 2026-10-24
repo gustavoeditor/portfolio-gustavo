@@ -1,0 +1,5 @@
+[
+ {"name":"butterfly","obj":"D:/CS 3D PACK v2/Armas/Facas/Butterfly/Butterfly.obj","flip":true,"cut":0.08},
+ {"name":"m9-bayonet","obj":"D:/CS 3D PACK v2/Armas/Facas/M9 Bayonet/M9 Bayonet.obj","flip":false,"cut":-0.115},
+ {"name":"bayonet","obj":"D:/CS 3D PACK v2/Armas/Facas/Bayonet/Bayonet.obj","flip":false,"cut":-0.125}
+]
