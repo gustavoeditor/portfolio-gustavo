@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#090a11">
+<title>Minha conta | GUSTAVO®</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/conta.css?v=1">
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><i></i><i></i></div>
+<header class="bar">
+ <a class="brand" href="/loja.html" aria-label="Voltar para a loja Creative Tools">
+  <span class="mark" aria-hidden="true">G<span>®</span></span>
+  <span class="brand-text">GUSTAVO <b>TOOLS.</b><small>MINHA CONTA</small></span>
+ </a>
+ <button id="logout" class="ghost small" type="button" hidden>Sair</button>
+</header>
+
+<main class="shell" id="conteudo">
+ <section id="view-loading" class="card center" aria-live="polite">
+  <span class="spinner" aria-hidden="true"></span>
+  <p class="muted">Carregando sua conta…</p>
+ </section>
+
+ <section id="view-off" class="card" hidden>
+  <span class="eyebrow">ÁREA DO CLIENTE</span>
+  <h1>Em <em>preparação.</em></h1>
+  <p class="muted">A área do cliente ainda não foi ativada. Assim que as vendas abrirem, você vai entrar aqui com o e-mail da compra para baixar o Creative Tools e pegar sua chave do Creative Hub.</p>
+  <a class="primary" href="/loja.html">Voltar para a loja <span aria-hidden="true">↗</span></a>
+ </section>
+
+ <section id="view-login" class="card" hidden>
+  <span class="eyebrow">ÁREA DO CLIENTE</span>
+  <h1>Acesse suas <em>compras.</em></h1>
+  <p class="muted">Use o mesmo e-mail da compra na Cakto. Enviamos um link de acesso — sem senha.</p>
+  <form id="login-form" novalidate>
+   <label for="email">E-mail da compra</label>
+   <div class="field">
+    <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@email.com" required maxlength="254">
+    <button id="login-submit" class="primary" type="submit">Enviar link <span aria-hidden="true">→</span></button>
+   </div>
+   <p id="login-status" class="status" role="status" aria-live="polite"></p>
+  </form>
+  <div class="steps" aria-label="Como funciona">
+   <div><b>01</b><span>Compre pela Cakto</span></div>
+   <div><b>02</b><span>Entre com o e-mail da compra</span></div>
+   <div><b>03</b><span>Baixe e ative no Creative Hub</span></div>
+  </div>
+ </section>
+
+ <section id="view-library" hidden>
+  <div class="head">
+   <div>
+    <span class="eyebrow">MINHA CONTA</span>
+    <h1>Seus <em>produtos.</em></h1>
+   </div>
+   <p class="muted" id="who"></p>
+  </div>
+  <div id="purchases" class="list" aria-live="polite"></div>
+  <div id="empty" class="card" hidden>
+   <h2>Nenhuma compra encontrada.</h2>
+   <p class="muted">Não achamos compras para este e-mail. Se você comprou com outro endereço, saia e entre com ele. A confirmação da Cakto pode levar alguns minutos.</p>
+   <div class="row"><button id="retry" class="ghost" type="button">Verificar novamente</button><a class="ghost" href="/loja.html">Ir para a loja</a></div>
+  </div>
+  <p id="library-status" class="status" role="status" aria-live="polite"></p>
+ </section>
+</main>
+
+<template id="tpl-purchase">
+ <article class="card product">
+  <div class="product-top">
+   <span class="app" aria-hidden="true">C<span>T</span></span>
+   <div class="product-name"><h2 data-name></h2><span class="muted small" data-date></span></div>
+   <span class="pill" data-status></span>
+  </div>
+  <div class="product-body" data-active>
+   <div class="block">
+    <div class="block-head"><h3>Instalador Windows</h3><span class="muted small" data-version></span></div>
+    <p class="muted small" data-download-note>O Creative Hub instala e atualiza o Creative Tools para você. Se preferir, baixe o instalador direto.</p>
+    <div class="progress" data-progress hidden><i></i></div>
+    <button class="primary" type="button" data-download>Baixar instalador <span aria-hidden="true">↓</span></button>
+   </div>
+   <div class="block">
+    <div class="block-head"><h3>Chave do Creative Hub</h3><span class="muted small" data-hint></span></div>
+    <p class="muted small">Cole no Creative Hub em Configurações → Licença. Gerar uma nova chave desativa a anterior.</p>
+    <div class="key" data-key hidden>
+     <code data-key-value></code>
+     <button class="ghost small" type="button" data-copy>Copiar</button>
+    </div>
+    <p class="warn small" data-key-warn hidden>Guarde esta chave agora: por segurança ela não aparece de novo.</p>
+    <button class="ghost" type="button" data-license>Gerar chave</button>
+   </div>
+  </div>
+  <p class="muted small" data-inactive hidden></p>
+  <p class="status" role="status" aria-live="polite" data-status-line></p>
+ </article>
+</template>
+
+<footer class="foot"><a href="/loja.html">Loja</a><a href="/informacoes-de-compra.html">Informações da compra</a><a href="/privacidade.html">Privacidade</a><span>© 2026 GUSTAVO®</span></footer>
+<script src="/conta.js?v=1" defer></script>
+</body>
+</html>

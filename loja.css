@@ -303,3 +303,5 @@ button,input{font:inherit}a{color:inherit}button,a,input{-webkit-tap-highlight-c
 .pack-launch-link{flex:none;display:inline-flex;gap:12px;align-items:center;justify-content:center;min-height:50px;padding:12px 19px;border:1px solid #ffffff82;border-radius:15px;background:#d5c2fb;color:#1b1527;font-size:13px;font-weight:750;text-decoration:none}
 .pack-launch-link:hover{background:#eee2ff}
 @media(max-width:750px){.pack-launch{display:block;margin-bottom:55px}.pack-launch-link{margin-top:25px;width:100%}}
+
+.account-link{display:inline-flex;align-items:center;gap:8px;margin-top:14px;color:#d5c0ff;font-size:12.5px;font-weight:650;text-decoration:none}.account-link:hover{color:#fff}
