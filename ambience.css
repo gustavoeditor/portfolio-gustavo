@@ -1,7 +1,7 @@
 /* G / AMBIENCE 01 — optional sound, never a prerequisite for navigation. */
 .ambience-dock{position:fixed;bottom:max(22px,env(safe-area-inset-bottom));left:max(22px,env(safe-area-inset-left));z-index:315;color:#f4f1fc;font-family:var(--font-body,ui-sans-serif,system-ui,sans-serif);pointer-events:none}
 .ambience-dock>*{pointer-events:auto}
-.ambience-trigger{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;border:1px solid rgba(204,180,255,.42);border-radius:100px;padding:9px 15px 9px 12px;background:linear-gradient(145deg,rgba(32,26,46,.95),rgba(14,13,22,.97));box-shadow:0 12px 36px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.09);color:#e9dfff;font-size:11px;font-weight:750;letter-spacing:.07em;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.ambience-trigger{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;border:1px solid rgba(204,180,255,.42);border-radius:100px;padding:9px 15px 9px 12px;background:linear-gradient(145deg,rgba(32,26,46,.95),rgba(14,13,22,.97));box-shadow:0 12px 36px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.09);color:#e9dfff;font-size:11px;font-weight:750;letter-spacing:.07em;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;}
 .ambience-trigger:hover{transform:translateY(-2px);border-color:#cbb2ff;box-shadow:0 16px 40px #0009,0 0 24px #a57aff17}
 .ambience-trigger:focus-visible,.ambience-dock button:focus-visible,.ambience-dock input:focus-visible{outline:2px solid #d8c2ff;outline-offset:3px}
 .ambience-trigger .ambience-icon{width:19px;height:19px;color:#cbb2ff}
