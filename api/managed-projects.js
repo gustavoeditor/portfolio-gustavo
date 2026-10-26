@@ -1,10 +1,15 @@
 const storeCheckout = require('../lib/store-checkout');
 const creativeToolsUpdate = require('../lib/creative-tools-update');
 const storeDelivery = require('../lib/store-delivery');
+const creativeHubDelivery = require('../lib/creative-hub-delivery');
+const creativeHubLicenses = require('../lib/creative-hub-licenses');
 const { hasStore, readManaged } = require('../lib/managed-projects');
 module.exports = async function handler(req, res) {
   const originalPath = String(req.url || '').split('?')[0];
   if ((req.query && req.query.ct_update === 'download') || originalPath === '/api/creative-tools-update') return creativeToolsUpdate(req, res);
+  if ((req.query && req.query.hub === 'download') || originalPath === '/api/creative-hub/download') return creativeHubDelivery(req, res);
+  if ((req.query && req.query.hub === 'license') || originalPath === '/api/creative-hub/license') return creativeHubLicenses.retrieve(req, res);
+  if ((req.query && req.query.cakto === 'webhook') || originalPath === '/api/cakto/webhook') return creativeHubLicenses.webhook(req, res);
   if ((req.query && req.query.store === 'checkout') || originalPath === '/api/store/checkout') return storeCheckout(req, res);
   if ((req.query && req.query.store === 'download') || originalPath === '/api/store/download') return storeDelivery(req, res);
   res.setHeader('Cache-Control', 'no-store, max-age=0');

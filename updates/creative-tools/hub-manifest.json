@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "product": "creative-tools",
+  "channel": "private-beta",
+  "latest": "1.5.1",
+  "message": "Beta privada: download pelo Creative Hub com a licença da compra. Notas de versão públicas em /novidades.html.",
+  "updatedAt": "2026-10-22",
+  "releases": [
+    {
+      "version": "1.5.1",
+      "date": "2026-10-22",
+      "status": "published",
+      "changes": [
+        "Painel Creative Tools 1.5.1 com favoritos e visual premium.",
+        "Menu rápido Ctrl+B 1.10.0 junto ao cursor, com curvas salvas e Bounce.",
+        "Instalador Windows v2.1.0 com reparo e remoção do menu sem apagar presets."
+      ],
+      "auth": "license",
+      "downloadUrl": "/api/creative-hub/download?product=creative-tools&version=1.5.1",
+      "sha256": "41a3aca985cc6dd5eb2fcc8737f9a7a05adda0af288441f3529e9c94431b14ca",
+      "size": 5742091,
+      "rangeChunkSize": 3145728,
+      "fileName": "Creative_Tools_Setup_1.5.1.exe",
+      "requiresAdmin": true,
+      "minHubVersion": "0.1.1",
+      "detectVersion": "1.5.1",
+      "installer": {
+        "args": [],
+        "repairArgs": [
+          "--repair-menu"
+        ],
+        "uninstallArgs": [
+          "--uninstall-menu"
+        ],
+        "interactive": true
+      },
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      },
+      "privatePath": "creative-hub/packages/creative-tools/Creative_Tools_Setup_1.5.1.exe"
+    }
+  ]
+}
