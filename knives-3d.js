@@ -14,7 +14,14 @@ async function loadKnife(def,maxAnisotropy){
   const gltf=await new GLTFLoader().loadAsync('/knives/models/'+def.file+'.glb');
   let mesh=null;gltf.scene.traverse(o=>{if(o.isMesh&&!mesh)mesh=o;});
   if(!mesh)throw new Error('Modelo sem malha: '+def.file);
-  const geometry=mesh.geometry.clone();
+  // Models ship quantized (KHR_mesh_quantization); expand to float before re-centring and scaling.
+  const geometry=new THREE.BufferGeometry();
+  for(const [name,attr] of Object.entries(mesh.geometry.attributes)){
+    const out=new Float32Array(attr.count*attr.itemSize);
+    for(let i=0;i<attr.count;i++)for(let k=0;k<attr.itemSize;k++)out[i*attr.itemSize+k]=attr.getComponent(i,k);
+    geometry.setAttribute(name,new THREE.BufferAttribute(out,attr.itemSize));
+  }
+  geometry.setIndex(mesh.geometry.index);
   geometry.computeBoundingBox();
   const box=geometry.boundingBox,size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
   geometry.translate(-center.x,-center.y,-center.z);

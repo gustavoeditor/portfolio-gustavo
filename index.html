@@ -676,6 +676,19 @@ body{
 .spotlight{inset:auto;left:0;top:0;width:960px;height:900px;background:radial-gradient(ellipse 480px 450px at 50% 50%,rgba(122,73,215,.065),transparent 79%);transform:translate3d(calc(50vw - 480px),calc(30vh - 450px),0);will-change:transform}
 .progress{width:100%;transform:scaleX(0);transform-origin:0 50%;will-change:transform}
 .is-offscreen *,.is-offscreen *::before,.is-offscreen *::after,.is-offscreen::before,.is-offscreen::after{animation-play-state:paused!important}
+/* MODO LEVE (celular / toque): sem vidro desfocado, sem blur pesado e sem camadas decorativas grandes. */
+html.lite *,html.lite *::before,html.lite *::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.lite .nav-shell{background:rgba(14,12,22,.96)}
+html.lite .hero .hero-grid>div:first-child:before,html.lite .manifesto::before,html.lite .services::before,html.lite .contact-inner::before,html.lite .scene:before{display:none}
+html.lite .trust-card:before{display:none}
+html.lite .reveal{filter:none;transition:opacity .7s var(--ease),transform .7s var(--ease)}
+html.lite .vortex-stars{display:none}
+html.lite .vortex{height:300vh}
+html.lite .vortex-knife img{filter:none}
+html.lite .vortex-card{box-shadow:none}
+html.lite .ticker-track .asterisk{animation:none}
+html.lite .hero-side .tile{box-shadow:none}
+html.lite .project-card.enter{animation:none}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -918,6 +931,9 @@ const projects=[
 const labels={cs2:'CS2 / Edit',cinematics:'Cinematic / 3D',youtube:'YouTube',motion:'Motion Design',outros:'Projetos especiais'};const colors={cs2:'#59477e',cinematics:'#3e456f',youtube:'#516177',motion:'#996e7b',outros:'#5f667c'};
 const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Quality ranking: every work is ordered by its QC score (quality-control.js).
+// Lite mode: phones and touch screens skip the GPU-heavy extras (3D scene, big blurs, scroll-linked effects).
+const lite=matchMedia('(max-width:700px),(pointer:coarse)').matches;
+document.documentElement.classList.toggle('lite',lite);
 const Q=window.GustavoQuality,QB=window.GustavoQualityBaseline||{lookup:()=>null};
 const qualityOf=new Map(),pins=new Map(),publishedAt=new Map();
 for(const entry of projects){const q=QB.lookup(entry[2]);if(q)qualityOf.set(entry,q);}
@@ -1045,7 +1061,7 @@ const heroCarousel=(()=>{
   img.alt='Capa do projeto '+data[0];
   const slide=document.createElement('div');slide.className='hero-slide';slide.append(img);
   const old=[...stage.children];stage.append(slide);
-  if(still.matches){
+  if(still.matches||lite){
    slide.animate([{opacity:0},{opacity:1}],{duration:450,fill:'both'});
   }else{
    slide.animate([{clipPath:'inset(0 0 0 100%)'},{clipPath:'inset(0 0 0 0%)'}],{duration:1150,easing:EASE,fill:'both'});
@@ -1147,10 +1163,10 @@ const vortex=(()=>{
  // Real 3D knives load during idle time after the page opens (or when the vortex gets close),
  // so model decoding and shader compilation never happen mid-scroll. Image knives are the fallback.
  let knives3d=null,loading3d=false;
- if(!still.matches&&'IntersectionObserver' in window){
+ if(!still.matches&&!lite&&'IntersectionObserver' in window){
   const load3d=()=>{
    if(loading3d)return;loading3d=true;near.disconnect();
-   import('/knives-3d.js?v=8').then(m=>m.mount(sticky,{small:innerWidth<=700})).then(api=>{
+   import('/vendor/knives-3d.bundle.js?v=9').then(m=>m.mount(sticky,{small:innerWidth<=700})).then(api=>{
     if(!api){buildKnives();current=-1;request();return;}
     knives3d=api;section.classList.add('has-3d');current=-1;request();
    }).catch(err=>{console.warn('Facas 3D indisponíveis; usando imagens.',err);buildKnives();current=-1;request();});
@@ -1164,7 +1180,7 @@ const vortex=(()=>{
  let knives=[];
  function buildKnives(){
   const K=window.GustavoKnives;if(!K)return;
-  const set=K.loadout(innerWidth<=700?5:9);
+  const set=K.loadout(lite?3:9);
   knives=set.map((pick,i)=>{
    const el=document.createElement('div'),bob=document.createElement('div'),img=new Image(),tag=document.createElement('span');
    el.className='vortex-knife';bob.className='vortex-knife-bob';
@@ -1180,7 +1196,7 @@ const vortex=(()=>{
  }
  function build(){
   // The helix repeats the ranking from the top so the tunnel stays dense.
-  const pool=projects.slice(0,18),count=innerWidth<=700?12:18;
+  const pool=projects.slice(0,18),count=lite?8:18;
   const list=Array.from({length:Math.min(count,pool.length*3)},(_,i)=>pool[i%pool.length]);
   helix.replaceChildren(...list.map((data,i)=>{
    const q=qualityOf.get(data),b=document.createElement('button');
@@ -1255,12 +1271,12 @@ const vortex=(()=>{
   sticky.addEventListener('pointerleave',()=>{mouseX=0;mouseY=0;request();});
  }
  if(still.matches)section.classList.add('is-static');
- layout();if(still.matches||!('IntersectionObserver' in window))buildKnives();build();
+ layout();if(still.matches||lite||!('IntersectionObserver' in window))buildKnives();build();
  return {refresh:build};
 })();
 // Hero parallax: title, poster and orbit drift at different depths while leaving the hero.
 (()=>{
- if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ if(lite||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const hero=document.getElementById('inicio');if(!hero)return;
  const copy=hero.querySelector('.hero-grid>div:first-child'),side=hero.querySelector('.hero-side'),scroll=hero.querySelector('.hero-scroll');
  let running=false,lastT=0,y=-1;
