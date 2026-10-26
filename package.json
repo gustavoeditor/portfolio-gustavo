@@ -13,8 +13,7 @@
   },
   "scripts": {
     "test": "node scripts/verify-portfolio.cjs && node scripts/check-channel-avatar.cjs && node --test tests/admin-upload.test.cjs && node --test tests/sentinel.test.cjs && node --test tests/store.test.cjs && node --test tests/store-delivery.test.cjs && node --test tests/creative-tools-update.test.cjs",
-    "build:upload-client": "esbuild scripts/blob-client-entry.mjs --bundle --format=esm --platform=browser --minify --legal-comments=eof --outfile=vendor/blob-client.js",
-    "build:knives-3d": "esbuild knives-3d.js --bundle --format=esm --platform=browser --minify --legal-comments=eof --outfile=vendor/knives-3d.bundle.js"
+    "build:upload-client": "esbuild scripts/blob-client-entry.mjs --bundle --format=esm --platform=browser --minify --legal-comments=eof --outfile=vendor/blob-client.js"
   },
   "devDependencies": {
     "esbuild": "^0.28.2"

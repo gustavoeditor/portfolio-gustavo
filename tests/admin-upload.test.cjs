@@ -347,33 +347,3 @@ test('home portfolio ranks by quality, fills featured slots and rotates the hero
  assert.match(uploader,/rankingMode,src:uploadedVideo\.url/);
  assert.match(uploader,/positionField\.addEventListener\('input'/);
 });
-
-test('CS knife loadout uses every cut-out render before repeating',()=>{
- const K=require('../cs-knives');
- let n=0;const seq=()=>((n=(n*9301+49297)%233280)/233280);
- const set=K.loadout(K.RENDERS.length+3,seq);
- assert.equal(new Set(set.slice(0,K.RENDERS.length).map(k=>k.file)).size,K.RENDERS.length);
- for(const k of K.RENDERS){
-  assert.ok(fs.existsSync(path.join(root,'knives',k.file+'.webp')),'render ausente: '+k.file);
-  assert.match(K.src(k),/^\/knives\/[a-z0-9-]+\.webp$/);
-  assert.ok(k.model&&k.finish&&/^#[0-9a-f]{6}$/.test(k.glow));
- }
-});
-
-test('3D knife model is a textured GLB loaded through the vendored three.js',()=>{
- const buf=fs.readFileSync(path.join(root,'knives/models/butterfly-emerald.glb'));
- assert.equal(buf.toString('latin1',0,4),'glTF');
- const gltf=JSON.parse(buf.toString('utf8',20,20+buf.readUInt32LE(12)));
- assert.ok(gltf.meshes[0].primitives[0].attributes.TEXCOORD_0!==undefined);
- assert.ok(gltf.materials[0].pbrMetallicRoughness.baseColorTexture,'textura de cor ausente');
- assert.ok(gltf.extensionsUsed.includes('KHR_mesh_quantization')&&gltf.extensionsUsed.includes('EXT_texture_webp'),'modelo não otimizado');
- assert.ok(buf.length<400*1024,'modelo 3D pesado demais: '+buf.length);
- const page=fs.readFileSync(path.join(root,'index.html'),'utf8');
- assert.ok(/import\('\/vendor\/knives-3d\.bundle\.js\?v=\d+'\)/.test(page),'pacote 3D não referenciado');
- assert.ok(page.includes(`const lite=matchMedia('(max-width:700px),(pointer:coarse)').matches`),'modo leve ausente');
- assert.ok(page.includes(`!still.matches&&!lite&&'IntersectionObserver' in window`),'celular não deve carregar o 3D');
- assert.ok(fs.statSync(path.join(root,'vendor/knives-3d.bundle.js')).size>100000,'pacote 3D ausente');
- const src=fs.readFileSync(path.join(root,'knives-3d.js'),'utf8');
- assert.match(src,/from '\.\/vendor\/three\/GLTFLoader\.js'/);
- for(const f of ['three.module.min.js','three.core.min.js','GLTFLoader.js','BufferGeometryUtils.js','RoomEnvironment.js'])assert.ok(fs.existsSync(path.join(root,'vendor/three',f)),f);
-});

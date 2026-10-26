@@ -537,67 +537,6 @@ body{
 .hero-side .tile img[data-cover-source]{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:cover}
 .hero-side .tile .offline-art{z-index:0}
 /* =====================================================
-   VORTEX 3D | o arquivo vira um túnel em hélice guiado pelo scroll.
-   CSS 3D puro + um único loop de scroll: sem WebGL, sem bibliotecas.
-   ===================================================== */
-.vortex{position:relative;z-index:2;height:420vh;background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(84,48,160,.16),transparent 75%)}
-.vortex-sticky{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;isolation:isolate}
-.vortex-stage{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 50%;z-index:2}
-/* Facas de CS flutuando: renders recortados em /knives, sorteados a cada carregamento. */
-.vortex-knives{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;pointer-events:none}
-.vortex-knife{position:absolute;left:-125px;top:-105px;width:250px;opacity:0;will-change:transform,opacity;transform-style:preserve-3d}
-.vortex-knife-bob{animation:knifeBob var(--bob,6s) ease-in-out var(--delay,0s) infinite}
-.vortex-knife img{display:block;width:100%;height:auto;filter:drop-shadow(0 0 16px var(--glow)) drop-shadow(0 22px 26px rgba(0,0,0,.65))}
-.vortex-knife span{display:block;margin-top:2px;text-align:center;font:700 9px var(--font);letter-spacing:.14em;text-transform:uppercase;color:#efe6ff;opacity:.8;text-shadow:0 0 12px var(--glow);white-space:nowrap}
-/* Facas em 3D real (three.js): substituem as imagens quando o WebGL carrega. */
-.vortex-3d{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity 1.2s var(--ease)}
-.vortex-3d canvas{display:block;width:100%;height:100%}
-.vortex.has-3d .vortex-3d{opacity:1}
-.vortex.has-3d .vortex-knives{display:none}
-@keyframes knifeBob{0%,100%{transform:translateY(-12px) rotate(-3deg)}50%{transform:translateY(12px) rotate(3deg)}}
-@media(max-width:700px){.vortex-knife{left:-70px;top:-60px;width:140px}.vortex-knife span{font-size:7px}}
-@media(prefers-reduced-motion:reduce){.vortex-knife-bob{animation:none}}
-.vortex-helix{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;will-change:transform}
-.vortex-card{--w:280px;--d:0;position:absolute;left:calc(var(--w)/-2);top:calc(var(--w)*-.28);width:var(--w);aspect-ratio:16/9;padding:0;border:1px solid rgba(220,200,255,.28);border-radius:10px;overflow:hidden;background:#15111f;color:#fff;transform-style:preserve-3d;backface-visibility:visible;box-shadow:0 10px 28px rgba(0,0,0,.45);will-change:transform,opacity;cursor:pointer;text-align:left}
-.vortex-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.vortex-card:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(6,4,14,.85),transparent 55%);pointer-events:none}
-.vortex-card b{position:absolute;z-index:2;left:10px;right:10px;bottom:8px;font:600 11px/1.25 var(--font);letter-spacing:-.01em;text-shadow:0 2px 10px #000}
-.vortex-card small{position:absolute;z-index:2;top:8px;left:9px;padding:3px 7px;border-radius:20px;background:rgba(14,10,24,.7);border:1px solid rgba(255,255,255,.18);font:700 8px var(--font);letter-spacing:.12em}
-.vortex-card:hover,.vortex-card:focus-visible{border-color:#d4bfff;box-shadow:0 0 40px rgba(170,120,255,.55)}
-.vortex-words{position:absolute;inset:0;z-index:1;display:grid;place-items:center;pointer-events:none}
-.vortex-words span{grid-area:1/1;font:700 clamp(70px,17vw,300px)/1 var(--font);letter-spacing:-.08em;color:transparent;-webkit-text-stroke:1.5px rgba(214,192,255,.5);opacity:0;will-change:transform,opacity;white-space:nowrap}
-.vortex-stars{position:absolute;inset:-50% 0;z-index:0;pointer-events:none}
-.vortex-stars i{position:absolute;inset:0;will-change:transform;background-repeat:repeat}
-.vortex-stars i:nth-child(1){background-image:radial-gradient(1px 1px at 20px 30px,#cbb8ff,transparent),radial-gradient(1px 1px at 140px 90px,#fff,transparent),radial-gradient(1px 1px at 80px 160px,#a98cf0,transparent);background-size:200px 200px;opacity:.45}
-.vortex-stars i:nth-child(2){background-image:radial-gradient(1.5px 1.5px at 60px 50px,#e8dcff,transparent),radial-gradient(1.5px 1.5px at 230px 170px,#b597ff,transparent);background-size:300px 260px;opacity:.55}
-.vortex-stars i:nth-child(3){background-image:radial-gradient(2px 2px at 120px 80px,#fff,transparent),radial-gradient(2.5px 2.5px at 330px 300px,#c9afff,transparent);background-size:460px 420px;opacity:.7}
-.vortex-hud{position:absolute;z-index:4;left:max(20px,4vw);right:max(20px,4vw);display:flex;justify-content:space-between;align-items:center;gap:16px;color:#b8a8d6;pointer-events:none}
-.vortex-hud-top{top:110px}
-.vortex-hud-bottom{bottom:40px;flex-direction:column;justify-content:center;gap:12px;text-align:center}
-.vortex-rec{display:inline-block;width:7px;height:7px;margin-right:8px;border-radius:50%;background:#ff5a77;box-shadow:0 0 10px #ff5a77;animation:statusPulse 1.4s infinite;vertical-align:1px}
-#vortex-tc{font-variant-numeric:tabular-nums;color:#e7dcff}
-.vortex-bar{flex:none;width:min(260px,50vw);height:2px;border-radius:2px;background:rgba(220,205,250,.15);overflow:hidden}
-.vortex-bar i{display:block;height:100%;background:linear-gradient(90deg,#7b55e0,#f0e7ff);transform-origin:left;transform:scaleX(0);will-change:transform}
-.vortex-final{position:absolute;z-index:5;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;padding:0 20px;opacity:0;transform:translateY(40px) scale(.9);will-change:transform,opacity;pointer-events:none}
-.vortex-final h2{margin:0;font:600 clamp(42px,7vw,112px)/.95 var(--font);letter-spacing:-.075em}
-.vortex-final .gradient{background:linear-gradient(105deg,#fff 0%,#d4c0ff 46%,#906ddd 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.vortex.is-final .vortex-final{pointer-events:auto}
-.vortex.is-final .vortex-card{pointer-events:none}
-/* Paralaxe do hero */
-.hero .hero-grid>div:first-child,.hero-side{will-change:transform}
-@media(max-width:700px){
- .vortex{height:340vh}
- .vortex-card{--w:160px;border-radius:8px}
- .vortex-card b{font-size:9px}
- .vortex-hud-top{top:84px}
- .vortex-hud-bottom{bottom:88px}
-}
-/* Movimento reduzido: um quadro fixo do vórtice, sem scroll longo. */
-.vortex.is-static{height:auto}
-.vortex.is-static .vortex-sticky{position:relative;height:720px}
-.vortex.is-static .vortex-final{position:absolute;inset:auto 0 60px;opacity:1;transform:none;pointer-events:auto}
-@media(prefers-reduced-motion:reduce){.vortex-rec{animation:none}}
-/* =====================================================
    EXPERIENCE LAB 05 | VISUAL UPGRADE
    Luz viva no hero, revelações cinematográficas, navegação
    com indicador ativo e microinterações mais ricas.
@@ -682,10 +621,6 @@ html.lite .nav-shell{background:rgba(14,12,22,.96)}
 html.lite .hero .hero-grid>div:first-child:before,html.lite .manifesto::before,html.lite .services::before,html.lite .contact-inner::before,html.lite .scene:before{display:none}
 html.lite .trust-card:before{display:none}
 html.lite .reveal{filter:none;transition:opacity .7s var(--ease),transform .7s var(--ease)}
-html.lite .vortex-stars{display:none}
-html.lite .vortex{height:300vh}
-html.lite .vortex-knife img{filter:none}
-html.lite .vortex-card{box-shadow:none}
 html.lite .ticker-track .asterisk{animation:none}
 html.lite .hero-side .tile{box-shadow:none}
 html.lite .project-card.enter{animation:none}
@@ -738,14 +673,11 @@ html.lite .project-card.enter{animation:none}
  <div class="hero-scroll" aria-hidden="true"><span></span> ROLE PARA EXPLORAR</div>
 </section>
 <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker-track"><span class="phrase">CINEMATICS & VISUAL STORYTELLING</span><span class="asterisk">✳</span><span class="phrase">MOTION DESIGN & VFX</span><span class="asterisk">✳</span><span class="phrase">CS2 & CREATIVE EDITING</span><span class="asterisk">✳</span><span class="phrase">EVERY FRAME MATTERS</span><span class="asterisk">✳</span><span class="phrase">CINEMATICS & VISUAL STORYTELLING</span><span class="asterisk">✳</span><span class="phrase">MOTION DESIGN & VFX</span><span class="asterisk">✳</span><span class="phrase">CS2 & CREATIVE EDITING</span><span class="asterisk">✳</span><span class="phrase">EVERY FRAME MATTERS</span><span class="asterisk">✳</span></div></div>
-<section class="vortex" id="vortex" aria-labelledby="vortex-title">
- <div class="vortex-sticky">
-  <div class="vortex-stars" aria-hidden="true"><i></i><i></i><i></i></div>
-  <div class="vortex-words" aria-hidden="true"><span>CORTE</span><span>RITMO</span><span>LUZ</span><span>MOVIMENTO</span></div>
-  <div class="vortex-stage"><div class="vortex-helix" id="vortex-helix"></div></div>
-  <div class="vortex-hud vortex-hud-top mono"><span><i class="vortex-rec" aria-hidden="true"></i> 01 / ARQUIVO EM 3D</span><span id="vortex-tc" aria-hidden="true">00:00:00:00</span></div>
-  <div class="vortex-hud vortex-hud-bottom mono" aria-hidden="true"><span id="vortex-phase">ROLE PARA MERGULHAR</span><span class="vortex-bar"><i id="vortex-bar"></i></span></div>
-  <div class="vortex-final"><span class="eyebrow mono">FIM DO TAKE</span><h2 id="vortex-title">CADA FRAME<br><span class="gradient">TEM UM PORQUÊ.</span></h2><a class="btn-primary" href="#trabalhos">Ver os trabalhos <span aria-hidden="true">↓</span></a></div>
+<section class="manifesto section" aria-labelledby="manifesto-title">
+ <div class="container">
+  <div class="section-kicker mono reveal"><span>01 / FILOSOFIA CRIATIVA</span><small>IDEIA → EMOÇÃO</small></div>
+  <div class="manifesto-grid"><h2 class="reveal" id="manifesto-title">O segredo não é apenas <i>fazer bonito.</i> É fazer cada segundo <i>significar algo.</i></h2><div class="manifesto-aside reveal delay1"><p>Do primeiro corte ao último frame, tudo tem uma intenção. Combino linguagem cinematográfica, precisão técnica e experimentação para criar vídeos que não parecem apenas mais um.</p><span class="signature">GUSTAVO / EDITOR & MOTION DESIGNER</span></div></div>
+  <div class="metrics reveal"><div class="metric"><strong id="catalog-total">16</strong><p>TRABALHOS NO CATÁLOGO</p></div><div class="metric"><strong>04</strong><p>UNIVERSOS CRIATIVOS</p></div><div class="metric"><strong>01</strong><p>ASSINATURA VISUAL</p></div></div>
  </div>
 </section>
 <section class="work section" id="trabalhos" aria-labelledby="work-title">
@@ -834,7 +766,6 @@ html.lite .project-card.enter{animation:none}
 <script src="/quality-control.js?v=1"></script>
 <script src="/portfolio-quality.js?v=1"></script>
 <script src="/portfolio-order.js?v=2"></script>
-<script src="/cs-knives.js?v=3"></script>
 <script>
 (()=>{'use strict';
 const ROOT=location.origin+'/';
@@ -1005,7 +936,7 @@ function paint(){stopPreview();const catalogTotal=document.getElementById('catal
    }
   }catch(_){/* Keep original video when renditions are unavailable. */}
  }
- if(added){applyRanking();paint();paintFeatured();heroCarousel.refresh();vortex.refresh();}
+ if(added){applyRanking();paint();paintFeatured();heroCarousel.refresh();}
  }catch(err){console.warn('Catálogo adicional temporariamente indisponível.',err);}})();
 filters.forEach(btn=>btn.addEventListener('click',()=>{filter=btn.dataset.filter;limit=6;filters.forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));paint()}));more.addEventListener('click',()=>{limit+=6;paint()});paint();paintFeatured();
 // Hero carousel: the best-ranked works rotate every 5 s. Pauses on hover, off-screen,
@@ -1137,142 +1068,6 @@ const heroCarousel=(()=>{
   btn.addEventListener('pointerleave',()=>{btn.style.transform='';});
  });
  document.querySelectorAll('.trust-card').forEach(card=>card.addEventListener('pointermove',e=>{const r=card.getBoundingClientRect();card.style.setProperty('--mx',(e.clientX-r.left)+'px');card.style.setProperty('--my',(e.clientY-r.top)+'px');}));
-})();
-// VORTEX 3D: scroll drives a camera through a helix of the best-ranked covers.
-// 0 → .78 rotate + dive through the tunnel; .78 → .95 the helix explodes outwards; then the final CTA.
-const vortex=(()=>{
- const section=document.getElementById('vortex'),helix=document.getElementById('vortex-helix');
- if(!section||!helix)return {refresh(){}};
- const sticky=section.querySelector('.vortex-sticky'),words=[...section.querySelectorAll('.vortex-words span')],stars=[...section.querySelectorAll('.vortex-stars i')];
- const tc=document.getElementById('vortex-tc'),phase=document.getElementById('vortex-phase');
- const bar=document.getElementById('vortex-bar'),finale=section.querySelector('.vortex-final');
- const still=matchMedia('(prefers-reduced-motion: reduce)');
- const PHASES=['ROLE PARA MERGULHAR','01 — CORTE: O RITMO NASCE','02 — RITMO: CADA BATIDA CONTA','03 — LUZ: A IMAGEM GANHA ALMA','04 — MOVIMENTO: TUDO SE CONECTA','FIM DO TAKE'];
- const STEP=40; // 9 cards per turn
- // Damped camera: the drawn progress chases the scroll position, so each wheel notch glides instead of jumping.
- const TAU=.16,TILT_TAU=.22;
- let cards=[],radius=420,rise=120,target=0,current=-1,mouseX=0,mouseY=0,mx=0,my=0,running=false,lastT=0;
- const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
- const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t);};
- function layout(){
-  const small=innerWidth<=700;
-  radius=small?Math.min(innerWidth*.5,210):Math.min(innerWidth*.29,410);
-  rise=small?34:50;
- }
- // CS knives: a new random loadout of real renders on every page load.
- // Real 3D knives load during idle time after the page opens (or when the vortex gets close),
- // so model decoding and shader compilation never happen mid-scroll. Image knives are the fallback.
- let knives3d=null,loading3d=false;
- if(!still.matches&&!lite&&'IntersectionObserver' in window){
-  const load3d=()=>{
-   if(loading3d)return;loading3d=true;near.disconnect();
-   import('/vendor/knives-3d.bundle.js?v=9').then(m=>m.mount(sticky,{small:innerWidth<=700})).then(api=>{
-    if(!api){buildKnives();current=-1;request();return;}
-    knives3d=api;section.classList.add('has-3d');current=-1;request();
-   }).catch(err=>{console.warn('Facas 3D indisponíveis; usando imagens.',err);buildKnives();current=-1;request();});
-  };
-  const near=new IntersectionObserver(entries=>{if(entries.some(en=>en.isIntersecting))load3d();},{rootMargin:'1600px 0px'});
-  near.observe(section);
-  addEventListener('load',()=>(window.requestIdleCallback||setTimeout)(load3d,{timeout:4000}),{once:true});
- }
- const knifeLayer=document.createElement('div');knifeLayer.className='vortex-knives';knifeLayer.setAttribute('aria-hidden','true');
- section.querySelector('.vortex-stage').append(knifeLayer);
- let knives=[];
- function buildKnives(){
-  const K=window.GustavoKnives;if(!K)return;
-  const set=K.loadout(lite?3:9);
-  knives=set.map((pick,i)=>{
-   const el=document.createElement('div'),bob=document.createElement('div'),img=new Image(),tag=document.createElement('span');
-   el.className='vortex-knife';bob.className='vortex-knife-bob';
-   img.decoding='async';img.alt='';img.src=K.src(pick);
-   tag.textContent='★ '+pick.model+' | '+pick.finish;
-   el.style.setProperty('--glow',pick.glow);
-   bob.style.setProperty('--bob',(5+Math.random()*4).toFixed(2)+'s');bob.style.setProperty('--delay',(-Math.random()*8).toFixed(2)+'s');
-   bob.append(img,tag);el.append(bob);
-   // Alternate sides so the knives frame the tunnel instead of covering the covers.
-   return {el,x:(i%2?1:-1)*(.17+Math.random()*.25),y:(Math.random()-.5)*.75,z0:i/set.length*2500+Math.random()*180,rot:(Math.random()-.5)*70,spin:(Math.random()-.5)*260,tilt:(Math.random()-.5)*50};
-  });
-  knifeLayer.replaceChildren(...knives.map(k=>k.el));
- }
- function build(){
-  // The helix repeats the ranking from the top so the tunnel stays dense.
-  const pool=projects.slice(0,18),count=lite?8:18;
-  const list=Array.from({length:Math.min(count,pool.length*3)},(_,i)=>pool[i%pool.length]);
-  helix.replaceChildren(...list.map((data,i)=>{
-   const q=qualityOf.get(data),b=document.createElement('button');
-   b.type='button';b.className='vortex-card';b.dataset.open=String(projects.indexOf(data));
-   b.setAttribute('aria-label','Assistir '+data[0]);
-   const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.alt='';img.src=coverOf(data);
-   const tag=document.createElement('small');tag.textContent='#'+String(projects.indexOf(data)+1).padStart(2,'0')+(q?' · '+q.overall:'');
-   const title=document.createElement('b');title.textContent=data[0];
-   b.append(img,tag,title);return b;
-  }));
-  cards=[...helix.children];
-  current=-1;request();
- }
- function frame(t){
-  const dt=lastT?Math.min(.05,(t-lastT)/1000):1/60;lastT=t;
-  const r=section.getBoundingClientRect();
-  target=still.matches?.42:clamp(-r.top/Math.max(1,r.height-innerHeight));
-  const offscreen=r.bottom<-50||r.top>innerHeight+50;
-  // Snap on first paint, anchor jumps or while the section is out of view.
-  if(current<0||offscreen||still.matches||Math.abs(target-current)>.35){current=target;mx=mouseX;my=mouseY;}
-  else{current+=(target-current)*(1-Math.exp(-dt/TAU));mx+=(mouseX-mx)*(1-Math.exp(-dt/TILT_TAU));my+=(mouseY-my)*(1-Math.exp(-dt/TILT_TAU));}
-  const settled=Math.abs(target-current)<.00012&&Math.abs(mouseX-mx)<.0008&&Math.abs(mouseY-my)<.0008;
-  if(settled){current=target;mx=mouseX;my=mouseY;}
-  if(!offscreen||settled)draw(current);
-  if(settled||offscreen){running=false;lastT=0;return;}
-  requestAnimationFrame(frame);
- }
- function draw(p){
-  const dive=smooth(0,.78,p),e=smooth(.78,.95,p),n=cards.length;
-  const rot=-p*720,total=(n-1)*rise,camY=-total/2+dive*total;
-  const z=-380+dive*(radius*.95)+e*320;
-  helix.style.transform=`translate3d(0,0,${z}px) rotateX(${-10+my*6-e*8}deg) rotateZ(${mx*-3}deg) rotateY(${rot+mx*10}deg) translateY(${-camY}px)`;
-  for(let i=0;i<n;i++){
-   const angle=i*STEP,y=i*rise-total/2;
-   const facing=Math.cos((angle+rot+mx*10)*Math.PI/180); // 1 = facing camera
-   const burst=e*(900+(i%3)*260);
-   const c=cards[i];
-   c.style.transform=`rotateY(${angle}deg) translateZ(${radius+burst}px) translateY(${y}px) rotateX(${e*(i%2?40:-40)}deg)`;
-   c.style.opacity=String((.18+.82*(facing+1)/2)*(1-e));
-  }
-  // Giant words: one per quarter of the dive, scaling through the camera.
-  words.forEach((w,k)=>{
-   const local=p/.78*words.length-k,o=clamp(1-Math.abs(local-.5)*1.7)*(1-e);
-   w.style.opacity=String(o);
-   w.style.transform=`scale(${.7+local*.45}) translateY(${(local-.5)*-6}vh)`;
-  });
-  // Knives stream towards the camera and wrap around, so the dive feels endless.
-  if(!knives3d)for(const k of knives){
-   const z=((k.z0+p*3600)%2500+2500)%2500-1500;
-   const fade=Math.min(smooth(-1500,-1050,z),1-smooth(620,940,z))*(1-e*.7);
-   k.el.style.transform=`translate3d(${k.x*innerWidth+mx*z*.06}px,${k.y*innerHeight+my*z*.04}px,${z}px) rotateZ(${k.rot+p*k.spin}deg) rotateY(${k.tilt+Math.sin(p*6+k.z0)*25}deg)`;
-   k.el.style.opacity=fade.toFixed(3);
-  }
-  knives3d?.update(p,e,mx,my);
-  stars.forEach((s,k)=>{s.style.transform=`translate3d(${mx*-(k+1)*8}px,${-p*(k+1)*35}%,0)`;});
-  // Write the two consumers directly: a custom property on the container restyled the whole tunnel.
-  bar.style.transform='scaleX('+p.toFixed(4)+')';
-  if(!still.matches){finale.style.opacity=e.toFixed(3);
-  finale.style.transform='translateY('+((1-e)*40).toFixed(1)+'px) scale('+(.9+e*.1).toFixed(4)+')';}
-  section.classList.toggle('is-final',e>.6);
-  const frames=Math.round(p*2400),ff=frames%24,s=Math.floor(frames/24);
-  const tcText=['00',String(Math.floor(s/60)).padStart(2,'0'),String(s%60).padStart(2,'0'),String(ff).padStart(2,'0')].join(':');
-  if(tc.textContent!==tcText)tc.textContent=tcText;
-  const phaseText=e>.5?PHASES[5]:p<.03?PHASES[0]:PHASES[1+Math.min(3,Math.floor(p/.78*4))];
-  if(phase.textContent!==phaseText)phase.textContent=phaseText;
- }
- const request=()=>{if(!running){running=true;requestAnimationFrame(frame);}};
- addEventListener('scroll',request,{passive:true});
- addEventListener('resize',()=>{layout();current=-1;request();});
- if(!still.matches&&matchMedia('(hover:hover) and (pointer:fine)').matches){
-  sticky.addEventListener('pointermove',e=>{mouseX=e.clientX/innerWidth-.5;mouseY=e.clientY/innerHeight-.5;request();});
-  sticky.addEventListener('pointerleave',()=>{mouseX=0;mouseY=0;request();});
- }
- if(still.matches)section.classList.add('is-static');
- layout();if(still.matches||lite||!('IntersectionObserver' in window))buildKnives();build();
- return {refresh:build};
 })();
 // Hero parallax: title, poster and orbit drift at different depths while leaving the hero.
 (()=>{
