@@ -92,7 +92,10 @@ if sitemap:
         root = ElementTree.fromstring(sitemap)
         locations = [
             element.text.strip() for element in root.iter()
-            if element.tag.endswith("loc") and element.text
+            # Só o <loc> das páginas; video:thumbnail_loc/content_loc podem
+            # apontar para o CDN de mídia (Vercel Blob), o que o Google aceita.
+            if element.tag == "{http://www.sitemaps.org/schemas/sitemap/0.9}loc"
+            and element.text
         ]
         if BASE + "/" not in locations:
             ERRORS.append("sitemap.xml: página inicial ausente.")
