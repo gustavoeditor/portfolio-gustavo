@@ -43,11 +43,12 @@ function cleanAIResult(raw, total, fallback, technical) {
     explanation:String(raw.reason || 'Sugestão baseada em quadros do vídeo, sujeita à revisão.').slice(0,220)
   };
 }
-function fallbackResult(fallback, code) {
+function fallbackResult(fallback, code, detail) {
   const guidance = {
+    token_missing:'A Vercel não entregou a credencial OIDC para a função de IA. Em Vercel → Project → Settings → Security, mantenha "Secure backend access with OIDC federation" ativado e faça um novo deploy.',
     not_configured:'A IA visual não está configurada neste site. Falta uma credencial do AI Gateway ou OpenAI na Vercel. O título atual usa o nome do arquivo.',
     no_frames:'O navegador não conseguiu extrair os quadros necessários para o título visual. Tente um MP4 H.264 ou WebM compatível.',
-    unauthorized:'A autenticação da IA foi recusada. Verifique a credencial ou a integração OIDC do projeto na Vercel.',
+    unauthorized:'O AI Gateway da Vercel recusou o acesso. Verifique se o AI Gateway está habilitado na conta (Vercel → AI Gateway) e se há forma de pagamento ou créditos.',
     credits:'A IA não conseguiu concluir por limite de créditos ou orçamento. Nenhum novo serviço foi contratado.',
     rate_limited:'O serviço de IA atingiu o limite de requisições. Tente novamente mais tarde.',
     model_unavailable:'O modelo de análise visual configurado não está disponível. Verifique o modelo no painel da Vercel.',
@@ -55,10 +56,12 @@ function fallbackResult(fallback, code) {
     invalid_response:'O serviço respondeu sem um título visual válido. Tente novamente.',
     provider_error:'O serviço de análise visual falhou. Verifique os registros privados da Vercel.'
   };
-  return {...fallback, reasonCode:code, explanation:guidance[code] || guidance.provider_error};
+  // detail is the provider's own short error message (admin-only panel); never tokens or frames.
+  const base=guidance[code] || guidance.provider_error;
+  return {...fallback, reasonCode:code, explanation:detail?base+' Resposta do serviço: '+detail:base};
 }
 function failureCode(error) {
-  if (error?.name === 'MissingAICredentialsError') return 'unauthorized';
+  if (error?.name === 'MissingAICredentialsError') return 'token_missing';
   if (error?.name === 'TimeoutError' || error?.name === 'AbortError') return 'timeout';
   if (error?.name === 'InvalidAIResponseError') return 'invalid_response';
   if (error?.status === 401 || error?.status === 403) return 'unauthorized';
@@ -86,7 +89,7 @@ module.exports=async function handler(req,res) {
   try{
     const response=await fetch(config.url,{
       method:'POST',
-      headers:{'Authorization':'Bearer '+await visualAIToken(config),'Content-Type':'application/json'},
+      headers:{'Authorization':'Bearer '+await visualAIToken(config,req),'Content-Type':'application/json'},
       body:JSON.stringify({
         model:config.model,
         max_tokens:750,
@@ -102,6 +105,12 @@ module.exports=async function handler(req,res) {
     if (!response.ok) {
       const problem = new Error('AI request rejected');
       problem.status = response.status;
+      try {
+        const body = await response.text();
+        let message = body;
+        try { const j = JSON.parse(body); message = j?.error?.message || j?.message || j?.error || body; } catch (_) {}
+        problem.detail = String(message).replace(/\s+/g,' ').replace(/(Bearer\s+|sk-|vck_)[\w.-]+/gi,'[oculto]').trim().slice(0,220);
+      } catch (_) {}
       throw problem;
     }
     const data=await response.json();
@@ -119,7 +128,7 @@ module.exports=async function handler(req,res) {
   }catch(e){
     const code=failureCode(e);
     // Safe operational signal only: no filenames, image frames, API responses or tokens.
-    console.warn('admin_visual_ai_unavailable',code,config.provider);
-    return res.status(200).json(fallbackResult(fallback,code));
+    console.warn('admin_visual_ai_unavailable',code,config.provider,e?.status||'',e?.detail||'');
+    return res.status(200).json(fallbackResult(fallback,code,e?.detail));
   }
 };
