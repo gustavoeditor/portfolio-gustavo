@@ -61,3 +61,9 @@
 @keyframes qcIn{from{opacity:0;transform:translateY(8px)}}
 @media(max-width:520px){.qc-bar{grid-template-columns:96px 1fr 26px}}
 @media(prefers-reduced-motion:reduce){.qc-panel{animation:none}.qc-bar i:after{transition:none}}
+
+/* Vídeos no site: retirar do ar / voltar ao site. */
+.site-video .site-video-status{display:inline-block;margin-top:8px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(159,232,185,.12);color:#9fe8b9;border:1px solid rgba(159,232,185,.3)}
+.site-video.is-hidden{opacity:.62}
+.site-video.is-hidden .site-video-status{background:rgba(255,143,158,.1);color:#ff8f9e;border-color:rgba(255,143,158,.35)}
+.site-video.is-hidden .item-title{text-decoration:line-through;text-decoration-color:rgba(255,255,255,.35)}

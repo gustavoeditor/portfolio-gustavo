@@ -907,6 +907,11 @@ document.documentElement.classList.toggle('lite',lite);
 const Q=window.GustavoQuality,QB=window.GustavoQualityBaseline||{lookup:()=>null};
 const qualityOf=new Map(),pins=new Map(),publishedAt=new Map();
 for(const entry of projects){const q=QB.lookup(entry[2]);if(q)qualityOf.set(entry,q);}
+// Videos taken off the site in the admin ("Retirar do site"). Keys: videos/<slug>.mp4 or the upload URL.
+const allOriginals=projects.slice();
+const videoKey=entry=>entry[4]||'videos/'+entry[2]+'.mp4';
+const HIDDEN_CACHE='gustavo-hidden-v1';
+try{const cached=JSON.parse(localStorage.getItem(HIDDEN_CACHE)||'[]');if(Array.isArray(cached)&&cached.length){const off=new Set(cached);projects.splice(0,projects.length,...allOriginals.filter(e=>!off.has(videoKey(e))));}}catch(_){}
 function applyRanking(){
  if(!window.GustavoPortfolioOrder)return;
  const next=GustavoPortfolioOrder.rank(projects.map(entry=>({entry,quality:qualityOf.get(entry)?.overall??null,pin:pins.has(entry)?pins.get(entry):null,publishedAt:publishedAt.get(entry)})));
@@ -942,12 +947,15 @@ function paint(){stopPreview();const catalogTotal=document.getElementById('catal
 // Only use public project metadata returned by our own endpoint. Never expose admin state or credentials.
 (async()=>{try{const response=await fetch('/api/managed-projects',{cache:'no-store'});if(!response.ok)return;
  const result=await response.json();if(!Array.isArray(result.projects))return;
+ const hidden=new Set(Array.isArray(result.hidden)?result.hidden:[]);
+ try{localStorage.setItem(HIDDEN_CACHE,JSON.stringify([...hidden]));}catch(_){}
+ projects.splice(0,projects.length,...allOriginals.filter(e=>!hidden.has(videoKey(e))));
  const existing=new Set(projects.map(p=>projectVideo(p)));
  const goodMedia=url=>{try{const u=new URL(url);return u.protocol==='https:'&&u.hostname.endsWith('.public.blob.vercel-storage.com')&&!u.username&&!u.password;}catch{return false}};
  const list=result.projects.slice(0,150);let added=0,treino=null;
  const normalizedTitle=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
  for(const p of list){
-  if(!p||typeof p.title!=='string'||!labels[p.category]||!goodMedia(p.src)||!goodMedia(p.poster)||existing.has(p.src))continue;
+  if(!p||typeof p.title!=='string'||!labels[p.category]||!goodMedia(p.src)||!goodMedia(p.poster)||existing.has(p.src)||hidden.has(p.src))continue;
   if(normalizedTitle(p.title)==='keydrop awp product cinematic')continue; // Pedido: não exibir este vídeo.
   const slug='upload-'+String(added+1).padStart(3,'0');
   const entry=[p.title.slice(0,90),p.category,slug,String(p.description||'').slice(0,220),p.src,p.poster];
@@ -975,7 +983,7 @@ function paint(){stopPreview();const catalogTotal=document.getElementById('catal
    }
   }catch(_){/* Keep original video when renditions are unavailable. */}
  }
- if(added){applyRanking();paint();paintFeatured();heroCarousel.refresh();}
+ applyRanking();paint();paintFeatured();heroCarousel.refresh();
  }catch(err){console.warn('Catálogo adicional temporariamente indisponível.',err);}})();
 filters.forEach(btn=>btn.addEventListener('click',()=>{filter=btn.dataset.filter;limit=6;filters.forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));paint()}));more.addEventListener('click',()=>{limit+=6;paint()});paint();paintFeatured();
 // Hero carousel: the best-ranked works rotate every 5 s. Pauses on hover, off-screen,
@@ -987,7 +995,7 @@ const heroCarousel=(()=>{
  const side=document.querySelector('.hero-side'),tile=side?.querySelector('.tile'),tileImg=tile?.querySelector('img');
  const still=matchMedia('(prefers-reduced-motion: reduce)');
  const DURATION=5000,POOL=8,EASE='cubic-bezier(.77,0,.18,1)',SOFT='cubic-bezier(.19,1,.22,1)';
- let pool=[],pos=-1,elapsed=0,busy=false,current=projects.find(p=>p[2]==='awp-the-prince')||projects[0];
+ let pool=[],pos=-1,elapsed=0,busy=false,current=projects.find(p=>p[2]==='awp-the-prince')||null; // null: the static first slide was taken down
  const paused=new Set();
  const loadImage=src=>new Promise(resolve=>{const img=new Image();img.decoding='async';img.onload=()=>Promise.resolve(img.decode&&img.decode()).catch(()=>{}).then(()=>resolve(img));img.onerror=()=>resolve(null);img.src=src;});
  function setCaption(data,index,animate){
@@ -1061,6 +1069,7 @@ const heroCarousel=(()=>{
  const pause=k=>{paused.add(k);hold();},resume=k=>{paused.delete(k);wake();};
  function refresh(){
   pool=projects.slice(0,POOL);
+  if(!projects.includes(current)&&pool.length){buildDots();pos=-1;go(0);return;}
   pos=pool.indexOf(current);
   buildDots();syncDots();
   if(pos>=0)setCaption(current,pos,false);

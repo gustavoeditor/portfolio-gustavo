@@ -164,8 +164,8 @@ test('admin title generator offers a retry with transparent status',()=>{
  const html=JSON.parse(encoded[1]);
  assert.ok(html.includes('id="auto-regenerate-title"'));
  assert.ok(html.includes('id="auto-title-ai-status"'));
- assert.ok(html.includes('/admin-smart-upload.js?v=7'));
- assert.ok(html.includes('/upload-ui.css?v=5'));
+ assert.ok(html.includes('/admin-smart-upload.js?v=8'));
+ assert.ok(html.includes('/upload-ui.css?v=6'));
  const uploader=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
  assert.doesNotThrow(()=>new vm.Script(uploader));
  assert.match(uploader,/aiRetry\.addEventListener\('click'/);
@@ -199,8 +199,8 @@ test('video thumbnail picker has an accessible timeline and never publishes with
  assert.match(html,/id="auto-cover-range"[^>]*type="range"/);
  assert.match(html,/id="auto-cover-confirm" disabled/);
  assert.match(html,/id="auto-change-cover">Enviar imagem/);
- assert.ok(html.includes('/admin-smart-upload.js?v=7'));
- assert.ok(html.includes('/upload-ui.css?v=5'));
+ assert.ok(html.includes('/admin-smart-upload.js?v=8'));
+ assert.ok(html.includes('/upload-ui.css?v=6'));
  const uploader=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
  assert.doesNotThrow(()=>new vm.Script(uploader));
  assert.match(uploader,/coverVideo\.addEventListener\('seeked',readyFrame\)/);
@@ -252,7 +252,7 @@ test('authenticated panel permits the upload SDK control API and serves its own 
  env();const handler=require('../api/admin-panel'),res=response();handler(request({},'GET'),res);
  assert.equal(res.code,200);assert.match(res.headers['Content-Security-Policy'],/https:\/\/vercel\.com\/api\/blob\//);
  assert.ok(!res.headers['Content-Security-Policy'].includes('https://esm.sh'));
- assert.ok(res.body.includes('/admin-smart-upload.js?v=7'));
+ assert.ok(res.body.includes('/admin-smart-upload.js?v=8'));
  assert.ok(fs.existsSync(path.join(root,'vendor/blob-client.js')));
 });
 
@@ -342,7 +342,10 @@ test('home portfolio ranks by quality, fills featured slots and rotates the hero
  assert.match(page,/quality-control\.js\?v=1[\s\S]*portfolio-quality\.js\?v=1[\s\S]*portfolio-order\.js\?v=2/);
  assert.match(html,/id="auto-ranking-mode"/);
  assert.match(html,/id="auto-ranking-status"/);
- assert.match(html,/quality-control\.js\?v=1"[^>]*><\/script><script src="\/admin-smart-upload\.js\?v=7/);
+ assert.match(html,/quality-control\.js\?v=1"[^>]*><\/script><script src="\/admin-site-videos\.js\?v=1"[^>]*><\/script><script src="\/admin-smart-upload\.js\?v=8/);
+ // "Vídeos no site": every video can be taken off the live site and put back.
+ assert.match(html,/id="site-videos-list"/);
+ assert.doesNotMatch(html,/Baixar projetos\.json/);
  const uploader=fs.readFileSync(path.join(root,'admin-smart-upload.js'),'utf8');
  assert.match(uploader,/rankingMode,src:uploadedVideo\.url/);
  assert.match(uploader,/positionField\.addEventListener\('input'/);

@@ -1,9 +1,9 @@
 const {BlobPreconditionFailedError} = require('@vercel/blob');
 const { validMutation, privateHeaders, parseJsonBody } = require('../lib/admin-session');
-const { hasStore, readSnapshot, writeManaged, cleanProject, validUploadedUrl } = require('../lib/managed-projects');
+const { hasStore, readSnapshot, writeManaged, cleanProject, validUploadedUrl, validHiddenKey } = require('../lib/managed-projects');
 module.exports = async function handler(req, res) {
   privateHeaders(res);
-  if (!['POST','DELETE'].includes(req.method)) { res.setHeader('Allow','POST, DELETE'); return res.status(405).end(); }
+  if (!['POST','DELETE','PATCH'].includes(req.method)) { res.setHeader('Allow','POST, DELETE, PATCH'); return res.status(405).end(); }
   if (!validMutation(req)) return res.status(403).json({error:'Acesso negado ou sessão expirada.'});
   if (!hasStore()) return res.status(503).json({error:'Conecte o Vercel Blob ao projeto antes de publicar.'});
   let body;
@@ -11,6 +11,15 @@ module.exports = async function handler(req, res) {
   try {
     const snapshot = await readSnapshot();
     const projects = snapshot.projects;
+    // PATCH: take a video off the site (hidden:true) or put it back (hidden:false). Files are kept.
+    if (req.method === 'PATCH') {
+      const key = String(body.key || '');
+      if (!validHiddenKey(key) || typeof body.hidden !== 'boolean') return res.status(400).json({error:'Vídeo inválido.'});
+      const hidden = new Set(snapshot.hidden || []);
+      if (body.hidden) hidden.add(key); else hidden.delete(key);
+      await writeManaged(projects, snapshot, [...hidden]);
+      return res.status(200).json({ok:true,hidden:[...hidden]});
+    }
     if (req.method === 'DELETE') {
       const id = String(body.id || '');
       if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(400).json({error:'Identificador inválido.'});

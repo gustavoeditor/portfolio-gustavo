@@ -600,6 +600,7 @@
     const data = await safeJson(response);
     const items = Array.isArray(data.projects) ? data.projects : [];
     renderManaged(items);
+    document.dispatchEvent(new Event('gustavo:catalog-changed'));
     return items.length;
   }
 
