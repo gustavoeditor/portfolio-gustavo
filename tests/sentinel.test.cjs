@@ -40,14 +40,29 @@ test('Telemetry capability endpoint never exposes infrastructure secrets',()=>{
  assert.equal(response.headers['X-Robots-Tag'],'noindex');
 });
 test('No remote writes without Redis-backed shared rate limiting',async()=>{
- const prior={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN};
+ const names=['UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN','KV_REST_API_URL','KV_REST_API_TOKEN'];
+ const prior=Object.fromEntries(names.map(k=>[k,process.env[k]]));
  try{
-  delete process.env.UPSTASH_REDIS_REST_URL;delete process.env.UPSTASH_REDIS_REST_TOKEN;
+  for(const k of names)delete process.env[k];
   assert.equal(sentinel.enabled(),false);
   const reply=res();await ingest(req('POST'),reply);assert.equal(reply.statusCode,503);
  }finally{
-  if(prior.url!==undefined)process.env.UPSTASH_REDIS_REST_URL=prior.url;
-  if(prior.token!==undefined)process.env.UPSTASH_REDIS_REST_TOKEN=prior.token;
+  for(const k of names)if(prior[k]!==undefined)process.env[k]=prior[k];
+ }
+});
+test('Redis connected through the Vercel Marketplace (KV_REST_API_*) enables collection',async()=>{
+ const names=['UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN','KV_REST_API_URL','KV_REST_API_TOKEN'];
+ const prior=Object.fromEntries(names.map(k=>[k,process.env[k]])),original=global.fetch;
+ try{
+  for(const k of names)delete process.env[k];
+  process.env.KV_REST_API_URL='https://example.upstash.io';process.env.KV_REST_API_TOKEN='kv-test-token';
+  assert.equal(sentinel.enabled(),true);
+  let seen;global.fetch=async(url,init)=>{seen={url,auth:init.headers.Authorization};return {ok:true,json:async()=>({result:1})};};
+  assert.equal(await sentinel.record(req('POST'),{type:'visit',component:'page'}),true);
+  assert.equal(seen.url,'https://example.upstash.io/');assert.equal(seen.auth,'Bearer kv-test-token');
+ }finally{
+  global.fetch=original;
+  for(const k of names){if(prior[k]===undefined)delete process.env[k];else process.env[k]=prior[k];}
  }
 });
 test('Anonymous counts and interactions must use a strict whitelist',()=>{

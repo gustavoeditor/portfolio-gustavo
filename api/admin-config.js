@@ -1,6 +1,7 @@
 const {storageMode} = require('../lib/storage-config');
 const {visualAIConfig} = require('../lib/visual-ai');
 const { isAdmin, privateHeaders } = require('../lib/admin-session');
+const {redisRest} = require('../lib/redis-env');
 module.exports = function handler(req, res) {
   privateHeaders(res);
   if (req.method !== 'GET') { res.setHeader('Allow','GET'); return res.status(405).end(); }
@@ -14,6 +15,6 @@ module.exports = function handler(req, res) {
     visualAIOidcPotential:Boolean(process.env.VERCEL === '1' && !process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN && !process.env.OPENAI_API_KEY),
     visualAIProvider:visualAIConfig()?.provider || null,
     secondFactorEnabled:Boolean(process.env.ADMIN_TOTP_SECRET),
-    sharedLoginLimit:Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+    sharedLoginLimit:Boolean(redisRest())
   });
 };
