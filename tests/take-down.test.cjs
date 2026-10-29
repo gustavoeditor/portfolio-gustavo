@@ -40,3 +40,16 @@ test('public catalogue exposes the taken-down list and the homepage filters it e
  assert.ok(page.includes('||hidden.has(p.src))continue;'),'uploads retirados continuam aparecendo');
  assert.ok(page.includes('if(!projects.includes(current)&&pool.length){buildDots();pos=-1;go(0);return;}'),'carrossel não pula vídeo retirado');
 });
+
+test('live sitemap drops videos taken off the site and includes new uploads',async()=>{
+ const real=require('../lib/managed-projects');
+ const snapshot={projects:[{title:'Novo vídeo',category:'youtube',src:'https://a.public.blob.vercel-storage.com/gustavo/videos/novo-1.mp4',poster:'https://a.public.blob.vercel-storage.com/gustavo/capas/novo-1.webp',publishedAt:'2026-10-29T12:00:00Z'}],hidden:['videos/awp-the-prince.mp4'],etag:'e'};
+ const sitemap=load('lib/seo-sitemap.js',{'./managed-projects':{...real,hasStore:()=>true,readSnapshot:async()=>snapshot}});
+ const out={headers:{},setHeader(k,v){this.headers[k.toLowerCase()]=v;return this;},status(c){this.code=c;return this;},send(b){this.body=b;return this;},end(){return this;}};
+ await sitemap({method:'GET',headers:{}},out);
+ assert.equal(out.code,200);
+ assert.match(out.headers['content-type'],/application\/xml/);
+ assert.ok(!out.body.includes('/videos/awp-the-prince.mp4'),'vídeo retirado no sitemap');
+ assert.ok(out.body.includes('novo-1.mp4'),'upload novo ausente do sitemap');
+ assert.ok(out.body.includes('<lastmod>2026-10-29</lastmod>'),'página inicial deve acompanhar o upload mais recente');
+});

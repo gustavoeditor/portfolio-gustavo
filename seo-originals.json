@@ -1,0 +1,167 @@
+{
+ "generatedAt": "2026-10-29T16:45:46.611Z",
+ "pages": [
+  [
+   "/",
+   null
+  ],
+  [
+   "/loja.html",
+   "2026-10-19"
+  ],
+  [
+   "/atualizacoes.html",
+   "2026-10-19"
+  ],
+  [
+   "/creative-cut.html",
+   "2026-10-21"
+  ]
+ ],
+ "videos": [
+  {
+   "key": "videos/awp-the-prince.mp4",
+   "name": "AWP The Prince | Cinematic Edit",
+   "description": "Montagem de AWP com trocas de cenário, ritmo e sound design. Edição de CS2 por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/awp-the-prince.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/awp-the-prince.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 30.19
+  },
+  {
+   "key": "videos/butterfly-gamma-dark.mp4",
+   "name": "Butterfly Gamma Doppler | Dark Studio",
+   "description": "Cinematic de produto com iluminação dramática e detalhes macro. Cinematic 3D por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/butterfly-gamma-dark.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/butterfly-gamma-dark.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 10.58
+  },
+  {
+   "key": "videos/flip-emerald-sfx.mp4",
+   "name": "Flip Emerald | Sound Design Cut",
+   "description": "Cortes dinâmicos, transições e efeitos sonoros. Edição de CS2 por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/flip-emerald-sfx.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/flip-emerald-sfx.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 30.04
+  },
+  {
+   "key": "videos/awp-orange-studio.mp4",
+   "name": "AWP | Studio Product Reveal",
+   "description": "Reveal em estúdio e iluminação quente. Cinematic 3D por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/awp-orange-studio.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/awp-orange-studio.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 5.87
+  },
+  {
+   "key": "videos/cs2-the-exchange.mp4",
+   "name": "CS2 | The Exchange",
+   "description": "Cena com personagens, atuação e detalhes das mãos. Cinematic 3D por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/cs2-the-exchange.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/cs2-the-exchange.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 3.07
+  },
+  {
+   "key": "videos/cs2-golden-hour-directors-cut.mp4",
+   "name": "CS2 Golden Hour | Close-Up Cut",
+   "description": "Cinematic em contraluz dourada, com planos próximos. Cinematic 3D por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/cs2-golden-hour-directors-cut.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/cs2-golden-hour-directors-cut.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 7.13
+  },
+  {
+   "key": "videos/cs2-golden-hour-wide-cut.mp4",
+   "name": "CS2 Golden Hour | Wide Cut",
+   "description": "Cinematic com planos abertos e luz de fundo. Cinematic 3D por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/cs2-golden-hour-wide-cut.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/cs2-golden-hour-wide-cut.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 10
+  },
+  {
+   "key": "videos/flip-emerald-original.mp4",
+   "name": "Flip Emerald | Original Cut",
+   "description": "Edição de faca verde com câmera dinâmica. Edição de CS2 por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/flip-emerald-original.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/flip-emerald-original.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 30.02
+  },
+  {
+   "key": "videos/neon-gloves-reveal.mp4",
+   "name": "Neon Gloves | Reveal",
+   "description": "Luvas e faca sob luz violeta em uma apresentação 3D. Cinematic 3D por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/neon-gloves-reveal.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/neon-gloves-reveal.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 3.07
+  },
+  {
+   "key": "videos/purple-gloves-studio.mp4",
+   "name": "Purple Gloves | Studio Animation",
+   "description": "Animação de luvas em um estúdio roxo. Cinematic 3D por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/purple-gloves-studio.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/purple-gloves-studio.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 3.1
+  },
+  {
+   "key": "videos/awp-creator-intro.mp4",
+   "name": "AWP | Creator Showcase",
+   "description": "Trecho de apresentação com criador e product shot. Edição para YouTube por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/awp-creator-intro.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/awp-creator-intro.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 15.7
+  },
+  {
+   "key": "videos/awp-gameplay-showcase.mp4",
+   "name": "AWP | Gameplay Showcase",
+   "description": "Gameplay e apresentação audiovisual de uma AWP. Edição para YouTube por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/awp-gameplay-showcase.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/awp-gameplay-showcase.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 8.58
+  },
+  {
+   "key": "videos/karambit-floating.mp4",
+   "name": "Karambit | Floating Shot",
+   "description": "Estudo 3D de faca suspensa com luz diurna. Cinematic 3D por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/karambit-floating.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/karambit-floating.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 3.8
+  },
+  {
+   "key": "videos/purple-karambit-inspect.mp4",
+   "name": "Purple Karambit | Inspect Animation",
+   "description": "Inspeção de faca em primeira pessoa e luvas roxas. Edição de CS2 por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/purple-karambit-inspect.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/purple-karambit-inspect.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 10.98
+  },
+  {
+   "key": "videos/kinetic-type-coral.mp4",
+   "name": "Kinetic Type | Coral",
+   "description": "Animação de tipografia 3D em um fundo coral. Motion design por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/kinetic-type-coral.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/kinetic-type-coral.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 5.04
+  },
+  {
+   "key": "videos/kinetic-type-mint.mp4",
+   "name": "Kinetic Type | Mint",
+   "description": "Estudo de animação tipográfica em paleta suave. Motion design por Gustavo, editor de vídeo.",
+   "thumbnail": "https://portfolio-gustavo-chi.vercel.app/capas/kinetic-type-mint.webp",
+   "content": "https://portfolio-gustavo-chi.vercel.app/videos/kinetic-type-mint.mp4",
+   "date": "2026-10-15T13:14:01-03:00",
+   "duration": 2.07
+  }
+ ]
+}

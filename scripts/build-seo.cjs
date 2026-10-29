@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /* Builds search metadata for the portfolio videos:
    - VideoObject JSON-LD (ItemList) embedded in index.html between the seo-videos markers
-   - sitemap.xml with Google video extension entries on the homepage
+   - seo-originals.json: original videos + pages for the live sitemap (lib/seo-sitemap.js,
+     served at /sitemap.xml), which adds panel uploads and drops videos taken off the site
    Sources: the static project list in index.html, durations from portfolio-quality.js,
    first-commit dates of each video, and the public managed-projects catalogue.
    Run after publishing new videos: npm run seo */
@@ -27,22 +28,27 @@ async function managedProjects(){
   try{
     const res=await fetch(SITE+'/api/managed-projects',{signal:AbortSignal.timeout(15000)});
     if(!res.ok)return [];
-    const {projects=[]}=await res.json();
+    const {projects=[],hidden:off=[]}=await res.json();
+    takenDown=new Set(off);
     const hidden=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()==='keydrop awp product cinematic';
-    return projects.filter(p=>p&&p.title&&/^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//.test(p.src)&&!hidden(p.title));
+    return projects.filter(p=>p&&p.title&&/^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//.test(p.src)&&!hidden(p.title)&&!takenDown.has(p.src));
   }catch(_){console.warn('Catálogo gerenciado indisponível; usando apenas os vídeos do repositório.');return [];}
 }
+let takenDown=new Set();
 const CATEGORY={cs2:'Edição de CS2',cinematics:'Cinematic 3D',youtube:'Edição para YouTube',motion:'Motion design',outros:'Projeto especial'};
 
 (async()=>{
-  const videos=[];
+  const videos=[],originalVideos=[];
+  const uploads=await managedProjects(); // also loads the taken-down list
   for(const p of staticProjects()){
     const r=reviews[p.slug];if(!r)continue;
     const date=firstCommitDate(`videos/${p.slug}.mp4`);if(!date)continue;
-    videos.push({name:p.title,description:`${p.description} ${CATEGORY[p.category]||''} por Gustavo, editor de vídeo.`.trim(),
-      thumbnail:`${SITE}/capas/${p.slug}.webp`,content:`${SITE}/videos/${p.slug}.mp4`,date,duration:r.meta.duration});
+    const video={key:`videos/${p.slug}.mp4`,name:p.title,description:`${p.description} ${CATEGORY[p.category]||''} por Gustavo, editor de vídeo.`.trim(),
+      thumbnail:`${SITE}/capas/${p.slug}.webp`,content:`${SITE}/videos/${p.slug}.mp4`,date,duration:r.meta.duration};
+    originalVideos.push(video);
+    if(!takenDown.has(video.key))videos.push(video);
   }
-  for(const p of await managedProjects()){
+  for(const p of uploads){
     const r=reviews[p.src];
     videos.push({name:p.title,description:`${p.description||p.title}. ${CATEGORY[p.category]||''} por Gustavo, editor de vídeo.`.replace(/\.\./g,'.').trim(),
       thumbnail:p.poster,content:p.src,date:p.publishedAt||new Date().toISOString(),duration:r?r.meta.duration:null});
@@ -58,24 +64,7 @@ const CATEGORY={cs2:'Edição de CS2',cinematics:'Cinematic 3D',youtube:'Ediçã
   if(crlf)html=html.replace(/\n/g,'\r\n');
   fs.writeFileSync(path.join(root,'index.html'),html);
 
-  const today=new Date().toISOString().slice(0,10);
-  const pages=[['/',today],['/loja.html','2026-10-19'],['/atualizacoes.html','2026-10-19'],['/creative-cut.html','2026-10-21']];
-  const videoXml=videos.map(v=>`    <video:video>
-      <video:thumbnail_loc>${esc(v.thumbnail)}</video:thumbnail_loc>
-      <video:title>${esc(v.name)}</video:title>
-      <video:description>${esc(v.description)}</video:description>
-      <video:content_loc>${esc(v.content)}</video:content_loc>${v.duration?`\n      <video:duration>${Math.round(v.duration)}</video:duration>`:''}
-      <video:publication_date>${esc(v.date)}</video:publication_date>
-      <video:family_friendly>yes</video:family_friendly>
-    </video:video>`).join('\n');
-  const sitemap=`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-${pages.map(([p,d])=>`  <url>
-    <loc>${SITE}${p}</loc>
-    <lastmod>${d}</lastmod>${p==='/'?'\n'+videoXml:''}
-  </url>`).join('\n')}
-</urlset>
-`;
-  fs.writeFileSync(path.join(root,'sitemap.xml'),sitemap);
-  console.log(`SEO: ${videos.length} vídeos no JSON-LD e no sitemap.`);
+  const pages=[['/',null],['/loja.html','2026-10-19'],['/atualizacoes.html','2026-10-19'],['/creative-cut.html','2026-10-21']];
+  fs.writeFileSync(path.join(root,'seo-originals.json'),JSON.stringify({generatedAt:new Date().toISOString(),pages,videos:originalVideos},null,1)+'\n');
+  console.log(`SEO: ${videos.length} vídeos no JSON-LD; ${originalVideos.length} originais em seo-originals.json (sitemap ao vivo em /sitemap.xml).`);
 })().catch(e=>{console.error(e.message);process.exit(1);});
