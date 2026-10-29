@@ -973,6 +973,7 @@ function paint(){stopPreview();const catalogTotal=document.getElementById('catal
   const q=Q.clean(p.quality)||QB.lookup(p.src)||(Q.validScore(p.qualityScore)?{overall:p.qualityScore,tier:Q.tier(p.qualityScore).id}:null);
   if(q)qualityOf.set(entry,q);
   if(p.rankingMode==='manual'&&Number.isInteger(p.position))pins.set(entry,p.position);
+  if(normalizedTitle(p.title)==='edit gungnir cs2')pins.set(entry,2); // Pedido: este vídeo ocupa o destaque 03.
   if(typeof p.publishedAt==='string')publishedAt.set(entry,p.publishedAt);
   projects.push(entry);existing.add(p.src);added++;
  }
