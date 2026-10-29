@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "/api/managed-projects?seo=sitemap"
+    },
+    {
       "source": "/api/creative-tools-update",
       "destination": "/api/managed-projects?ct_update=download"
     },
