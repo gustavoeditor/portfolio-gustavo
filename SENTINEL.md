@@ -5,11 +5,11 @@
 - **Ativo sem configuração extra:** testes de disponibilidade de produção via GitHub Actions a cada 30 minutos (agendamentos do GitHub podem atrasar ou ser desativados após inatividade). Três tentativas por alvo; incidentes em GitHub Issues, sem duplicação e encerramento automático quando recuperados. A automação não publica código.
 - **Ativo no painel:** /sentinel e /admin/sentinel, protegidos pela sessão existente de /admin. Verificações ao vivo dos recursos principais.
 - **Ativo no navegador:** identifica sinais técnicos sem capturar conteúdo digitado, identidade, IP ou URLs. Os fallbacks existentes de capas e vídeos continuam operando localmente.
-- **Pendente de infraestrutura:** armazenar contadores anônimos requer UPSTASH_REDIS_REST_URL e UPSTASH_REDIS_REST_TOKEN; o Vercel Blob permanece usado apenas para os vídeos. A coleta é desabilitada por padrão caso o limitador distribuído não esteja configurado.
+- **Pendente de infraestrutura:** armazenar contadores anônimos requer um Redis Upstash conectado (KV_REST_API_URL e KV_REST_API_TOKEN, criados pela integração da Vercel, ou UPSTASH_REDIS_REST_URL e UPSTASH_REDIS_REST_TOKEN); o Vercel Blob permanece usado apenas para os vídeos. A coleta é desabilitada por padrão caso o limitador distribuído não esteja configurado.
 
 ## Preparar eventos reais
 
-1. Conectar um armazenamento Redis/Upstash compatível ao projeto Vercel, usando variáveis **somente no servidor**: UPSTASH_REDIS_REST_URL e UPSTASH_REDIS_REST_TOKEN. Não inserir esses valores no HTML ou GitHub.
+1. Conectar um armazenamento Redis/Upstash compatível ao projeto Vercel, usando variáveis **somente no servidor**. O caminho mais simples é Vercel → Storage → Upstash for Redis → Connect Project, que cria KV_REST_API_URL e KV_REST_API_TOKEN; UPSTASH_REDIS_REST_URL e UPSTASH_REDIS_REST_TOKEN também são aceitos. Não inserir esses valores no HTML ou GitHub.
 2. Confirmar que o Vercel Blob está conectado (BLOB_STORE_ID / BLOB_WEBHOOK_PUBLIC_KEY via OIDC ou BLOB_READ_WRITE_TOKEN).
 3. Implantar as alterações de variáveis e verificar o painel /sentinel. Se o endpoint /api/sentinel-status informar telemetryEnabled=true, a coleta fica habilitada.
 4. Limites: até 18 eventos por origem de rede/hora e 1500 eventos/dia globais, aplicados de forma atômica no Redis. O cliente limita a 12 sinais por carregamento, com intervalos mínimos por categoria.
