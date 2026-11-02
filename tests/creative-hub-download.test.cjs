@@ -86,12 +86,18 @@ test('produto ou versao desconhecidos: 404',async()=>{
   assert.equal(res.code,404);
  }
 });
-test('feed publicado bate com o contrato do Hub',()=>{
+test('feed publicado bate com o arquivo publico e com o contrato do Hub',()=>{
+ const fs=require('node:fs'),path=require('node:path');
  const f=require('../updates/creative-tools/hub-manifest.json');
  const rel=f.releases.find(x=>x.version===f.latest);
  assert.equal(f.product,'creative-tools');
- assert.equal(rel.status,'published');assert.equal(rel.auth,'license');
- assert.match(rel.sha256,/^[a-f0-9]{64}$/);assert.ok(rel.size>0);
- assert.ok(rel.rangeChunkSize<=4*1024*1024);
- assert.equal(rel.downloadUrl,'/api/creative-hub/download?product=creative-tools&version='+rel.version);
+ assert.equal(rel.status,'published');assert.equal(rel.auth,undefined);
+ assert.match(rel.downloadUrl,/^\/downloads\/creative-tools\/[A-Za-z0-9._-]+\.exe$/);
+ const file=fs.readFileSync(path.join(__dirname,'..',rel.downloadUrl));
+ assert.equal(file.subarray(0,2).toString(),'MZ');
+ assert.equal(file.length,rel.size);assert.equal(hash(file),rel.sha256);
+ const c=require('../creative-hub/catalog.json');
+ const ct=c.apps.find(a=>a.id==='creative-tools');
+ assert.equal(ct.access,'public');
+ assert.equal(ct.feed,'https://portfolio-gustavo-chi.vercel.app/updates/creative-tools/hub-manifest.json');
 });
