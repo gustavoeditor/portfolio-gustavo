@@ -2,10 +2,53 @@
   "schemaVersion": 1,
   "product": "creative-tools",
   "channel": "beta",
-  "latest": "1.8.2",
+  "latest": "1.8.3",
   "message": "Beta gratuita: download direto pelo Creative Hub.",
   "updatedAt": "2026-11-02",
   "releases": [
+    {
+      "version": "1.8.3",
+      "date": "2026-11-02",
+      "status": "published",
+      "changes": [
+        "Atualização direto pelo Creative Hub: barra de progresso e \"Atualizado\", sem abrir a janela do instalador.",
+        "Nenhuma janela de console (CMD) e nenhuma caixa de aviso durante a instalação.",
+        "Menu Ctrl+B abre junto ao cursor do mouse.",
+        "Camadas criadas com as cores de etiqueta padrão do After Effects (ajuste, luz, câmera, shape...)."
+      ],
+      "downloadUrl": "/downloads/creative-tools/Creative_Tools_Setup_1.8.3.exe",
+      "sha256": "06b8f994d7619e2a528f694e4a30ed99d3e605ce789e91fdba57d0b6083f7985",
+      "size": 3913102,
+      "rangeChunkSize": 3145728,
+      "fileName": "Creative_Tools_Setup_1.8.3.exe",
+      "requiresAdmin": true,
+      "minHubVersion": "0.1.3",
+      "detectVersion": "1.8.3",
+      "installer": {
+        "args": [],
+        "repairArgs": [
+          "--repair-menu"
+        ],
+        "uninstallArgs": [
+          "--uninstall-menu"
+        ],
+        "interactive": false,
+        "silentArgs": [
+          "--hub-silent",
+          "install"
+        ],
+        "silentUninstallArgs": [
+          "--hub-silent",
+          "uninstall"
+        ],
+        "statusArg": "--hub-status"
+      },
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      }
+    },
     {
       "version": "1.8.2",
       "date": "2026-11-02",
