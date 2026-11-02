@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "product": "creative-text",
+  "channel": "beta",
+  "latest": "1.0.0",
+  "message": "Creative Text: download direto pelo Creative Hub.",
+  "updatedAt": "2026-11-02",
+  "releases": [
+    {
+      "version": "1.0.0",
+      "date": "2026-11-02",
+      "status": "published",
+      "changes": [
+        "Primeira versão: 20 animações de texto (35 presets) por letras, palavras ou linhas.",
+        "Um clique aplica em todas as camadas de texto selecionadas, com um único Ctrl+Z.",
+        "Prévia animada, busca, categorias, favoritas, + TEXTO e LIMPAR."
+      ],
+      "downloadUrl": "/downloads/creative-text/Creative_Text_Setup_1.0.0.exe",
+      "sha256": "b25b88db30b91907f5ed70da66a9c3868adb3cc19498ec2facc3ce742106cc65",
+      "size": 2681344,
+      "rangeChunkSize": 3145728,
+      "fileName": "Creative_Text_Setup_1.0.0.exe",
+      "requiresAdmin": false,
+      "minHubVersion": "0.1.3",
+      "detectVersion": "1.0.0",
+      "installer": {
+        "args": [],
+        "uninstallArgs": [
+          "--uninstall"
+        ],
+        "interactive": false,
+        "silentArgs": [
+          "--hub-silent",
+          "install"
+        ],
+        "silentUninstallArgs": [
+          "--hub-silent",
+          "uninstall"
+        ],
+        "statusArg": "--hub-status"
+      },
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      }
+    }
+  ]
+}

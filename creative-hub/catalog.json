@@ -59,6 +59,52 @@
       "screenshots": []
     },
     {
+      "id": "creative-text",
+      "name": "Creative Text",
+      "tagline": "Animações de texto em um clique para o After Effects.",
+      "description": "Painel com 20 animações de texto prontas (Slide, Bounce, Pop, Blur, Fade, Reveal, Typewriter, Flicker e mais). Escolha letras, palavras ou linhas e aplique em todas as camadas de texto selecionadas com um clique.",
+      "category": "Plugin · After Effects",
+      "host": "o Adobe After Effects",
+      "status": "available",
+      "icon": "creative-text",
+      "accent": "#c4b5fd",
+      "access": "public",
+      "feed": "https://portfolio-gustavo-chi.vercel.app/updates/creative-text/hub-manifest.json",
+      "website": "https://portfolio-gustavo-chi.vercel.app/atualizacoes.html",
+      "hostProcesses": [
+        "AfterFX.exe"
+      ],
+      "detector": {
+        "type": "cep-extension",
+        "bundleId": "com.gustavo.creativetext",
+        "bundleName": "Creative Text"
+      },
+      "features": [
+        {
+          "title": "Um clique",
+          "text": "Aplica a animação em todas as camadas de texto selecionadas, no indicador de tempo, com um único Ctrl+Z."
+        },
+        {
+          "title": "Letras, palavras ou linhas",
+          "text": "Escolha a unidade uma vez; cada cartão mostra a prévia animada."
+        },
+        {
+          "title": "20 animações",
+          "text": "Slide, Bounce, Pop, Blur, Fade, Reveal, Typewriter, Snap, Flicker e Rise."
+        },
+        {
+          "title": "Limpar",
+          "text": "Remove só o que o Creative Text criou, sem tocar nos seus efeitos."
+        }
+      ],
+      "requirements": [
+        "Windows 10 ou 11 (64 bits)",
+        "Adobe After Effects 2019 (16.0) ou superior",
+        "Adobe Creative Cloud instalado (instalador de extensões da Adobe)"
+      ],
+      "screenshots": []
+    },
+    {
       "id": "creative-cut",
       "name": "Creative Cut",
       "tagline": "Edição automática com IA para o Premiere Pro.",
