@@ -1,11 +1,13 @@
 const storeCheckout = require('../lib/store-checkout');
 const creativeToolsUpdate = require('../lib/creative-tools-update');
+const creativeHubDownload = require('../lib/creative-hub-download');
 const storeDelivery = require('../lib/store-delivery');
 const { hasStore, readSnapshot } = require('../lib/managed-projects');
 const seoSitemap = require('../lib/seo-sitemap');
 module.exports = async function handler(req, res) {
   const originalPath = String(req.url || '').split('?')[0];
   if ((req.query && req.query.ct_update === 'download') || originalPath === '/api/creative-tools-update') return creativeToolsUpdate(req, res);
+  if ((req.query && req.query.hub === 'download') || originalPath === '/api/creative-hub/download') return creativeHubDownload(req, res);
   if ((req.query && req.query.store === 'checkout') || originalPath === '/api/store/checkout') return storeCheckout(req, res);
   if ((req.query && req.query.store === 'download') || originalPath === '/api/store/download') return storeDelivery(req, res);
   if ((req.query && req.query.seo === 'sitemap') || originalPath === '/sitemap.xml') return seoSitemap(req, res);

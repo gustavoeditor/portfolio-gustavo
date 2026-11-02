@@ -37,3 +37,19 @@ Esta branch prepara a central pública `/atualizacoes.html` e o manifesto `/upda
 
 ## Bloqueio
 O código-fonte do instalador Alpha atualmente distribuído ainda não está no repositório. É necessário incorporá-lo para implementar o cliente de atualização e a instalação automática reais.
+
+## Creative Hub (download com licença)
+
+O Creative Hub lê `updates/creative-tools/hub-manifest.json` e baixa por
+`GET /api/creative-hub/download?product=creative-tools&version=<versão>` com `Authorization: Bearer <licença>`,
+em partes (HTTP Range, até 4 MB por resposta). O endpoint (`lib/creative-hub-download.js`) só entrega se:
+a release estiver `published` com `auth: "license"` no feed, a licença bater com um hash de
+`CT_HUB_LICENSE_SHA256` (ou `CT_UPDATE_LICENSE_SHA256`) e o SHA-256 do arquivo do Blob privado bater com
+`CT_HUB_SHA256` e com o feed. Enquanto as variáveis não existirem, responde 503 e o Hub não instala nada.
+
+Para ativar uma versão:
+1. `node scripts/upload-creative-hub-release.mjs <instalador.exe> <versão>` com `CT_HUB_PRIVATE_BLOB_TOKEN`
+   definido no terminal (o script confere SHA-256 e tamanho com o feed antes de enviar).
+2. Na Vercel (Production): `CT_HUB_ENABLED=true`, `CT_HUB_VERSION`, `CT_HUB_PRIVATE_BLOB_PATH`, `CT_HUB_SHA256`
+   e, se não reutilizar os do atualizador, `CT_HUB_PRIVATE_BLOB_TOKEN` e `CT_HUB_LICENSE_SHA256`.
+3. Redeploy e teste no Hub: licença inválida → "licença recusada"; licença válida → instala.
