@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "product": "creative-tools",
+  "channel": "private-beta",
+  "latest": "1.8.0",
+  "message": "Beta privada: download somente com licença, pelo Creative Hub. Não é uma liberação comercial.",
+  "updatedAt": "2026-11-02",
+  "releases": [
+    {
+      "version": "1.8.0",
+      "date": "2026-11-02",
+      "status": "published",
+      "changes": [
+        "Camadas criadas com os nomes padrão do After Effects (Black Solid 1, Spot Light 1, Camera 1, Null 1...).",
+        "Luz na posição padrão do After Effects, com Casts Shadows ligado.",
+        "Novo menu CONFIGURAR no botão direito de cada item do Create Studio, com os valores padrão do AE.",
+        "Pasta de presets extra não se desvincula mais: fica salva nas preferências do After Effects.",
+        "Menu rápido Ctrl+B junto ao cursor, com curvas salvas e Bounce."
+      ],
+      "auth": "license",
+      "downloadUrl": "/api/creative-hub/download?product=creative-tools&version=1.8.0",
+      "sha256": "9fd1acde1f2e2c396bae251c5c47c14144e586e271681cbe4c4b910cb4eeb320",
+      "size": 3902436,
+      "rangeChunkSize": 3145728,
+      "fileName": "Creative_Tools_Setup_1.8.0.exe",
+      "requiresAdmin": true,
+      "minHubVersion": "0.1.1",
+      "detectVersion": "1.8.0",
+      "installer": {
+        "args": [],
+        "repairArgs": [
+          "--repair-menu"
+        ],
+        "uninstallArgs": [
+          "--uninstall-menu"
+        ],
+        "interactive": true
+      },
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      }
+    }
+  ]
+}
