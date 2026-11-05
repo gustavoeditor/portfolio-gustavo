@@ -4,6 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>
+/* Modo leve antes da primeira pintura: celular/toque ou navegador sem GPU (aceleração por hardware desligada). */
+(()=>{
+  let lite=matchMedia('(max-width:700px),(pointer:coarse)').matches;
+  if(!lite){
+    try{
+      const gl=document.createElement('canvas').getContext('webgl',{failIfMajorPerformanceCaveat:true});
+      lite=!gl;
+      gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    }catch(_){lite=true;}
+  }
+  document.documentElement.classList.toggle('lite',lite);
+})();
+</script>
+<script>
 /* Start every plain homepage visit at its hero, instead of a previously restored section.
    Explicit #anchors remain deep-linkable and navigation stays untouched. */
 (()=>{
@@ -628,8 +642,12 @@ body{
 .spotlight{inset:auto;left:0;top:0;width:960px;height:900px;background:radial-gradient(ellipse 480px 450px at 50% 50%,rgba(122,73,215,.065),transparent 79%);transform:translate3d(calc(50vw - 480px),calc(30vh - 450px),0);will-change:transform}
 .progress{width:100%;transform:scaleX(0);transform-origin:0 50%;will-change:transform}
 .is-offscreen *,.is-offscreen *::before,.is-offscreen *::after,.is-offscreen::before,.is-offscreen::after{animation-play-state:paused!important}
-/* MODO LEVE (celular / toque): sem vidro desfocado, sem blur pesado e sem camadas decorativas grandes. */
-html.lite *,html.lite *::before,html.lite *::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+/* MODO LEVE (celular / toque / sem GPU): sem vidro desfocado, sem filtros e sem camadas decorativas grandes. */
+html.lite *,html.lite *::before,html.lite *::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;filter:none!important}
+html.lite .spotlight{display:none}
+html.lite .modal{background:rgba(4,3,9,.96)}
+html.lite .ticker{-webkit-mask-image:none;mask-image:none}
+html.lite .hero-poster .hero-slide,html.lite .hero-poster .hero-slide img{will-change:auto}
 html.lite .nav-shell{background:rgba(14,12,22,.96)}
 html.lite .hero .hero-grid>div:first-child:before,html.lite .manifesto::before,html.lite .services::before,html.lite .contact-inner::before,html.lite .scene:before{display:none}
 html.lite .trust-card:before{display:none}
@@ -901,9 +919,9 @@ const projects=[
 const labels={cs2:'CS2 / Edit',cinematics:'Cinematic / 3D',youtube:'YouTube',motion:'Motion Design',outros:'Projetos especiais'};const colors={cs2:'#59477e',cinematics:'#3e456f',youtube:'#516177',motion:'#996e7b',outros:'#5f667c'};
 const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Quality ranking: every work is ordered by its QC score (quality-control.js).
-// Lite mode: phones and touch screens skip the GPU-heavy extras (3D scene, big blurs, scroll-linked effects).
-const lite=matchMedia('(max-width:700px),(pointer:coarse)').matches;
-document.documentElement.classList.toggle('lite',lite);
+// Lite mode: phones, touch screens and browsers without a GPU skip the heavy extras (big blurs, filters, scroll-linked effects).
+// Set in <head>; it can also turn on later if the frame rate turns out low.
+const isLite=()=>document.documentElement.classList.contains('lite');
 const Q=window.GustavoQuality,QB=window.GustavoQualityBaseline||{lookup:()=>null};
 const qualityOf=new Map(),pins=new Map(),publishedAt=new Map();
 for(const entry of projects){const q=QB.lookup(entry[2]);if(q)qualityOf.set(entry,q);}
@@ -1048,7 +1066,7 @@ const heroCarousel=(()=>{
   img.alt='Capa do projeto '+data[0];
   const slide=document.createElement('div');slide.className='hero-slide';slide.append(img);
   const old=[...stage.children];stage.append(slide);
-  if(still.matches||lite){
+  if(still.matches||isLite()){
    slide.animate([{opacity:0},{opacity:1}],{duration:450,fill:'both'});
   }else{
    slide.animate([{clipPath:'inset(0 0 0 100%)'},{clipPath:'inset(0 0 0 0%)'}],{duration:1150,easing:EASE,fill:'both'});
@@ -1128,11 +1146,12 @@ const heroCarousel=(()=>{
 })();
 // Hero parallax: title, poster and orbit drift at different depths while leaving the hero.
 (()=>{
- if(lite||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ if(isLite()||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const hero=document.getElementById('inicio');if(!hero)return;
  const copy=hero.querySelector('.hero-grid>div:first-child'),side=hero.querySelector('.hero-side'),scroll=hero.querySelector('.hero-scroll');
  let running=false,lastT=0,y=-1;
  function frame(t){
+  if(isLite()){running=false;if(copy)copy.style.transform=copy.style.opacity='';if(side)side.style.transform='';if(scroll)scroll.style.opacity='';return;}
   const dt=lastT?Math.min(.05,(t-lastT)/1000):1/60;lastT=t;
   const goal=Math.min(scrollY,hero.offsetHeight);
   y=y<0||Math.abs(goal-y)>hero.offsetHeight*.6?goal:y+(goal-y)*(1-Math.exp(-dt/.14));
@@ -1144,6 +1163,24 @@ const heroCarousel=(()=>{
  }
  addEventListener('scroll',()=>{if(!running){running=true;requestAnimationFrame(frame);}},{passive:true});
  running=true;requestAnimationFrame(frame);
+})();
+// Weak GPU that the <head> check can't see: under ~33 fps at rest or on the first scroll turns lite mode on.
+(()=>{
+ if(isLite())return;
+ const sample=()=>{
+  let last=0;const gaps=[];
+  const tick=t=>{
+   if(isLite())return;
+   if(last&&t-last<250)gaps.push(t-last);
+   last=t;
+   if(gaps.length<60)return requestAnimationFrame(tick);
+   gaps.sort((a,b)=>a-b);
+   if(gaps[30]>=30)document.documentElement.classList.add('lite');
+  };
+  requestAnimationFrame(tick);
+ };
+ addEventListener('load',()=>setTimeout(sample,1500),{once:true});
+ addEventListener('scroll',sample,{once:true,passive:true});
 })();
 const modal=document.getElementById('video-modal'),player=document.getElementById('modal-player'),close=document.getElementById('modal-close'),previousProject=document.getElementById('modal-prev'),nextProject=document.getElementById('modal-next');let playerUI=null,activeProjectIndex=-1;
 function projectVideo(data){return data[4]||ROOT+'videos/'+data[2]+'.mp4'}
@@ -1204,7 +1241,7 @@ const menu=document.getElementById('menu-btn'),nav=document.getElementById('nav-
 const progress=document.getElementById('progress'),shell=document.getElementById('nav-shell');let ticking=false;function onScroll(){if(ticking)return;ticking=true;requestAnimationFrame(()=>{const max=document.documentElement.scrollHeight-innerHeight;progress.style.transform='scaleX('+(max>0?scrollY/max:0)+')';shell.classList.toggle('scrolled',scrollY>30);ticking=false})}document.addEventListener('scroll',onScroll,{passive:true});onScroll();
 if('IntersectionObserver'in window){const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}}),{threshold:.08,rootMargin:'0px 0px -25px 0px'});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el))}else{document.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'))}
 const spotlightEl=document.querySelector('.spotlight');
-if(!reduced.matches&&matchMedia('(hover:hover) and (pointer:fine)').matches){let mouseX=innerWidth/2,mouseY=innerHeight/2,raf=false;document.addEventListener('pointermove',e=>{mouseX=e.clientX;mouseY=e.clientY;if(raf)return;raf=true;requestAnimationFrame(()=>{spotlightEl&&(spotlightEl.style.transform='translate3d('+(mouseX-480)+'px,'+(mouseY-450)+'px,0)');raf=false})},{passive:true});const scene=document.getElementById('hero-scene');scene?.parentElement?.addEventListener('pointermove',e=>{const r=scene.getBoundingClientRect(),dx=(e.clientX-r.left)/r.width-.5,dy=(e.clientY-r.top)/r.height-.5;scene.style.transform=`rotate(${(-6+dx*5).toFixed(2)}deg) rotateY(${(-8+dx*13).toFixed(2)}deg) rotateX(${(-dy*10).toFixed(2)}deg)`});scene?.parentElement?.addEventListener('pointerleave',()=>scene.style.transform='')}
+if(!reduced.matches&&matchMedia('(hover:hover) and (pointer:fine)').matches){let mouseX=innerWidth/2,mouseY=innerHeight/2,raf=false;document.addEventListener('pointermove',e=>{if(isLite())return;mouseX=e.clientX;mouseY=e.clientY;if(raf)return;raf=true;requestAnimationFrame(()=>{spotlightEl&&(spotlightEl.style.transform='translate3d('+(mouseX-480)+'px,'+(mouseY-450)+'px,0)');raf=false})},{passive:true});const scene=document.getElementById('hero-scene');let tiltEvent=null;scene?.parentElement?.addEventListener('pointermove',e=>{if(isLite())return;const pending=tiltEvent;tiltEvent=e;if(pending)return;requestAnimationFrame(()=>{const ev=tiltEvent;tiltEvent=null;if(!ev)return;const r=scene.getBoundingClientRect(),dx=(ev.clientX-r.left)/r.width-.5,dy=(ev.clientY-r.top)/r.height-.5;scene.style.transform=`rotate(${(-6+dx*5).toFixed(2)}deg) rotateY(${(-8+dx*13).toFixed(2)}deg) rotateX(${(-dy*10).toFixed(2)}deg)`})},{passive:true});scene?.parentElement?.addEventListener('pointerleave',()=>{tiltEvent=null;scene.style.transform=''})}
 document.querySelectorAll('[data-service]').forEach(link=>link.addEventListener('click',()=>{document.getElementById('brief-type').value=link.dataset.service}));
 document.getElementById('brief-form').addEventListener('submit',e=>{e.preventDefault();const form=e.currentTarget;if(!form.reportValidity())return;const name=document.getElementById('brief-name').value.trim().slice(0,60),type=document.getElementById('brief-type').value,detail=document.getElementById('brief-detail').value.trim().slice(0,1100);if(detail.length<10){document.getElementById('brief-detail').setCustomValidity('Escreva pelo menos 10 caracteres.');form.reportValidity();document.getElementById('brief-detail').setCustomValidity('');return}const msg=['Olá, Gustavo! Vi seu portfólio e gostaria de conversar sobre um projeto.',name?'Nome: '+name:'','Tipo de projeto: '+type,'Minha ideia: '+detail,'Podemos conversar sobre um orçamento?'].filter(Boolean).join('\n');const url='https://wa.me/5537988445372?text='+encodeURIComponent(msg);const popup=window.open(url,'_blank');if(popup){try{popup.opener=null}catch(_){}}else{window.location.assign(url)}});
 })();
