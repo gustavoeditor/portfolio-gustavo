@@ -2,10 +2,55 @@
   "schemaVersion": 1,
   "product": "creative-tools",
   "channel": "beta",
-  "latest": "1.8.4",
+  "latest": "1.8.5",
   "message": "Beta gratuita: download direto pelo Creative Hub.",
   "updatedAt": "2026-11-07",
   "releases": [
+    {
+      "version": "1.8.5",
+      "date": "2026-11-07",
+      "status": "published",
+      "changes": [
+        "Atualização direto pelo Creative Hub: barra de progresso e \"Atualizado\", sem abrir a janela do instalador.",
+        "Nenhuma janela de console (CMD) e nenhuma caixa de aviso durante a instalação.",
+        "Menu Ctrl+B abre junto ao cursor do mouse.",
+        "Camadas criadas com as cores de etiqueta padrão do After Effects (ajuste, luz, câmera, shape...).",
+        "Âncora 9 pontos: os botões voltam a funcionar em camadas 3D (inclusive com pai, orientação e rotações X/Y/Z), sem mover a camada.",
+        "Ctrl+B: o atalho do menu volta a ser instalado no perfil padrão de atalhos do After Effects 2026 (antes ficava nas ferramentas nativas e o Hub mostrava \"Instalação parcial\")."
+      ],
+      "downloadUrl": "/downloads/creative-tools/Creative_Tools_Setup_1.8.5.exe",
+      "sha256": "29d95788e46438ad4e8413b2ae2dca57f1a411c97c8ca2f81dc03ed78f92b0ec",
+      "size": 3917780,
+      "rangeChunkSize": 3145728,
+      "fileName": "Creative_Tools_Setup_1.8.5.exe",
+      "requiresAdmin": true,
+      "minHubVersion": "0.1.3",
+      "detectVersion": "1.8.5",
+      "installer": {
+        "args": [],
+        "repairArgs": [
+          "--repair-menu"
+        ],
+        "uninstallArgs": [
+          "--uninstall-menu"
+        ],
+        "interactive": false,
+        "silentArgs": [
+          "--hub-silent",
+          "install"
+        ],
+        "silentUninstallArgs": [
+          "--hub-silent",
+          "uninstall"
+        ],
+        "statusArg": "--hub-status"
+      },
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      }
+    },
     {
       "version": "1.8.4",
       "date": "2026-11-07",
