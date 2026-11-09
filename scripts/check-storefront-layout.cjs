@@ -10,7 +10,7 @@ const server=http.createServer((req,res)=>{
  const url=new URL(req.url,'http://localhost');
  if(url.pathname==='/api/store/checkout'){
   res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});
-  return res.end(JSON.stringify({available:false,product:'gustavo-trio',priceLabel:null}));
+  return res.end(JSON.stringify({available:true,product:'creative-tools',provider:'cakto',priceLabel:'R$ 39,90',checkoutUrl:'https://pay.cakto.com.br/g6gcpgr_1217766'}));
  }
  const pathname=url.pathname==='/'?'/loja.html':url.pathname;
  const filename=path.resolve(root,'.'+pathname);
@@ -39,7 +39,7 @@ async function check(){
      css:getComputedStyle(document.querySelector('.hero')).display,
      h1:b('#hero-title'),art:b('.art'),purchase:b('.purchase'),order:b('.order'),faq:b('.faq-list'),
      cards:document.querySelectorAll('.feature').length,styles:document.styleSheets.length,
-     checkoutDisabled:document.getElementById('checkout').disabled,
+     checkoutHref:document.getElementById('checkout').getAttribute('href'),checkoutOff:document.getElementById('checkout').getAttribute('aria-disabled'),price:document.getElementById('price').textContent,
      badge:document.getElementById('sale-badge').textContent
     };
    });
@@ -51,8 +51,10 @@ async function check(){
     assert.ok(a.left>=-7&&a.right<=width+7,k+' outside viewport '+width+'px '+JSON.stringify(a));
    }
    assert.equal(x.cards,6);
-   assert.ok(x.checkoutDisabled,'purchase must remain disabled');
-   assert.match(x.badge,/PRÉ-LANÇAMENTO/);
+   assert.equal(x.checkoutHref,'https://pay.cakto.com.br/g6gcpgr_1217766','purchase must point to the official Cakto checkout');
+   assert.notEqual(x.checkoutOff,'true');
+   assert.match(x.price,/39,90/);
+   assert.match(x.badge,/DISPONÍVEL/);
    assert.deepEqual(errors,[],'JS error '+width+'px');
    await page.locator('.faq summary').first().click();
    assert.equal(await page.locator('.faq details').first().getAttribute('open'),'');
@@ -61,7 +63,7 @@ async function check(){
     await page.locator('.faq summary').first().click();
     await page.screenshot({path:path.join(out,'loja-'+width+'.png'),fullPage:true});
    }
-   console.log('Storefront: '+width+'px responsive, 6 features, checkout locked, FAQ OK');
+   console.log('Storefront: '+width+'px responsive, 6 features, Cakto checkout live, FAQ OK');
    await context.close();
   }
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
