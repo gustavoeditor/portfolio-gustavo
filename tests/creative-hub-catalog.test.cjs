@@ -53,7 +53,7 @@ test('cada versão publicada aponta para um instalador íntegro',()=>{
 
 test('página de vendas mostra as ferramentas que o Hub oferece, na versão atual',()=>{
  const html=fs.readFileSync(path.join(root,'loja.html'),'utf8');
- assert.match(html,/<title>Creative Hub \|/);assert.match(html,/id="ferramentas"/);
+ assert.match(html,/<title>Creative Hub \|/);assert.match(html,/icon3d icon-hub icon-hero/);assert.doesNotMatch(html,/ct-demo|id="experiencia"|class="bento"/);assert.match(html,/id="ferramentas"/);
  for(const app of catalog.apps.filter(a=>!a.hidden)){
   const card=html.split('<article class="tool-card').find(x=>x.includes('data-app="'+app.id+'"'));
   assert.ok(card,'loja sem cartão de '+app.id);
@@ -62,7 +62,7 @@ test('página de vendas mostra as ferramentas que o Hub oferece, na versão atua
   if(app.feed){
    const feed=read(feedPath(app));
    assert.ok(card.includes('<b data-version>v'+feed.latest+'</b>'),app.id+': versão da loja diferente do feed ('+feed.latest+')');
-   for(const f of app.features)assert.ok(card.includes('<strong>'+f.title+'</strong>'),app.id+': recurso "'+f.title+'" fora da loja');
+   assert.ok(card.includes('class="icon3d '),app.id+': sem ícone 3D');
   }else assert.match(card,/EM DESENVOLVIMENTO/);
  }
 });
