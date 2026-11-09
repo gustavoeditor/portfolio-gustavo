@@ -64,7 +64,7 @@ const CATEGORY={cs2:'Edição de CS2',cinematics:'Cinematic 3D',youtube:'Ediçã
   if(crlf)html=html.replace(/\n/g,'\r\n');
   fs.writeFileSync(path.join(root,'index.html'),html);
 
-  const pages=[['/',null],['/loja.html','2026-10-19'],['/atualizacoes.html','2026-10-19'],['/creative-cut.html','2026-10-21']];
+  const pages=[['/',null],['/loja.html','2026-11-09'],['/atualizacoes.html','2026-11-09'],['/creative-cut.html','2026-10-21']];
   fs.writeFileSync(path.join(root,'seo-originals.json'),JSON.stringify({generatedAt:new Date().toISOString(),pages,videos:originalVideos},null,1)+'\n');
   console.log(`SEO: ${videos.length} vídeos no JSON-LD; ${originalVideos.length} originais em seo-originals.json (sitemap ao vivo em /sitemap.xml).`);
 })().catch(e=>{console.error(e.message);process.exit(1);});
