@@ -1,6 +1,19 @@
-# GUSTAVO TRIO — MANUAL DE PUBLICAÇÃO COMERCIAL
+# CREATIVE TOOLS — LOJA E CHECKOUT
 
-Estado atual: **pré-lançamento, compras desligadas**. Este repositório contém a vitrine e a API de entrega, mas **NÃO** contém o ZIP comercial nem segredos. Não publicar o arquivo do produto em diretórios públicos.
+## Estado atual (09/11/2026): venda ativa pela Cakto
+- O botão "Comprar agora" da `loja.html` aponta para o checkout oficial `https://pay.cakto.com.br/g6gcpgr_1217766` (R$ 39,90, pagamento único, Pix ou cartão). Pagamento **e entrega** são feitos pela Cakto; o site não recebe dados de pagamento nem distribui o arquivo.
+- `GET /api/store/checkout` informa `available`, `priceLabel` e `checkoutUrl`. A página já nasce com a compra liberada e só consulta a API para ajustar preço/link ou pausar.
+- Variáveis **opcionais** na Vercel (sem nenhuma, valem o link e o preço acima):
+  - `STORE_CT_SALES_DISABLED=true` pausa o botão de compra sem alterar código.
+  - `STORE_CT_CHECKOUT_URL` troca o link (aceita apenas `https://pay.cakto.com.br/...`).
+  - `STORE_CT_PRICE_CENTS` troca o preço exibido (ex.: `4990`).
+- Ao mudar preço ou link na Cakto, atualizar também `lib/store-checkout.js`, o texto estático da `loja.html` e a `informacoes-de-compra.html` (ou usar as variáveis acima).
+- O conteúdo entregue ao comprador (arquivo/acesso) é configurado no produto dentro do painel da Cakto.
+
+---
+
+## Histórico: fluxo Stripe (não utilizado)
+O restante deste documento descreve o fluxo anterior baseado em Stripe + Blob privado (`/api/store/download`, `receber.html`). Ele permanece no código, inerte sem as variáveis `STORE_TRIO_*`, e **não** faz parte da venda atual.
 
 ## Bloqueadores reais
 - Vercel Hobby não pode ser usado para atividade comercial. Antes de cobrar, utilizar hospedagem/plano autorizado (conferir https://vercel.com/docs/limits/fair-use-guidelines); não alterar variáveis de liberação enquanto isso não estiver resolvido. Nenhuma alteração de plano está autorizada automaticamente.

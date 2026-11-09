@@ -137,10 +137,11 @@ button,input{font:inherit}a{color:inherit}button,a,input{-webkit-tap-highlight-c
 .order-list{display:grid;gap:0}
 .order-list>div{display:flex;justify-content:space-between;gap:15px;border-bottom:1px solid #d7d4dd;padding:15px 0;font-size:12px}
 .order-list>div span{color:#7c738a}.order-list>div strong{text-align:right;font-weight:730;color:#2c263c}
-.order form{margin:29px 0 0}
-.order button{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;min-height:57px;padding:15px 19px;border-radius:15px;background:#242034;border:0;color:#fff;font-weight:760;font-size:14px;cursor:pointer;transition:transform .2s,background .2s}
-.order button:not(:disabled):hover{transform:translateY(-2px);background:#42335e}
-.order button:disabled{background:#b6b0c1;color:#fff;cursor:not-allowed}
+.order form,.order-cta{margin:29px 0 0}
+.order button,.order-buy{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;min-height:57px;padding:15px 19px;border-radius:15px;background:#242034;border:0;color:#fff;font-weight:760;font-size:14px;cursor:pointer;text-decoration:none;transition:transform .2s,background .2s}
+.order button:not(:disabled):hover,.order-buy:not([aria-disabled="true"]):hover{transform:translateY(-2px);background:#42335e}
+.order button:disabled,.order-buy[aria-disabled="true"]{background:#b6b0c1;color:#fff;cursor:not-allowed;pointer-events:none}
+.prelaunch-pill.is-live{border-color:#a9d9c4;background:#d8f1e6;color:#1f6b4c}
 .order #status{min-height:31px;margin:16px 0 13px;color:#5e516d;font-size:11px;line-height:1.65}
 .order small{display:block;font-size:10px;line-height:1.7;color:#817a8c}
 .faq-section{padding:55px 0 118px}

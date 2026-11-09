@@ -257,7 +257,7 @@ async function run(){
   }
 
   // Sales-page browser demo must reproduce the four v1.4.16 panel tabs safely.
-  // This is a web simulation only; checkout remains disabled without release flags.
+  // This is a web simulation only; the buy button links to the external Cakto checkout.
   for(const width of [320,390,768,1440]){
    const ctx=await browser.newContext({viewport:{width,height:844},isMobile:width<=390,hasTouch:width<=390});
    const page=await ctx.newPage(),errors=[];
@@ -283,7 +283,7 @@ async function run(){
    await page.locator('#ct-search').fill('');
    await page.locator('#ct-next').click();
    assert.match(await page.locator('#ct-presetname').innerText(),/Impact Motion/);
-   assert.equal(await page.locator('#checkout').isDisabled(),true);
+   assert.match(await page.locator('#checkout').getAttribute('href')||'',/^https:\/\/pay\.cakto\.com\.br\//);
    assert.deepEqual(errors,[],'Creative Tools demo page errors '+width+'px');
    await ctx.close();
    console.log('Creative Tools v1.4.16 interactive store demo '+width+'px OK');
