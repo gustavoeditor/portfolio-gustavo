@@ -31,14 +31,14 @@ async function check(){
    const page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(String(e)));
    await page.goto(base+'/loja.html',{waitUntil:'networkidle',timeout:13000});
-   await page.locator('.feature').first().waitFor();
+   await page.locator('.tool-card').first().waitFor();
    const x=await page.evaluate(()=>{
     const b=(s)=>{const el=document.querySelector(s);if(!el)return null;const a=el.getBoundingClientRect();return {left:a.left,right:a.right,width:a.width,height:a.height};};
     return {
      scrollWidth:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth,
      css:getComputedStyle(document.querySelector('.hero')).display,
-     h1:b('#hero-title'),art:b('.art'),purchase:b('.purchase'),order:b('.order'),faq:b('.faq-list'),
-     cards:document.querySelectorAll('.feature').length,styles:document.styleSheets.length,
+     h1:b('#hero-title'),art:b('.icon-hero'),purchase:b('.purchase'),order:b('.order'),faq:b('.faq-list'),
+     cards:document.querySelectorAll('.tool-card .icon3d').length,styles:document.styleSheets.length,
      checkoutHref:document.getElementById('checkout').getAttribute('href'),checkoutOff:document.getElementById('checkout').getAttribute('aria-disabled'),price:document.getElementById('price').textContent,
      badge:document.getElementById('sale-badge').textContent
     };
@@ -50,7 +50,7 @@ async function check(){
     const a=x[k];assert.ok(a&&a.width>0&&a.height>0,'missing '+k+' '+width+'px');
     assert.ok(a.left>=-7&&a.right<=width+7,k+' outside viewport '+width+'px '+JSON.stringify(a));
    }
-   assert.equal(x.cards,6);
+   assert.equal(x.cards,3);
    assert.equal(x.checkoutHref,'https://pay.cakto.com.br/g6gcpgr_1217766','purchase must point to the official Cakto checkout');
    assert.notEqual(x.checkoutOff,'true');
    assert.match(x.price,/39,90/);
@@ -63,7 +63,7 @@ async function check(){
     await page.locator('.faq summary').first().click();
     await page.screenshot({path:path.join(out,'loja-'+width+'.png'),fullPage:true});
    }
-   console.log('Storefront: '+width+'px responsive, 6 features, Cakto checkout live, FAQ OK');
+   console.log('Storefront: '+width+'px responsive, 3 tools, Cakto checkout live, FAQ OK');
    await context.close();
   }
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
