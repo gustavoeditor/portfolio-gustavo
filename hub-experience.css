@@ -78,10 +78,10 @@ a{color:inherit;text-decoration:none}
 .slab{pointer-events:auto;position:absolute;left:50%;top:50%;width:min(600px,60vw);aspect-ratio:1.5;margin:calc(min(600px,60vw)/-3) 0 0 calc(min(600px,60vw)/-2);border-radius:22px;cursor:pointer;will-change:transform,opacity;overflow:hidden;background:#0c0d12;--g:#b6a8ff;
  box-shadow:inset 0 0 0 1.5px #ffffff3d,inset 0 0 0 7px #ffffff0a,inset 0 2px 16px #ffffff3d,inset 0 -18px 40px #000a,0 0 50px -18px var(--g),0 40px 90px -24px #000;transition:filter .5s}
 .slab:not(.is-active){filter:brightness(.55) saturate(.7)}
-.media,.big-card .media{position:absolute;inset:-10%;background:var(--m);background-size:160% 160%;animation:drift 18s ease-in-out infinite alternate;filter:blur(6px) saturate(1.25);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.media,.big-card .media{position:absolute;inset:-10%;background:var(--m);background-size:160% 160%;animation:drift 18s ease-in-out infinite alternate;filter:blur(10px) saturate(.85) brightness(.7);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
 @keyframes drift{0%{background-position:0% 20%}100%{background-position:100% 80%}}
 .grain,.big-card .grain{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:overlay;opacity:.55}
-.frost,.big-card .frost{position:absolute;inset:0;background:linear-gradient(122deg,#ffffff38 0,#ffffff08 22%,#ffffff00 48%,#ffffff0d 76%,#ffffff26),radial-gradient(120% 70% at 50% 120%,#0009,transparent 60%)}
+.frost,.big-card .frost{position:absolute;inset:0;background:linear-gradient(#24242b66,#14141a8c),linear-gradient(122deg,#ffffff38 0,#ffffff08 22%,#ffffff00 48%,#ffffff0d 76%,#ffffff26),radial-gradient(120% 70% at 50% 120%,#0009,transparent 60%)}
 .slab::after,.big-card::after{content:"";position:absolute;top:-30%;bottom:-30%;left:-60%;width:30%;background:linear-gradient(100deg,transparent,#ffffff33,transparent);transform:skewX(-18deg);animation:sweep 8s ease-in-out infinite;pointer-events:none}
 @keyframes sweep{0%,45%{left:-60%}85%,100%{left:140%}}
 .slab .k,.big-card .k{position:absolute;top:22px;left:24px;z-index:3;font:9px var(--pix);color:#ffffffa6;letter-spacing:.2em}

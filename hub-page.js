@@ -35,13 +35,13 @@
    c.style.opacity=String(Math.max(0,1-a*.42));c.style.zIndex=String(100-Math.round(a*10));c.classList.toggle('is-active',a<.5);});
   const k=Math.round(pos);dots.forEach((d,i)=>d.classList.toggle('on',i===k));
   if(k!==act){act=k;const t=slabs[k]&&slabs[k].querySelector('h3');if(t&&H.phase)scramble(t,600);}
-  if(!det.classList.contains('open')){if(H.phase&&slabs[k]){try{H.tint=JSON.parse(slabs[k].dataset.tint);}catch(_){}H.tintAmt=.14;}else H.tintAmt=0;}
+  if(!det.classList.contains('open')){if(H.phase===1&&slabs[k]){try{H.tint=JSON.parse(slabs[k].dataset.tint);}catch(_){}H.tintAmt=.14;}else H.tintAmt=0;}
  }
  function onScroll(){
   const y=scrollY,vh=innerHeight;document.body.classList.toggle('after-hero',y>vh*.4);
   if(!shot&&y>vh*.5){shot=true;H.burst=.001;}if(y<vh*.25)shot=false;
   const g=gal.getBoundingClientRect(),total=g.height-vh,p=Math.max(0,Math.min(1,-g.top/total));
-  H.phase=(g.top<vh*.55&&g.bottom>vh*.45)?1:0;
+  H.phase=g.bottom<vh*.45?2:((g.top<vh*.55&&g.bottom>vh*.45)?1:0);
   const b=buy.getBoundingClientRect();document.body.classList.toggle('in-buy',b.top<vh*.7);
   layout(p);
  }
@@ -60,7 +60,7 @@
   det.classList.add('open');document.body.classList.add('locked','detail-open');openAt=performance.now();scramble(h,900);
   setTimeout(()=>$('#d-close').focus(),250);
  }
- function closeD(){if(!det.classList.contains('open'))return;det.classList.remove('open');document.body.classList.remove('locked','detail-open');H.tintAmt=H.phase?.14:0;if(lastF)lastF.focus({preventScroll:true});}
+ function closeD(){if(!det.classList.contains('open'))return;det.classList.remove('open');document.body.classList.remove('locked','detail-open');H.tintAmt=H.phase===1?.14:0;if(lastF)lastF.focus({preventScroll:true});}
  slabs.forEach((c,i)=>{
   c.addEventListener('pointermove',e=>{if(!c.classList.contains('is-active'))return;const r=c.getBoundingClientRect();c.querySelector('.media').style.transform=`translate(${((e.clientX-r.left)/r.width-.5)*-18}px,${((e.clientY-r.top)/r.height-.5)*-14}px)`;});
   c.addEventListener('pointerleave',()=>{c.querySelector('.media').style.transform='';});
