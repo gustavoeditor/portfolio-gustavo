@@ -217,7 +217,7 @@ if(hf&&hfl){TYPE=hf.HALF_FLOAT_OES;const test=fbo(4,4);if(!test.ok)TYPE=gl.UNSIG
 const HDR=TYPE!==gl.UNSIGNED_BYTE;
 let quality=1,S,B1,B1b,B2,B2b,W=0,HH=0;
 function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);W=Math.round(innerWidth*dpr);HH=Math.round(innerHeight*dpr);cv.width=W;cv.height=HH;
- const cap=Math.min(1,Math.sqrt(1600000/(innerWidth*innerHeight*dpr*dpr)));const k=dpr*quality*cap;const sw=Math.max(4,Math.round(innerWidth*k)),shh=Math.max(4,Math.round(innerHeight*k));
+ const k=dpr*quality;const sw=Math.max(4,Math.round(innerWidth*k)),shh=Math.max(4,Math.round(innerHeight*k));
  S=fbo(sw,shh);B1=fbo(Math.max(2,sw>>2),Math.max(2,shh>>2));B1b=fbo(B1.w,B1.h);B2=fbo(Math.max(2,sw>>3),Math.max(2,shh>>3));B2b=fbo(B2.w,B2.h);}
 resize();addEventListener('resize',resize);
 const H=window.HUB=window.HUB||{phase:0,burst:0,tint:[.6,.4,1],tintAmt:0};
@@ -233,7 +233,7 @@ let last=0,last0=0,slow=0,visible=true;
 document.addEventListener('visibilitychange',()=>{visible=!document.hidden;if(visible){last0=0;requestAnimationFrame(frame);}});
 function frame(now){
  if(!visible)return;
- if(last){const dt=now-last;slow=slow*.96+(dt>30?.04:0);if(slow>.5&&quality>.4){quality*=.85;slow=0;resize();}}last=now;
+ if(last){const dt=now-last;slow=slow*.96+(dt>30?.04:0);if(slow>.55&&quality>.55){quality*=.88;slow=0;resize();}}last=now;
  const dt=Math.min(.25,last0?(now-last0)/1000:.016);last0=now;const k=x=>1-Math.exp(-dt*x);
  m.x+=(m.tx-m.x)*k(2.8);m.y+=(m.ty-m.y)*k(2.8);sc+=(stx-sc)*k(5);
  ph+=(H.phase-ph)*k(2.6);ta+=(H.tintAmt-ta)*k(3.5);for(let i=0;i<3;i++)tn[i]+=(H.tint[i]-tn[i])*k(3.5);
