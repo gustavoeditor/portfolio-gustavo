@@ -481,3 +481,41 @@ body{background:radial-gradient(ellipse 80% 50% at 50% 0%,#3a1f7a66 0%,transpare
 @media(prefers-reduced-motion:reduce){.i3d-face::before,.fx-panel::after,.fx-tile::after,.nav-buy::after,.button-primary::after,.order-buy::after{animation:none;left:-80%}.i3d-glow{animation:none}}
 html{overflow-x:clip}
 .tool-grid{contain:layout}
+/* ===== Glow contido: mantém reflexo e volume, reduz o brilho espalhado ===== */
+.ambient i{opacity:.3}.ambient i:nth-child(2){opacity:.14}.ambient i:nth-child(3){opacity:.1}
+.i3d-glow,.icon-hero .i3d-glow{inset:-30%;opacity:.38;filter:blur(22px);animation:glow-spin 18s linear infinite}
+.icon-hero .i3d-glow{inset:-36%;opacity:.45}
+.i3d>i:last-of-type{box-shadow:-4px -4px 16px -2px var(--glow),6px 8px 18px -2px var(--glow2),0 30px 40px #000b}
+.i3d-rim{box-shadow:-2px -2px 8px color-mix(in srgb,var(--glow) 70%,transparent),3px 3px 9px color-mix(in srgb,var(--glow2) 60%,transparent)}
+.i3d-face{box-shadow:inset 0 2.5px 0 #ffffffb3,inset 2px 0 0 #ffffff40,inset 0 -3px 0 color-mix(in srgb,var(--glow2) 70%,transparent),inset 0 -16px 28px #0006,inset 0 0 16px color-mix(in srgb,var(--glow) 30%,transparent)}
+.i3d-face svg{filter:drop-shadow(0 0 4px var(--g2)) drop-shadow(0 0 10px color-mix(in srgb,var(--glow2) 55%,transparent)) drop-shadow(0 3px 0 #0007)}
+.fx-panel{box-shadow:1px 1px 0 #7d5ee6,2px 2px 0 #7a56dc,3px 3px 0 #8250cf,4px 4px 0 #9a4fc6,5px 5px 0 #b651c0,6px 6px 0 #c85ac0,7px 7px 0 #7a3a94,-4px -4px 20px #8f6cf540,8px 10px 24px #ff7fe030,0 30px 60px #000b}
+.fx-graph svg{filter:drop-shadow(0 0 4px #a98bff80)}
+.fx-tile{box-shadow:1px 1px 0 #7d5ee6,2px 2px 0 #8250cf,3px 3px 0 #9a4fc6,4px 4px 0 #b651c0,5px 5px 0 #c85ac0,6px 6px 0 #7a3a94,-3px -3px 14px #8f6cf559,5px 6px 16px #ff7fe04d,inset 0 0 12px #a98bff40}
+.fx-spark,.fx-spark:nth-of-type(odd){box-shadow:0 0 8px 1px #cdb5ff}
+.hero h1{text-shadow:0 1px 0 #f0e6ff,0 2px 0 #cdb5ff,0 3px 0 #a98bff,0 4px 0 #9a6fe6,0 5px 0 #b860d0,0 6px 0 #7a3a94,0 14px 30px #000b}
+.hero h1 em{filter:drop-shadow(0 5px 0 #6a3aa8) drop-shadow(0 0 10px #c98bff59)}
+.hero-topline,.eyebrow,.hub-steps span,.tool-link,.trust-link{text-shadow:none}
+.intro-heading h2,.faq-header h2,.trust-heading h2,.product-story h2,.pack-launch h2{text-shadow:0 3px 0 #45309c}
+.intro-heading h2 em,.product-story h2 em,.trust-heading h2 em,.pack-launch h2 em,.statement>p em{text-shadow:0 3px 0 #45309c,0 0 14px #c98bff4d}
+.statement>p{text-shadow:none}
+.nav-glass{box-shadow:0 0 18px #7a4df026,0 18px 60px #000a,inset 0 1px #ffffff40}
+.nav-buy,.button-primary,.order button,.order-buy{box-shadow:inset 0 2px 0 #fff,0 0 0 1px #ffffffb0,0 0 14px #c98bff59,0 6px 0 #6a3fc0,0 14px 30px #0008}
+.nav-buy:hover,.button-primary:hover,.order-buy:not([aria-disabled="true"]):hover{box-shadow:inset 0 2px 0 #fff,0 0 0 1px #fff,0 0 22px #c98bff8c,0 8px 0 #6a3fc0,0 18px 34px #0008}
+.button-ghost{box-shadow:0 0 10px #a98bff26,inset 0 0 12px #a98bff1a,0 6px 0 #241a55}
+.button-ghost:hover{box-shadow:0 0 16px #a98bff4d,inset 0 0 16px #a98bff26,0 6px 0 #241a55}
+.tool-card,.tool-card[data-app="creative-text"],.tool-soon{box-shadow:0 10px 0 #1b1342,0 0 24px #7a4df01f,0 34px 60px #0009}
+.tool-card[data-app="creative-text"]{box-shadow:0 10px 0 #0d2a30,0 0 24px #2fb8a81f,0 34px 60px #0009}
+.tool-card:hover{box-shadow:0 14px 0 #1b1342,0 0 34px #a98bff47,0 40px 70px #000a}
+.tool-card[data-app="creative-text"]:hover{box-shadow:0 14px 0 #0d2a30,0 0 34px #49d6c040,0 40px 70px #000a}
+.tool-card h3{text-shadow:0 2px 0 #45309c}
+.tool-status.is-live,.prelaunch-pill.is-live{box-shadow:none;text-shadow:none}
+.hub-steps>div{box-shadow:0 6px 0 #1b1342}
+.product-shell{box-shadow:0 12px 0 #1b1342,0 0 40px #7a4df026,0 50px 100px #000a}
+.order{box-shadow:0 10px 0 #1b1342,0 0 30px #a98bff33,0 30px 60px #000a}
+.price{text-shadow:0 2px 0 #cdb5ff,0 4px 0 #9a6fe6,0 6px 0 #a04fc0,0 0 18px #c98bff4d}
+.product-visual-symbol{filter:drop-shadow(0 6px 0 #5a309c) drop-shadow(0 0 14px #c98bff4d)}
+.trust-item{box-shadow:0 7px 0 #1b1342}.trust-strip,.pack-launch{box-shadow:0 9px 0 #1b1342}.trust-strip{box-shadow:none}
+.trust-icon{box-shadow:0 4px 0 #6a3aa8,0 0 10px #c98bff4d,inset 0 2px 0 #ffffff80}
+.pack-launch-link{box-shadow:none}.foot{box-shadow:none}
+.nav-glass::before,.tool-card::before,.order::before{opacity:.6}
