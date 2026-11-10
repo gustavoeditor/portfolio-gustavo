@@ -434,3 +434,50 @@ body{background:radial-gradient(ellipse 80% 50% at 50% 0%,#3a1f7a66 0%,transpare
 .foot{border-top-color:#a98bff40;box-shadow:0 -1px 40px #7a4df026}
 @media(max-width:700px){.hero h1{text-shadow:0 1px 0 #b9a0ff,0 2px 0 #7558d6,0 3px 0 #45309c,0 8px 20px #000b,0 0 34px #a98bff73}.price{font-size:44px}}
 @media(prefers-reduced-motion:reduce){.fx-panel,.fx-tile,.fx-spark{animation:none}.nav-buy,.button-primary,.order-buy{transition:none}}
+/* ===== Luz e reflexo: brilho especular, varredura de luz e glow em duas cores (violeta + rosa) ===== */
+:root{--pink:#ff8fe6;--rimgrad:linear-gradient(135deg,#fff,#cdb5ff 22%,#ff9be8 48%,#7a55ea 70%,#b2f3de)}
+.icon3d{--glow2:#ff7fe0;--side3:#ff8fe6}
+.icon-text{--glow2:#ff9be8;--side3:#c9b2ff}
+.icon-cut{--glow2:#a98bff;--side3:#ffb3f0}
+.i3d-glow{inset:-55%;background:radial-gradient(closest-side at 34% 36%,var(--glow),transparent 68%),radial-gradient(closest-side at 70% 68%,var(--glow2),transparent 62%);opacity:.8;filter:blur(20px);animation:i3d-pulse 5s ease-in-out infinite,glow-spin 14s linear infinite}
+.icon-hero .i3d-glow{inset:-70%;opacity:.95}
+.i3d>i{background:linear-gradient(150deg,#fff 0,var(--side1) 16%,var(--side1) 48%,var(--side3) 78%,var(--side2))}
+.i3d>i:last-of-type{box-shadow:-10px -8px 34px 2px var(--glow),14px 16px 40px 4px var(--glow2),0 36px 46px #000c}
+.i3d-rim{background:conic-gradient(from 210deg,#fff,var(--rim) 12%,var(--glow) 30%,var(--glow2) 52%,#fff 64%,var(--glow2) 78%,var(--glow) 90%,#fff);box-shadow:-4px -4px 20px var(--glow),5px 6px 22px var(--glow2)}
+.i3d-face{background:radial-gradient(60% 34% at 30% 10%,#ffffffb8,#ffffff00 70%),radial-gradient(90% 60% at 82% 104%,color-mix(in srgb,var(--glow2) 62%,transparent),transparent 62%),radial-gradient(70% 60% at 0% 100%,color-mix(in srgb,var(--glow) 45%,transparent),transparent 60%),linear-gradient(150deg,var(--f1),var(--f2));box-shadow:inset 0 2.5px 0 #ffffffb3,inset 2px 0 0 #ffffff40,inset 0 -3px 0 color-mix(in srgb,var(--glow2) 80%,transparent),inset 0 -16px 28px #0006,inset 0 0 30px color-mix(in srgb,var(--glow) 55%,transparent)}
+.i3d-face::after{inset:0 0 52% 0;border-radius:26% 26% 60% 60%/26% 26% 28% 28%;background:linear-gradient(180deg,#ffffff5c,#ffffff12 70%,#ffffff00);transform:none}
+.i3d-face::before{content:"";position:absolute;z-index:2;top:-30%;bottom:-30%;left:-80%;width:46%;background:linear-gradient(100deg,#ffffff00,#ffffffd9 48%,#ffd6f7a6 56%,#ffffff00);transform:skewX(-20deg);filter:blur(3px);mix-blend-mode:screen;animation:sheen 5.2s cubic-bezier(.5,0,.2,1) infinite;pointer-events:none}
+.icon-text .i3d-face::before{animation-delay:-1.7s}.icon-cut .i3d-face::before{animation-delay:-3.4s}
+.i3d-face svg{z-index:1;filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px var(--g2)) drop-shadow(0 0 24px var(--glow2)) drop-shadow(0 3px 0 #0007)}
+@keyframes sheen{0%,38%{left:-80%}72%,100%{left:150%}}
+@keyframes glow-spin{to{rotate:360deg}}
+@keyframes i3d-pulse{0%,100%{opacity:.62}50%{opacity:.95}}
+/* painéis e blocos do topo */
+.fx-panel{overflow:hidden;background-image:linear-gradient(118deg,#ffffff2e 0,#ffffff0a 22%,#ffffff00 40%),radial-gradient(80% 70% at 100% 100%,#ff8fe62e,transparent 60%);box-shadow:1px 1px 0 #7d5ee6,2px 2px 0 #7a56dc,3px 3px 0 #8250cf,4px 4px 0 #9a4fc6,5px 5px 0 #b651c0,6px 6px 0 #c85ac0,7px 7px 0 #7a3a94,-10px -10px 44px #8f6cf580,16px 18px 50px #ff7fe066,0 30px 60px #000b}
+.fx-panel::after,.fx-tile::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-70%;width:34%;background:linear-gradient(100deg,#ffffff00,#ffffff73 50%,#ffffff00);transform:skewX(-20deg);filter:blur(4px);animation:sheen 7s cubic-bezier(.5,0,.2,1) infinite;pointer-events:none}
+.fx-layers::after{animation-delay:-2.5s}.fx-timeline::after{animation-delay:-4.5s}
+.fx-tile{overflow:hidden;border-color:#fff;background:radial-gradient(70% 40% at 30% 8%,#ffffffa6,#ffffff00 70%),radial-gradient(90% 70% at 90% 105%,#ff8fe68c,transparent 60%),linear-gradient(150deg,#3b2a86,#170f3d);box-shadow:1px 1px 0 #7d5ee6,2px 2px 0 #8250cf,3px 3px 0 #9a4fc6,4px 4px 0 #b651c0,5px 5px 0 #c85ac0,6px 6px 0 #7a3a94,-6px -6px 28px #8f6cf5a6,9px 10px 32px #ff7fe099,inset 0 0 18px #a98bff66}
+.fx-spark:nth-of-type(odd){box-shadow:0 0 14px 3px #ff8fe6}
+/* glow em duas cores no resto da página */
+.ambient i:nth-child(3){background:#e05ad0;opacity:.2}
+.hero h1{text-shadow:0 1px 0 #f0e6ff,0 2px 0 #cdb5ff,0 3px 0 #a98bff,0 4px 0 #9a6fe6,0 5px 0 #b860d0,0 6px 0 #7a3a94,0 14px 34px #000b,-18px 0 60px #a98bff80,18px 6px 60px #ff7fe066}
+.hero h1 em{background:linear-gradient(120deg,#fff,#cdb5ff 30%,#ff9be8 62%,#b2f3de);background-clip:text;-webkit-background-clip:text;filter:drop-shadow(0 5px 0 #6a3aa8) drop-shadow(0 0 22px #ff7fe099) drop-shadow(0 0 30px #a98bff99)}
+.nav-glass{box-shadow:-12px 0 34px #7a4df04d,12px 0 34px #ff7fe033,0 18px 60px #000a,inset 0 1px #ffffff40}
+.nav-buy,.button-primary,.order button,.order-buy{position:relative;overflow:hidden;background:linear-gradient(120deg,#fff,#cdb5ff 38%,#ff9be8 72%,#b2f3de);box-shadow:inset 0 2px 0 #fff,0 0 0 1px #ffffffb0,-8px 0 26px #a98bffa6,8px 0 26px #ff7fe08c,0 6px 0 #6a3fc0,0 14px 30px #0008}
+.nav-buy::after,.button-primary::after,.order-buy::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-70%;width:30%;background:linear-gradient(100deg,#ffffff00,#ffffffe6 50%,#ffffff00);transform:skewX(-20deg);filter:blur(2px);animation:sheen 4.6s cubic-bezier(.5,0,.2,1) infinite;pointer-events:none}
+.nav-buy:hover,.button-primary:hover,.order-buy:not([aria-disabled="true"]):hover{background:linear-gradient(120deg,#fff,#dccbff 38%,#ffb3f0 72%,#c8fff0);box-shadow:inset 0 2px 0 #fff,0 0 0 1px #fff,-10px 0 40px #a98bffd9,10px 0 40px #ff7fe0bf,0 8px 0 #6a3fc0,0 18px 34px #0008}
+.order-buy[aria-disabled="true"]::after{display:none}
+.tool-card{box-shadow:0 10px 0 #1b1342,-14px 0 46px #7a4df02e,14px 10px 46px #ff7fe01f,0 34px 60px #0009;background-image:linear-gradient(125deg,#ffffff17 0,#ffffff00 26%),radial-gradient(ellipse 80% 55% at 50% 12%,#7a4df04d,transparent 70%),radial-gradient(ellipse 70% 40% at 90% 100%,#ff7fe01f,transparent 70%),linear-gradient(170deg,#1d1440,#0e0a1e)}
+.tool-card:hover{box-shadow:0 14px 0 #1b1342,-16px 0 70px #8f6cf580,16px 12px 70px #ff7fe059,0 40px 70px #000a}
+.tool-card[data-app="creative-text"]{background-image:linear-gradient(125deg,#ffffff17 0,#ffffff00 26%),radial-gradient(ellipse 80% 55% at 50% 12%,#2fb8a847,transparent 70%),radial-gradient(ellipse 70% 40% at 90% 100%,#ff7fe01a,transparent 70%),linear-gradient(170deg,#0f2a33,#0a1218)}
+.tool-soon{background-image:linear-gradient(125deg,#ffffff17 0,#ffffff00 26%),radial-gradient(ellipse 80% 55% at 50% 12%,#d974f040,transparent 70%),linear-gradient(170deg,#24123a,#100a1c)}
+.tool-card h3{text-shadow:0 2px 0 #45309c,-6px 0 24px #a98bff80,6px 0 24px #ff7fe059}
+.product-shell{box-shadow:0 12px 0 #1b1342,-20px 0 80px #7a4df04d,20px 14px 80px #ff7fe02e,0 50px 100px #000a;background-image:linear-gradient(125deg,#ffffff14 0,#ffffff00 22%),radial-gradient(ellipse 60% 70% at 12% 10%,#7a4df059,transparent 65%),radial-gradient(ellipse 50% 60% at 95% 100%,#ff7fe026,transparent 65%),linear-gradient(150deg,#1b1340,#0d0a1c)}
+.order{box-shadow:0 10px 0 #1b1342,-14px 0 60px #8f6cf566,14px 12px 60px #ff7fe04d,0 30px 60px #000a;background-image:linear-gradient(125deg,#ffffff1f 0,#ffffff00 24%),radial-gradient(ellipse 90% 50% at 50% 0%,#7a4df052,transparent 70%),radial-gradient(ellipse 70% 40% at 100% 100%,#ff7fe02e,transparent 70%),linear-gradient(165deg,#1e1547,#0c0919)}
+.price{text-shadow:0 2px 0 #cdb5ff,0 4px 0 #9a6fe6,0 6px 0 #a04fc0,-10px 0 40px #a98bffb3,12px 4px 40px #ff7fe099}
+.product-visual-symbol{background:linear-gradient(130deg,#fff,#cdb5ff 35%,#ff9be8 68%,#b2f3de);background-clip:text;-webkit-background-clip:text;filter:drop-shadow(0 6px 0 #5a309c) drop-shadow(-8px 0 30px #a98bffb3) drop-shadow(10px 0 30px #ff7fe080)}
+.intro-heading h2 em,.product-story h2 em,.trust-heading h2 em,.pack-launch h2 em,.statement>p em{text-shadow:0 3px 0 #45309c,-8px 0 30px #a98bffcc,8px 0 30px #ff7fe080}
+.trust-icon{box-shadow:0 4px 0 #6a3aa8,-4px 0 20px #a98bff8c,5px 3px 20px #ff7fe073,inset 0 2px 0 #ffffff80,inset 0 0 12px #a98bff66}
+@media(prefers-reduced-motion:reduce){.i3d-face::before,.fx-panel::after,.fx-tile::after,.nav-buy::after,.button-primary::after,.order-buy::after{animation:none;left:-80%}.i3d-glow{animation:none}}
+html{overflow-x:clip}
+.tool-grid{contain:layout}
