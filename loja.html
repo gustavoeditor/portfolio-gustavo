@@ -3,12 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090a11">
+<meta name="theme-color" content="#030406">
 <meta name="robots" content="index,follow">
 <meta name="description" content="Creative Hub: o aplicativo que instala e atualiza os plugins Creative para After Effects. Inclui Creative Tools (curvas, Bounce, menu Ctrl+B) e Creative Text (20 animações de texto).">
 <link rel="canonical" href="https://portfolio-gustavo-chi.vercel.app/loja.html">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/loja.css?v=8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Silkscreen&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/hub-experience.css?v=1">
+<script src="/hub-scene.js?v=1" defer></script>
 <meta property="og:type" content="product">
 <meta property="og:title" content="Creative Hub | Plugins para After Effects">
 <meta property="og:description" content="Um aplicativo, todas as ferramentas Creative: Creative Tools e Creative Text para After Effects, sempre atualizados.">
@@ -17,122 +20,105 @@
 <title>Creative Hub | Plugins para After Effects · GUSTAVO®</title>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Creative Hub","applicationCategory":"MultimediaApplication","operatingSystem":"Windows 10, Windows 11","description":"Aplicativo que instala e atualiza os plugins Creative para Adobe After Effects: Creative Tools (curvas de velocidade, Bounce, menu Ctrl+B, texto e âncoras) e Creative Text (20 animações de texto).","softwareRequirements":"Adobe After Effects 2019 (16.0) ou superior com Adobe Creative Cloud","author":{"@type":"Person","name":"Gustavo"},"offers":{"@type":"Offer","price":"39.90","priceCurrency":"BRL","availability":"https://schema.org/InStock","url":"https://portfolio-gustavo-chi.vercel.app/loja.html#produto"},"url":"https://portfolio-gustavo-chi.vercel.app/loja.html"}</script>
 </head>
-<body>
+<body class="locked">
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
-<div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
-<header class="topbar">
- <nav class="nav-glass wrap" aria-label="Navegação da loja">
-  <a class="brand" href="/" aria-label="Voltar ao portfólio GUSTAVO">
-   <span class="brand-logo" aria-hidden="true">C<span>H</span></span>
-   <span class="brand-name">GUSTAVO <b>HUB.</b><small>CREATIVE HUB</small></span>
-  </a>
-  <div class="nav-links"><a href="#ferramentas">Ferramentas</a><a href="#produto">Comprar</a><a href="#duvidas">Dúvidas</a></div>
-  <a class="nav-buy" href="#produto">Comprar <span aria-hidden="true">↗</span></a>
- </nav>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="loader" aria-hidden="true"><div class="ld"><i></i><i></i><svg viewBox="0 0 200 200"><g class="ticks"><line x1="100" y1="8" x2="100" y2="23" transform="rotate(0.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(7.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(15.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(22.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(30.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(37.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(45.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(52.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(60.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(67.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(75.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(82.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(90.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(97.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(105.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(112.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(120.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(127.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(135.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(142.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(150.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(157.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(165.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(172.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(180.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(187.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(195.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(202.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(210.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(217.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(225.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(232.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(240.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(247.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(255.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(262.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(270.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(277.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(285.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(292.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(300.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(307.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(315.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(322.5 100 100)"/><line x1="100" y1="8" x2="100" y2="23" transform="rotate(330.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(337.5 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(345.0 100 100)"/><line x1="100" y1="13" x2="100" y2="21" transform="rotate(352.5 100 100)"/></g><g class="arcs"><path d="M100 36a64 64 0 0 1 64 64"/><path d="M100 164a64 64 0 0 1-64-64"/></g><circle cx="100" cy="100" r="58" fill="none" stroke="#3f8cff" stroke-opacity=".55" stroke-width="1.3"/></svg><span class="dots"></span><b id="ldp">0%</b></div></div>
+<header class="top">
+ <a class="mark rgb" href="/" aria-label="GUSTAVO, voltar ao portfólio">GUSTAVO®<small>CREATIVE HUB</small></a>
+ <div class="navstack">
+  <nav class="pill rgb" aria-label="Navegação da loja"><a href="#ferramentas" data-scramble>FERRAMENTAS</a><svg class="swoosh" viewBox="0 0 48 9" aria-hidden="true"><path d="M1 5C10 1 18 1 24 4.5S40 8 47 3" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg><a href="#produto" data-scramble>COMPRAR</a></nav>
+  <div class="ticker"><button type="button" aria-label="Novidade anterior">&lt;&lt;</button><span id="tick" aria-live="polite">CREATIVE TEXT 1.0 · NOVO</span><button type="button" aria-label="Próxima novidade">&gt;&gt;</button></div>
+ </div>
 </header>
-<main id="conteudo">
- <section class="hero wrap" aria-labelledby="hero-title">
-  <div class="hero-deco" aria-hidden="true">
-   <div class="fx-panel fx-graph"><div class="fx-bar"><b>⌁</b> Graph Editor<i></i></div><svg viewBox="0 0 260 130"><g stroke="#ffffff" stroke-opacity=".09"><path d="M0 32H260M0 65H260M0 98H260M52 0V130M104 0V130M156 0V130M208 0V130"/></g><path d="M14 112C96 112 150 18 246 18" fill="none" stroke="url(#fxg)" stroke-width="4" stroke-linecap="round"/><path d="M14 112H92M246 18H170" stroke="#b2f3de" stroke-width="2"/><g fill="#b2f3de"><rect x="88" y="108" width="8" height="8"/><rect x="166" y="14" width="8" height="8"/></g><g fill="#fff"><circle cx="14" cy="112" r="5"/><circle cx="246" cy="18" r="5"/></g><defs><linearGradient id="fxg" x1="0" x2="1"><stop stop-color="#c9b2ff"/><stop offset="1" stop-color="#b2f3de"/></linearGradient></defs></svg></div>
-   <div class="fx-panel fx-layers"><div class="fx-row"><em>◉</em><span>Adjustment Layer</span><u style="--w:78%;--c:#a98bff"></u></div><div class="fx-row"><em>◉</em><span>Clip 01</span><u style="--w:52%;--c:#7fb6ff"></u></div><div class="fx-row"><em>◉</em><span>fx Effects</span><u style="--w:66%;--c:#b2f3de"></u></div></div>
-   <div class="fx-panel fx-timeline"><div class="fx-bar"><b>▤</b> Comp 1<i></i></div><div class="fx-time"><strong>0:00:00:00</strong><small>25.00 fps</small><span>0s</span><span>01s</span><span>02s</span><span>03s</span></div><div class="fx-track" style="--c:#a98bff;--l:8%;--w:70%"><i style="left:74%"></i></div><div class="fx-track" style="--c:#e79cf0;--l:4%;--w:58%"><i style="left:22%"></i><i style="left:58%"></i></div><div class="fx-track" style="--c:#7fb6ff;--l:14%;--w:80%"><i style="left:48%"></i><i style="left:90%"></i></div><div class="fx-head"></div></div>
-   <div class="fx-tile fx-t1">fx</div><div class="fx-tile fx-t2">▶</div><div class="fx-tile fx-t3">◆</div>
-   <span class="fx-spark" style="left:12%;top:58%"></span><span class="fx-spark" style="left:86%;top:52%;--d:1.4s"></span><span class="fx-spark" style="left:30%;top:16%;--d:2.6s"></span><span class="fx-spark" style="left:70%;top:12%;--d:.7s"></span><span class="fx-spark" style="left:93%;top:84%;--d:3.2s"></span><span class="fx-spark" style="left:5%;top:90%;--d:2s"></span>
-  </div>
-  <span class="icon3d icon-hub icon-hero" aria-hidden="true"><span class="i3d-glow"></span><span class="i3d"><i style="--z:1"></i><i style="--z:2"></i><i style="--z:3"></i><i style="--z:4"></i><i style="--z:5"></i><i style="--z:6"></i><i style="--z:7"></i><i style="--z:8"></i><i style="--z:9"></i><i style="--z:10"></i><i style="--z:11"></i><i style="--z:12"></i><i style="--z:13"></i><i style="--z:14"></i><span class="i3d-rim"></span><span class="i3d-face"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M43 21a15 15 0 1 0 0 22" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><path d="M45 37v12M53 37v12M45 43h8" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/></svg></span></span></span>
-  <div class="hero-topline"><span class="spark" aria-hidden="true">✳</span> CREATIVE HUB <span class="bar" aria-hidden="true"></span> FEITO PARA MOTION DESIGNERS</div>
-  <h1 id="hero-title">A sua criatividade<br>não precisa de <em>limites.</em></h1>
-  <p class="hero-sub">O Creative Hub reúne as ferramentas da família Creative em um só aplicativo. Instale, atualize e repare seus plugins de After Effects sem sair do fluxo.</p>
-  <div class="hero-actions"><a class="button-primary" href="#ferramentas">Ver as ferramentas <span aria-hidden="true">↗</span></a><a class="button-ghost" href="#produto">Comprar por R$ 39,90 <span aria-hidden="true">↓</span></a></div>
-  <div class="hero-tags"><span class="tag-dot" aria-hidden="true"></span> Disponível agora <span aria-hidden="true">·</span> After Effects 2019+ <span aria-hidden="true">·</span> Windows 10/11
-  </div>
+<nav class="menu" id="menu" aria-label="Atalhos">
+ <b class="rgb">C</b>
+ <ul>
+  <li><a href="#ferramentas" data-go="0" data-scramble>-&gt; CREATIVE TOOLS</a></li>
+  <li><a href="#ferramentas" data-go="1" data-scramble>-&gt; CREATIVE TEXT</a></li>
+  <li><a href="#ferramentas" data-go="2" data-scramble>-&gt; CREATIVE CUT <em>[EM BREVE]</em></a></li>
+  <li><a href="/atualizacoes.html" data-scramble>-&gt; ATUALIZAÇÕES</a></li>
+  <li><a href="#produto" data-scramble>-&gt; COMPRAR · R$ 39,90</a></li>
+ </ul>
+ <a class="ask" href="/#contato" data-scramble>FALE COMIGO</a>
+</nav>
+<main id="conteudo" class="ui">
+ <section class="hero" aria-labelledby="hero-title">
+  <span class="icon3d icon-hub icon-hero hero-anchor" aria-hidden="true"></span>
+  <span class="cue" aria-hidden="true">ROLE PARA BAIXO</span>
+  <h1 id="hero-title" class="rgb"><span class="vh">Creative Hub: </span><span data-loop>FERRAMENTAS PARA AFTER EFFECTS,</span><span data-loop>FEITAS POR QUEM EDITA TODO DIA.</span></h1>
  </section>
- <section class="tools wrap section" id="ferramentas" aria-labelledby="tools-title">
-  <div class="intro-heading"><div><span class="eyebrow">01 / DENTRO DO HUB</span><h2 id="tools-title">Um aplicativo.<br><em>Todas as ferramentas.</em></h2></div><p>O Hub mostra o que está instalado, baixa a versão mais recente e mantém cada plugin em dia. Estas são as ferramentas que ele oferece hoje.</p></div>
-  <div class="tool-grid">
-   <article class="tool-card" data-app="creative-tools">
-    <span class="icon3d icon-tools" aria-hidden="true"><span class="i3d-glow"></span><span class="i3d"><i style="--z:1"></i><i style="--z:2"></i><i style="--z:3"></i><i style="--z:4"></i><i style="--z:5"></i><i style="--z:6"></i><i style="--z:7"></i><i style="--z:8"></i><i style="--z:9"></i><i style="--z:10"></i><i style="--z:11"></i><i style="--z:12"></i><i style="--z:13"></i><i style="--z:14"></i><span class="i3d-rim"></span><span class="i3d-face"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 50C26 50 24 14 32 14S38 50 54 50" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><circle cx="32" cy="14" r="5.5" fill="currentColor"/></svg></span></span></span>
-    <h3>Creative Tools</h3>
-    <span class="tool-cat">PLUGIN · AFTER EFFECTS</span>
+ <section class="manifest" aria-labelledby="mf-title">
+  <h2 class="big rgb" id="mf-title" data-in><span>CREATIVE</span><span>HUB FOR</span><span>MOTION.</span></h2>
+  <div class="manifest-side" data-in><strong class="rgb" data-scramble-in>UM APLICATIVO. TODAS AS FERRAMENTAS.</strong>O CREATIVE HUB REÚNE AS FERRAMENTAS DA FAMÍLIA CREATIVE. INSTALE, ATUALIZE E REPARE SEUS PLUGINS DE AFTER EFFECTS SEM SAIR DO FLUXO.</div>
+ </section>
+ <section class="gal" id="ferramentas" aria-labelledby="gal-title">
+  <div class="stage">
+   <h2 class="gal-label" id="gal-title">-&gt; DENTRO DO HUB</h2>
+   <div class="track" id="track">
+   <article class="tool-card slab" data-app="creative-tools" data-i="0" data-tint='[0.62,0.45,1]' data-desc="Painel de animação para o After Effects: editor de curvas de velocidade, Bounce Overshoot/Elastic e o menu rápido Ctrl+B junto ao cursor." data-feat="VELOCITY DESIGNER|MENU CTRL+B|BOUNCE|TEXTO E ÂNCORAS" data-k="01 / AFTER EFFECTS" tabindex="0" role="button" aria-label="Abrir Creative Tools" style="--m:radial-gradient(40% 50% at 25% 35%,#8a5cff 0,transparent 70%),radial-gradient(35% 45% at 70% 60%,#ff5fc8 0,transparent 70%),radial-gradient(30% 40% at 55% 20%,#4fd8ff 0,transparent 70%),#15121f;--g:#9d80ff">
+    <div class="media"></div><div class="grain"></div><div class="frost"></div>
+    <span class="k">01 / AFTER EFFECTS</span><span class="icon3d icon-tools" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M10 50C26 50 24 14 32 14S38 50 54 50" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg></span>
+    <div class="body"><div class="glitch rgb" data-text="Creative Tools"><h3>Creative Tools</h3></div><p class="tool-tagline">Curvas, Bounce e atalhos de animação para o After Effects.</p></div>
+    <a class="tool-link" href="/atualizacoes.html">VER VERSÕES ↗</a>
     <span class="tool-status is-live">DISPONÍVEL · <b data-version>v1.8.6</b></span>
-    <p class="tool-tagline">Curvas, Bounce e atalhos de animação para o After Effects.</p>
-    <a class="tool-link" href="/atualizacoes.html">Ver versões <span aria-hidden="true">↗</span></a>
    </article>
-   <article class="tool-card" data-app="creative-text">
-    <span class="icon3d icon-text" aria-hidden="true"><span class="i3d-glow"></span><span class="i3d"><i style="--z:1"></i><i style="--z:2"></i><i style="--z:3"></i><i style="--z:4"></i><i style="--z:5"></i><i style="--z:6"></i><i style="--z:7"></i><i style="--z:8"></i><i style="--z:9"></i><i style="--z:10"></i><i style="--z:11"></i><i style="--z:12"></i><i style="--z:13"></i><i style="--z:14"></i><span class="i3d-rim"></span><span class="i3d-face"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 18h28M28 18v30" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><path d="M51 14v36" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity=".7"/></svg></span></span></span>
-    <h3>Creative Text</h3>
-    <span class="tool-cat">PLUGIN · AFTER EFFECTS</span>
+   <article class="tool-card slab" data-app="creative-text" data-i="1" data-tint='[0.3,1,0.85]' data-desc="20 animações de texto prontas. Escolha letras, palavras ou linhas e aplique em todas as camadas selecionadas com um clique." data-feat="SLIDE · BOUNCE · POP|UM CLIQUE|UM CTRL+Z|LIMPAR" data-k="02 / AFTER EFFECTS" tabindex="0" role="button" aria-label="Abrir Creative Text" style="--m:radial-gradient(40% 50% at 30% 40%,#1fd1b4 0,transparent 70%),radial-gradient(35% 45% at 72% 55%,#3d6bff 0,transparent 70%),radial-gradient(30% 35% at 50% 85%,#b6a8ff 0,transparent 70%),#0f1619;--g:#2ec8b0">
+    <div class="media"></div><div class="grain"></div><div class="frost"></div>
+    <span class="k">02 / AFTER EFFECTS</span><span class="icon3d icon-text" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M14 18h28M28 18v30" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M51 14v36" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></span>
+    <div class="body"><div class="glitch rgb" data-text="Creative Text"><h3>Creative Text</h3></div><p class="tool-tagline">Animações de texto em um clique para o After Effects.</p></div>
+    <a class="tool-link" href="/atualizacoes.html">VER VERSÕES ↗</a>
     <span class="tool-status is-live">DISPONÍVEL · <b data-version>v1.0.0</b></span>
-    <p class="tool-tagline">Animações de texto em um clique para o After Effects.</p>
-    <a class="tool-link" href="/atualizacoes.html">Ver versões <span aria-hidden="true">↗</span></a>
    </article>
-   <article class="tool-card tool-soon" data-app="creative-cut">
-    <span class="icon3d icon-cut" aria-hidden="true"><span class="i3d-glow"></span><span class="i3d"><i style="--z:1"></i><i style="--z:2"></i><i style="--z:3"></i><i style="--z:4"></i><i style="--z:5"></i><i style="--z:6"></i><i style="--z:7"></i><i style="--z:8"></i><i style="--z:9"></i><i style="--z:10"></i><i style="--z:11"></i><i style="--z:12"></i><i style="--z:13"></i><i style="--z:14"></i><span class="i3d-rim"></span><span class="i3d-face"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="19" cy="20" r="7" fill="none" stroke="currentColor" stroke-width="5.5"/><circle cx="19" cy="44" r="7" fill="none" stroke="currentColor" stroke-width="5.5"/><path d="M25 24l27 21M25 40l27-21" fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/></svg></span></span></span>
-    <h3>Creative Cut</h3>
-    <span class="tool-cat">PLUGIN · PREMIERE PRO</span>
+   <article class="tool-card tool-soon slab" data-app="creative-cut" data-i="2" data-tint='[1,0.35,0.7]' data-desc="Edição automática com inteligência artificial para o Premiere Pro. Em desenvolvimento: ainda não faz parte da compra." data-feat="EM DESENVOLVIMENTO|PREMIERE PRO" data-k="03 / PREMIERE PRO" tabindex="0" role="button" aria-label="Abrir Creative Cut" style="--m:radial-gradient(40% 50% at 30% 40%,#ff3fa6 0,transparent 70%),radial-gradient(35% 45% at 70% 60%,#7a2cff 0,transparent 70%),radial-gradient(30% 35% at 60% 15%,#ff9be8 0,transparent 70%),#1a0f19;--g:#e05ab8">
+    <div class="media"></div><div class="grain"></div><div class="frost"></div>
+    <span class="k">03 / PREMIERE PRO</span><span class="icon3d icon-cut" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="19" cy="20" r="7" fill="none" stroke="#fff" stroke-width="5"/><circle cx="19" cy="44" r="7" fill="none" stroke="#fff" stroke-width="5"/><path d="M25 24l27 21M25 40l27-21" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg></span>
+    <div class="body"><div class="glitch rgb" data-text="Creative Cut"><h3>Creative Cut</h3></div><p class="tool-tagline">Edição automática com IA para o Premiere Pro.</p></div>
+    <a class="tool-link" href="/creative-cut.html">CONHECER ↗</a>
     <span class="tool-status">EM DESENVOLVIMENTO</span>
-    <p class="tool-tagline">Edição automática com IA para o Premiere Pro.</p>
-    <p class="tool-note">Ainda não faz parte da compra de hoje.</p>
-    <a class="tool-link" href="/creative-cut.html">Conhecer <span aria-hidden="true">↗</span></a>
    </article>
-  </div>
-  <div class="hub-steps" aria-label="Como o Creative Hub funciona">
-   <div><span>01 / INSTALAR</span><p>Escolha a ferramenta e o Hub baixa o instalador oficial, conferindo a integridade do arquivo antes de instalar.</p></div>
-   <div><span>02 / ATUALIZAR</span><p>Versão nova publicada? O Hub mostra a barra de progresso e conclui a atualização sem abrir janelas de instalador.</p></div>
-   <div><span>03 / REPARAR</span><p>Se algo sair do lugar, repare ou remova a ferramenta pelo próprio Hub.</p></div>
+   <article class="slab-extra slab" data-app="updates" data-i="3" data-tint='[0.4,0.65,1]' data-desc="O Hub mostra o que está instalado, baixa a versão mais recente com a integridade do arquivo conferida e repara a ferramenta quando algo sai do lugar." data-feat="INSTALAR|ATUALIZAR|REPARAR|HISTÓRICO" data-k="04 / CREATIVE HUB" tabindex="0" role="button" aria-label="Abrir Atualizações" style="--m:radial-gradient(40% 50% at 30% 40%,#3d7bff 0,transparent 70%),radial-gradient(35% 45% at 70% 60%,#8ef0d6 0,transparent 70%),radial-gradient(30% 35% at 50% 85%,#5a3bd6 0,transparent 70%),#0d1220;--g:#4f8bff">
+    <div class="media"></div><div class="grain"></div><div class="frost"></div>
+    <span class="k">04 / CREATIVE HUB</span>
+    <div class="body"><div class="glitch rgb" data-text="Atualizações"><h3>Atualizações</h3></div><p class="tool-tagline">Instalar, atualizar e reparar cada ferramenta pelo próprio Hub.</p></div>
+    <a class="tool-link" href="/atualizacoes.html">HISTÓRICO ↗</a>
+    <span class="tool-status">SEMPRE EM DIA</span>
+   </article>
+   </div>
+   <div class="gal-dots" id="gal-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+   <span class="gal-hint" aria-hidden="true">ROLE PARA NAVEGAR · CLIQUE PARA ABRIR</span>
   </div>
  </section>
- <section class="statement wrap"><span class="eyebrow">02 / A EXPERIÊNCIA</span><p>Boas ferramentas não roubam sua atenção. <em>Elas deixam você criar.</em></p><div class="statement-line"><span>GUSTAVO® CREATIVE HUB</span><span>DESIGN É INTENÇÃO. MOVIMENTO É LINGUAGEM.</span></div></section>
- <section id="produto" class="product-section wrap" aria-labelledby="product-title">
-  <div class="product-shell">
-   <div class="product-story"><span class="eyebrow">03 / DISPONÍVEL AGORA</span><div class="product-visual-symbol" aria-hidden="true">C<span>H</span></div><h2 id="product-title">Seu próximo<br><em>atalho criativo.</em></h2><p>Creative Hub. Um aplicativo para instalar e manter em dia o Creative Tools e o Creative Text dentro do After Effects.</p><div class="product-specs"><span>AFTER EFFECTS 2019+</span><span>WINDOWS 10/11</span><span>CREATIVE TOOLS</span><span>CREATIVE TEXT</span></div></div>
-   <div class="purchase">
-    <div class="order">
-     <div class="order-top"><span>G / CREATIVE HUB</span><span class="prelaunch-pill is-live" id="sale-badge">DISPONÍVEL</span></div>
-     <div class="order-divider"></div><span class="order-caption">SOFTWARE DIGITAL · USO INDIVIDUAL</span>
-     <div id="price" class="price" aria-live="polite">R$ 39,90</div>
-     <div class="order-list"><div><span>Plataforma</span><strong>Windows 10/11</strong></div><div><span>Aplicativo</span><strong>After Effects 2019+</strong></div><div><span>Ferramentas</span><strong>Creative Tools · Creative Text</strong></div><div><span>Pagamento</span><strong>Único · Pix ou cartão</strong></div><div><span>Entrega</span><strong>Digital · por e-mail</strong></div></div>
-     <div class="order-cta"><a id="checkout" class="order-buy" href="https://pay.cakto.com.br/g6gcpgr_1217766" target="_blank" rel="noopener">Comprar agora <span aria-hidden="true">↗</span></a></div>
-     <p id="status" role="status" aria-live="polite">Pagamento processado pela Cakto em página externa. Confira as informações da compra antes de concluir.</p>
-     <small>A plataforma de pagamento acrescenta taxa de serviço de R$ 0,99 no checkout. Acesso ao produto enviado pela Cakto ao e-mail informado na compra.</small>
-    </div>
+ <section id="produto" class="buy-sec" aria-labelledby="product-title">
+  <div class="buy-copy" data-in><span class="label">PAGAMENTO ÚNICO</span><h2 class="rgb" id="product-title">SEU PRÓXIMO<br>ATALHO<br>CRIATIVO.</h2><p>CREATIVE HUB COM CREATIVE TOOLS E CREATIVE TEXT. WINDOWS 10/11 · AFTER EFFECTS 2019 OU SUPERIOR. ATUALIZAÇÕES PELO PRÓPRIO HUB.</p></div>
+  <div class="purchase" data-in>
+   <div class="order">
+    <div class="order-top"><span>CREATIVE HUB</span><span class="prelaunch-pill is-live" id="sale-badge">DISPONÍVEL</span></div>
+    <div class="order-divider"></div><span class="order-caption">SOFTWARE DIGITAL · USO INDIVIDUAL</span>
+    <div id="price" class="price" aria-live="polite">R$ 39,90</div>
+    <div class="order-list"><div><span>PLATAFORMA</span><strong>WINDOWS 10/11</strong></div><div><span>APLICATIVO</span><strong>AFTER EFFECTS 2019+</strong></div><div><span>FERRAMENTAS</span><strong>CREATIVE TOOLS · CREATIVE TEXT</strong></div><div><span>PAGAMENTO</span><strong>ÚNICO · PIX OU CARTÃO</strong></div><div><span>ENTREGA</span><strong>DIGITAL · POR E-MAIL</strong></div></div>
+    <div class="order-cta"><a id="checkout" class="order-buy" href="https://pay.cakto.com.br/g6gcpgr_1217766" target="_blank" rel="noopener">COMPRAR AGORA <span aria-hidden="true">↗</span></a></div>
+    <p id="status" role="status" aria-live="polite">Pagamento processado pela Cakto em página externa. Confira as informações da compra antes de concluir.</p>
+    <small>A plataforma de pagamento acrescenta taxa de serviço de R$ 0,99 no checkout. Acesso ao produto enviado pela Cakto ao e-mail informado na compra.</small>
    </div>
   </div>
  </section>
- <section id="compra-segura" class="trust-section wrap" aria-labelledby="trust-title">
-  <div class="trust-heading">
-   <div><span class="eyebrow">TRANSPARÊNCIA / COMPRA DIGITAL</span><h2 id="trust-title">Confiança se constrói<br><em>nos detalhes.</em></h2></div>
-   <p>Antes de comprar, você precisa saber quem criou, como funciona o pagamento e o que acontece depois. Sem promessas vazias.</p>
-  </div>
+ <section id="compra-segura" class="sec" aria-labelledby="trust-title">
+  <div data-in><span class="label">COMPRA DIGITAL</span><h2 id="trust-title" class="rgb">CONFIANÇA SE CONSTRÓI<br>NOS DETALHES.</h2><p class="lead">Antes de comprar, você precisa saber quem criou, como funciona o pagamento e o que acontece depois. Sem promessas vazias.</p></div>
   <div class="trust-grid">
-   <article class="trust-item">
-    <div class="trust-item-head"><span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span><span class="trust-idx">01 / PAGAMENTO</span></div>
-    <h3>Checkout externo.</h3>
-    <p>O pagamento acontece no ambiente da Cakto (pay.cakto.com.br), por Pix ou cartão. Os dados completos do cartão não passam pelo nosso site.</p>
-    <span class="trust-meta">PAY.CAKTO.COM.BR · PIX OU CARTÃO</span>
-   </article>
-   <article class="trust-item">
-    <div class="trust-item-head"><span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="m8 12 3 3 5-6"/></svg></span><span class="trust-idx">02 / ENTREGA</span></div>
-    <h3>Entrega por e-mail.</h3>
-    <p>Depois que o pagamento é confirmado, a Cakto envia o acesso ao produto para o e-mail informado na compra.</p>
-    <span class="trust-meta">ACESSO APÓS CONFIRMAÇÃO</span>
-   </article>
-   <article class="trust-item">
-    <div class="trust-item-head"><span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h13"/><path d="m18 15 2 3-2 3"/></svg></span><span class="trust-idx">03 / INFORMAÇÃO</span></div>
-    <h3>Regras às claras.</h3>
-    <p>Compatibilidade, detalhes de entrega, suporte e direito de arrependimento explicados antes de qualquer cobrança.</p>
-    <a href="/informacoes-de-compra.html" class="trust-link">Informações da compra <span aria-hidden="true">↗</span></a>
-   </article>
+   <article class="trust-item" data-in><span class="idx">01 / PAGAMENTO</span><h3>Checkout externo.</h3><p>O pagamento acontece no ambiente da Cakto (pay.cakto.com.br), por Pix ou cartão. Os dados completos do cartão não passam pelo nosso site.</p></article>
+   <article class="trust-item" data-in><span class="idx">02 / ENTREGA</span><h3>Entrega por e-mail.</h3><p>Depois que o pagamento é confirmado, a Cakto envia o acesso ao produto para o e-mail informado na compra.</p></article>
+   <article class="trust-item" data-in><span class="idx">03 / INFORMAÇÃO</span><h3>Regras às claras.</h3><p>Compatibilidade, detalhes de entrega, suporte e direito de arrependimento explicados antes de qualquer cobrança.</p><a href="/informacoes-de-compra.html">INFORMAÇÕES DA COMPRA ↗</a></article>
   </div>
-  <div class="trust-strip"><span class="trust-strip-dot" aria-hidden="true"></span><p><strong>COMPRA DIRETA:</strong> pagamento e entrega pela Cakto. Nenhum selo de certificação independente é exibido sem autorização do emissor.</p><div><a href="/privacidade.html">Privacidade ↗</a><a href="/#contato">Falar com o criador ↗</a></div></div>
+  <div class="trust-strip" data-in><p><strong>COMPRA DIRETA:</strong> pagamento e entrega pela Cakto. Nenhum selo de certificação independente é exibido sem autorização do emissor.</p><a href="/privacidade.html">PRIVACIDADE ↗</a><a href="/#contato">FALAR COM O CRIADOR ↗</a></div>
  </section>
- <section id="pack-interesse" class="pack-launch wrap" aria-labelledby="pack-title">
-  <div><span class="eyebrow">PRÓXIMO PROJETO / EM DESENVOLVIMENTO</span><h2 id="pack-title">O Pack de edição<br><em>está chegando.</em></h2><p>Um segundo produto está em preparação. Ainda não existe checkout, entrega ou data oficial. Registre seu interesse em uma mensagem que você poderá revisar antes de enviar.</p></div>
-  <a class="pack-launch-link" href="/?interesse=pack">Tenho interesse no Pack <span aria-hidden="true">↗</span></a>
+ <section id="pack-interesse" class="sec" aria-labelledby="pack-title">
+  <div class="pack-launch" data-in><div><span class="label">PRÓXIMO PROJETO</span><h2 id="pack-title" class="rgb">O PACK DE EDIÇÃO ESTÁ CHEGANDO.</h2><p>Um segundo produto está em preparação. Ainda não existe checkout, entrega ou data oficial. Registre seu interesse em uma mensagem que você poderá revisar antes de enviar.</p></div><a class="pack-launch-link" href="/?interesse=pack">TENHO INTERESSE ↗</a></div>
  </section>
- <section id="duvidas" class="faq faq-section wrap" aria-labelledby="faq-title">
-  <div class="faq-header"><div><span class="eyebrow">04 / TUDO ESCLARECIDO</span><h2 id="faq-title">Perguntas frequentes.</h2></div><p>Sem promessas nebulosas. As informações importantes antes de escolher seu próximo plugin.</p></div>
-  <div class="faq-list">
+ <section id="duvidas" class="sec faq" aria-labelledby="faq-title">
+  <div class="faq-wrap">
+   <div data-in><span class="label">DÚVIDAS</span><h2 id="faq-title" class="rgb">PERGUNTAS<br>FREQUENTES.</h2></div>
+   <div class="faq-list" data-in>
    <details><summary>O que é o Creative Hub?</summary><p>É o aplicativo para Windows que reúne as ferramentas da família Creative. Por ele você instala, atualiza, repara e remove cada plugin, sem procurar instaladores.</p></details>
    <details><summary>Quais ferramentas estão incluídas?</summary><p>Hoje o Hub oferece o <strong>Creative Tools</strong> (curvas de velocidade, Bounce, menu Ctrl+B, texto e âncoras) e o <strong>Creative Text</strong> (20 animações de texto). O Creative Cut, para Premiere Pro, está em desenvolvimento e ainda não faz parte do pacote.</p></details>
    <details><summary>Onde acompanho as atualizações?</summary><p>Consulte a <a href="/atualizacoes.html">central oficial de atualizações</a> para ver a versão atual e o histórico de cada ferramenta.</p></details>
@@ -142,46 +128,14 @@
    <details><summary>Como verificar a segurança da compra?</summary><p>Antes de qualquer pagamento, confira se o endereço da página de checkout é pay.cakto.com.br, o valor total, o fornecedor e as condições de entrega. Veja as <a href="/informacoes-de-compra.html">informações de compra</a>. Não exibimos selos ou certificados de terceiros sem validação oficial.</p></details>
     <details><summary>Como receberei o produto?</summary><p>A entrega é digital. Após a confirmação do pagamento, a Cakto envia o acesso ao produto para o e-mail informado na compra. Se não encontrar, confira a caixa de spam ou fale pelo <a href="/#contato">canal de contato</a>.</p></details>
    <details><summary>E quanto ao suporte e reembolso?</summary><p>O suporte é feito pelo <a href="/#contato">canal de contato do portfólio</a>. Em compras online você pode desistir em até 7 dias após a compra (art. 49 do Código de Defesa do Consumidor); o pedido de reembolso é feito pela Cakto ou pelo mesmo canal de contato.</p></details>
+   </div>
   </div>
  </section>
 </main>
-<footer class="foot"><div class="wrap foot-content"><a href="/" class="foot-brand">GUSTAVO<span>®</span></a><p>Ferramentas para dar movimento às suas ideias.</p><div class="foot-links"><a href="/">Portfólio</a><a href="#ferramentas">Ferramentas</a><a href="/atualizacoes.html">Atualizações</a><a href="/creative-cut.html">Creative Cut · Em desenvolvimento</a><a href="/privacidade.html">Privacidade</a><a href="/informacoes-de-compra.html">Informações da compra</a><a href="#conteudo">Voltar ao topo ↑</a></div><small>© 2026 GUSTAVO® CREATIVE HUB.</small></div></footer>
-<script>
-(()=>{'use strict';
- const ALLOWED='pay.cakto.com.br';
- const button=document.getElementById('checkout'),status=document.getElementById('status'),price=document.getElementById('price'),badge=document.getElementById('sale-badge');
- const pause=()=>{
-  button.removeAttribute('href');button.setAttribute('aria-disabled','true');button.textContent='Vendas pausadas';
-  badge.textContent='PAUSADO';badge.classList.remove('is-live');
-  status.textContent='As vendas estão pausadas no momento. Nenhuma cobrança será realizada.';
- };
- // Padrão da página: compra liberada. A API só ajusta preço/link ou pausa as vendas.
- fetch('/api/store/checkout',{credentials:'same-origin',cache:'no-store'})
- .then(r=>r.ok?r.json():Promise.reject(new Error('API indisponível')))
- .then(data=>{
-  if(!data||data.available!==true)return pause();
-  if(typeof data.priceLabel==='string'&&data.priceLabel)price.textContent=data.priceLabel;
-  try{const url=new URL(data.checkoutUrl);if(url.protocol==='https:'&&url.hostname===ALLOWED)button.href=url.href;}catch(_){}
- })
- .catch(()=>{});
- // Ícones 3D acompanham o ponteiro (só com mouse e sem "reduzir movimento").
- if(matchMedia('(hover:hover) and (pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
-  document.querySelectorAll('.icon3d').forEach(icon=>{
-   const host=icon.closest('.tool-card')||icon.closest('.hero')||icon;
-   host.addEventListener('pointermove',e=>{const r=icon.getBoundingClientRect();
-    const x=Math.max(-1,Math.min(1,(e.clientX-(r.left+r.width/2))/260)),y=Math.max(-1,Math.min(1,(e.clientY-(r.top+r.height/2))/260));
-    icon.style.setProperty('--ry',(x*26)+'deg');icon.style.setProperty('--rx',(-y*22)+'deg');icon.classList.add('is-tracking');});
-   host.addEventListener('pointerleave',()=>{icon.classList.remove('is-tracking');icon.style.removeProperty('--ry');icon.style.removeProperty('--rx');});
-  });
- }
- // Versões das ferramentas: o texto estático vale como padrão; os feeds do Hub só atualizam o número.
- document.querySelectorAll('.tool-card[data-app]').forEach(card=>{
-  const slot=card.querySelector('[data-version]');if(!slot)return;
-  fetch('/updates/'+card.dataset.app+'/hub-manifest.json',{cache:'no-store'})
-  .then(r=>r.ok?r.json():null)
-  .then(feed=>{if(feed&&feed.product===card.dataset.app&&typeof feed.latest==='string'&&/^\d+\.\d+\.\d+$/.test(feed.latest))slot.textContent='v'+feed.latest;})
-  .catch(()=>{});
- });
-})();
-</script>
+<div id="detail" role="dialog" aria-modal="true" aria-labelledby="d-title"><div class="shade"></div><span class="close-hint">ROLE PARA FECHAR</span>
+ <div class="big-card" id="d-card"><div class="media"></div><div class="grain"></div><div class="frost"></div><span class="k" id="d-k"></span>
+  <div class="body"><h2 id="d-title" class="glitch rgb" data-text=""></h2><p class="desc" id="d-desc"></p><ul class="feat" id="d-feat"></ul>
+   <div class="acts"><a class="pri" href="#produto" id="d-buy">COMPRAR · R$ 39,90</a><a id="d-more" href="/atualizacoes.html">VER VERSÕES ↗</a><button type="button" id="d-close">&lt;- FECHAR</button></div></div></div></div>
+<footer><span>© 2026 GUSTAVO® CREATIVE HUB</span><span><a href="/">PORTFÓLIO</a> · <a href="/atualizacoes.html">ATUALIZAÇÕES</a> · <a href="/informacoes-de-compra.html">INFORMAÇÕES DA COMPRA</a> · <a href="/privacidade.html">PRIVACIDADE</a></span></footer>
+<script src="/hub-page.js?v=1"></script>
 </body></html>
