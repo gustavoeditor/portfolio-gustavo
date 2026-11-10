@@ -17,6 +17,8 @@ a{color:inherit;text-decoration:none}
 /* carregamento */
 #loader{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:#020304;pointer-events:none;transition:opacity 1.1s ease,visibility 1.1s}
 #loader.done{opacity:0;visibility:hidden}
+#loader{animation:ldsafe 1s ease 7s forwards}@keyframes ldsafe{to{opacity:0;visibility:hidden}}
+body.locked{animation:unlock 0s 7s forwards}@keyframes unlock{to{overflow:auto}}
 .ld{position:relative;width:min(300px,64vw);aspect-ratio:1;display:grid;place-items:center}
 .ld svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 6px #3fa9ff99)}
 .ld .ticks{animation:spin 16s linear infinite;transform-origin:50% 50%}
