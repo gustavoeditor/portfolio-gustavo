@@ -9,7 +9,7 @@ test('não permite redirect perigoso',()=>{for(const x of ['https://evil.example
 test('chave de pausa e configuração inválida fecham a venda',()=>{reset();process.env.STORE_CT_SALES_DISABLED='true';assert.equal(mock('GET').body.available,false);assert.equal(mock('GET').body.checkoutUrl,null);assert.equal(mock('POST').code,503);reset();process.env.STORE_CT_CHECKOUT_URL='https://evil.example/pago';assert.equal(mock('GET').body.available,false);assert.equal(mock('POST').code,503);reset();process.env.STORE_CT_PRICE_CENTS='abc';assert.equal(mock('GET').body.available,false);reset();});
 test('link e preço podem ser trocados por variável de ambiente',()=>{reset();process.env.STORE_CT_CHECKOUT_URL='https://pay.cakto.com.br/outro_999';process.env.STORE_CT_PRICE_CENTS='4990';const b=mock('GET').body;assert.equal(b.available,true);assert.match(b.priceLabel,/49,90/);assert.equal(mock('POST').headers.Location,'https://pay.cakto.com.br/outro_999');reset();});
 test('bloqueia origin estranho e métodos extras',()=>{reset();assert.equal(mock('POST',{origin:'https://outro.example',host:'portfolio-gustavo-chi.vercel.app'}).code,403);assert.equal(mock('PUT').code,405);});
-test('loja aponta o botão de compra para o checkout oficial da Cakto',()=>{const html=fs.readFileSync(path.join(__dirname,'../loja.html'),'utf8');assert.match(html,/<a id="checkout" class="order-buy" href="https:\/\/pay\.cakto\.com\.br\/g6gcpgr_1217766" target="_blank" rel="noopener">/);assert.match(html,/id="price"[^>]*>R\$ 39,90</);assert.match(html,/taxa de serviço de R\$ 0,99/);assert.doesNotMatch(html,/buy\.stripe\.com/);assert.match(html,/id="ferramentas"/);assert.match(html,/id="duvidas"/);assert.doesNotMatch(html,/sk_live_|pk_live_|BLOB_READ_WRITE_TOKEN/);});
+test('loja aponta o botão de compra para o checkout oficial da Cakto',()=>{const html=fs.readFileSync(path.join(__dirname,'../loja.html'),'utf8');assert.match(html,/<a id="checkout" class="order-buy" aria-disabled="true" target="_blank" rel="noopener">/);assert.doesNotMatch(html,/<a id="checkout"[^>]+href=/);assert.match(html,/id="price"[^>]*>R\$ 39,90</);assert.match(html,/taxa de serviço de R\$ 0,99/);assert.doesNotMatch(html,/buy\.stripe\.com/);assert.match(html,/id="ferramentas"/);assert.match(html,/id="duvidas"/);assert.doesNotMatch(html,/sk_live_|pk_live_|BLOB_READ_WRITE_TOKEN/);});
 
 
 test('transparência não inventa certificações e explica pagamento, entrega e reembolso',()=>{
@@ -39,4 +39,16 @@ test('Pack em pré-lançamento convida para contato, sem checkout fictício',()=
  assert.match(home,/value="pack"/);
  assert.match(sales,/isPack=service==='pack'/);
  assert.match(html,/Ainda não existe checkout, entrega ou data oficial/);
+});
+
+test('loja imersiva mantém checkout fechado até a API validar o link e trata foco do modal',()=>{
+ const html=fs.readFileSync(path.join(__dirname,'../loja.html'),'utf8');
+ const js=fs.readFileSync(path.join(__dirname,'../hub-page.js'),'utf8');
+ assert.match(html,/id="detail"[^>]+aria-hidden="true" inert/);
+ assert.match(js,/fetch\('\/api\/store\/checkout'/);
+ assert.match(js,/button\.href=u\.href/);
+ assert.match(js,/\.catch\(\(\)=>pause\(/);
+ assert.match(js,/det\.removeAttribute\('inert'\)/);
+ assert.match(js,/det\.setAttribute\('inert',''\)/);
+ assert.match(js,/e\.key!=='Tab'/);
 });
