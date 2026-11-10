@@ -5,8 +5,24 @@
  const H=window.HUB=window.HUB||{phase:0,burst:0,tint:[.6,.4,1],tintAmt:0};
  // Checkout: compra liberada por padrão; a API só ajusta preço/link ou pausa as vendas.
  const ALLOWED='pay.cakto.com.br',button=$('#checkout'),status=$('#status'),price=$('#price'),badge=$('#sale-badge');
- const pause=()=>{button.removeAttribute('href');button.setAttribute('aria-disabled','true');button.textContent='VENDAS PAUSADAS';badge.textContent='PAUSADO';badge.classList.remove('is-live');status.textContent='As vendas estão pausadas no momento. Nenhuma cobrança será realizada.';};
- fetch('/api/store/checkout',{credentials:'same-origin',cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(!d||d.available!==true)return pause();if(typeof d.priceLabel==='string'&&d.priceLabel)price.textContent=d.priceLabel;try{const u=new URL(d.checkoutUrl);if(u.protocol==='https:'&&u.hostname===ALLOWED)button.href=u.href;}catch(_){}}).catch(()=>{});
+ const pause=(msg='As vendas estão pausadas no momento. Nenhuma cobrança será realizada.')=>{
+  button.removeAttribute('href');button.setAttribute('aria-disabled','true');button.textContent='VENDAS INDISPONÍVEIS';
+  badge.textContent='PAUSADO';badge.classList.remove('is-live');status.textContent=msg;
+ };
+ // A URL está ausente até a API confirmar disponibilidade, preço e destino seguro.
+ fetch('/api/store/checkout',{credentials:'same-origin',cache:'no-store'})
+  .then(r=>r.ok?r.json():Promise.reject(new Error('checkout indisponível')))
+  .then(d=>{
+   if(!d||d.available!==true)return pause();
+   let u;try{u=new URL(d.checkoutUrl);}catch(_){return pause();}
+   if(u.protocol!=='https:'||u.hostname!==ALLOWED||u.username||u.password||u.port||u.hash||u.pathname.length<3||u.searchParams.has('email')||u.searchParams.has('prefilled_email'))return pause();
+   if(typeof d.priceLabel!=='string'||d.priceLabel.slice(0,2)!=='R$'||d.priceLabel.length>40)return pause();
+   price.textContent=d.priceLabel;button.href=u.href;button.removeAttribute('aria-disabled');
+   button.innerHTML='COMPRAR AGORA <span aria-hidden="true">↗</span>';
+   badge.textContent='DISPONÍVEL';badge.classList.add('is-live');
+   status.textContent='Pagamento processado pela Cakto em página externa. Confira as informações da compra antes de concluir.';
+  })
+  .catch(()=>pause('Não foi possível confirmar a disponibilidade da compra agora. Tente novamente mais tarde.'));
  // Versões das ferramentas a partir dos feeds do Hub.
  $$('.tool-card[data-app]').forEach(c=>{const slot=c.querySelector('[data-version]');if(!slot)return;fetch('/updates/'+c.dataset.app+'/hub-manifest.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(f=>{if(f&&f.product===c.dataset.app&&/^\d+\.\d+\.\d+$/.test(f.latest||''))slot.textContent='v'+f.latest;}).catch(()=>{});});
  // Texto que embaralha.
@@ -57,10 +73,11 @@
   $('#d-feat').replaceChildren(...c.dataset.feat.split('|').map(t=>{const li=document.createElement('li');li.textContent=t;return li;}));
   const more=c.querySelector('.tool-link');$('#d-more').href=more.getAttribute('href');$('#d-more').textContent=more.textContent;
   try{H.tint=JSON.parse(c.dataset.tint);}catch(_){}H.tintAmt=.7;H.burst=.001;
+  det.removeAttribute('inert');det.removeAttribute('aria-hidden');
   det.classList.add('open');document.body.classList.add('locked','detail-open');openAt=performance.now();scramble(h,900);
-  setTimeout(()=>$('#d-close').focus(),250);
+  setTimeout(()=>{if(det.classList.contains('open'))$('#d-close').focus();},250);
  }
- function closeD(){if(!det.classList.contains('open'))return;det.classList.remove('open');document.body.classList.remove('locked','detail-open');H.tintAmt=H.phase?.14:0;if(lastF)lastF.focus({preventScroll:true});}
+ function closeD(){if(!det.classList.contains('open'))return;det.classList.remove('open');document.body.classList.remove('locked','detail-open');H.tintAmt=H.phase?.14:0;if(lastF)lastF.focus({preventScroll:true});det.setAttribute('inert','');det.setAttribute('aria-hidden','true');}
  slabs.forEach((c,i)=>{
   c.addEventListener('pointermove',e=>{if(!c.classList.contains('is-active'))return;const r=c.getBoundingClientRect();c.querySelector('.media').style.transform=`translate(${((e.clientX-r.left)/r.width-.5)*-18}px,${((e.clientY-r.top)/r.height-.5)*-14}px)`;});
   c.addEventListener('pointerleave',()=>{c.querySelector('.media').style.transform='';});
@@ -68,7 +85,16 @@
   c.addEventListener('click',go);c.addEventListener('keydown',e=>{if(e.target!==c)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
  });
  $('#d-close').addEventListener('click',closeD);$('#d-buy').addEventListener('click',closeD);
- addEventListener('keydown',e=>{if(e.key==='Escape')closeD();});
+ addEventListener('keydown',e=>{
+  if(!det.classList.contains('open'))return;
+  if(e.key==='Escape'){e.preventDefault();closeD();return;}
+  if(e.key!=='Tab')return;
+  const focusable=[...det.querySelectorAll('a[href],button:not([disabled])')];
+  if(!focusable.length){e.preventDefault();return;}
+  const first=focusable[0],last=focusable[focusable.length-1];
+  if(e.shiftKey&&(document.activeElement===first||!det.contains(document.activeElement))){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&(document.activeElement===last||!det.contains(document.activeElement))){e.preventDefault();first.focus();}
+ });
  addEventListener('wheel',e=>{if(det.classList.contains('open')&&performance.now()-openAt>700&&Math.abs(e.deltaY)>20)closeD();},{passive:true});
  let ty=0;addEventListener('touchstart',e=>{ty=e.touches[0].clientY;},{passive:true});addEventListener('touchmove',e=>{if(det.classList.contains('open')&&Math.abs(e.touches[0].clientY-ty)>60)closeD();},{passive:true});
  // Novidades.
