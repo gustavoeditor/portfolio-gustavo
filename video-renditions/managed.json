@@ -3,9 +3,11 @@
  "sources": {
   "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/abertura-keydrop-treino-mvb5csle-AZAxdGtZjIZReauGlG0qO5L0yXJuuD.mp4": {
    "id": "up-afe5e3e241a9",
+   "ladder": 2,
    "title": "Abertura Keydrop Treino",
    "width": 2560,
    "height": 1440,
+   "fps": 60,
    "bytes": 15093682,
    "levels": [
     {
@@ -37,13 +39,15 @@
      "size": 1440
     }
    ],
-   "generatedAt": "2026-11-11T13:34:40.742Z"
+   "generatedAt": "2026-11-11T13:53:36.350Z"
   },
   "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/5y56-mvfq0qb3-guubpWQFtBCv84shHPqC05B9FgZbXl.mp4": {
    "id": "up-cce7f7615660",
+   "ladder": 2,
    "title": "Take feito para tutorial e treino",
    "width": 1920,
    "height": 1080,
+   "fps": 30,
    "bytes": 6616213,
    "levels": [
     {
@@ -71,13 +75,15 @@
      "size": 1080
     }
    ],
-   "generatedAt": "2026-11-11T13:34:44.393Z"
+   "generatedAt": "2026-11-11T13:53:36.797Z"
   },
   "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/121231232131-mvludqwh-wVYhR8yO2C6WAaUPwGxttE1fzd7mjs.mp4": {
    "id": "up-9ee4d37de014",
+   "ladder": 2,
    "title": "Cenario dakr com pano sobe a AWP",
    "width": 1920,
    "height": 1080,
+   "fps": 30,
    "bytes": 13609041,
    "levels": [
     {
@@ -105,13 +111,15 @@
      "size": 1080
     }
    ],
-   "generatedAt": "2026-11-11T13:34:50.270Z"
+   "generatedAt": "2026-11-11T13:53:37.271Z"
   },
   "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/adsasdadsa-mvrlhs9g-oN44gxztFOSHZqL26zKyQRFnlcyRCF.mp4": {
    "id": "up-1f2157a7f1d9",
+   "ladder": 2,
    "title": "Cenario estilo canais de CS",
    "width": 1920,
    "height": 1080,
+   "fps": 30,
    "bytes": 12541976,
    "levels": [
     {
@@ -139,13 +147,15 @@
      "size": 1080
     }
    ],
-   "generatedAt": "2026-11-11T13:34:56.203Z"
+   "generatedAt": "2026-11-11T13:53:37.717Z"
   },
   "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/edit-muito-foda-da-gugnir-mvtoy628-C1qvO8EIYpdmk9iiesQMs17FXovnrX.mp4": {
    "id": "up-394b18037ece",
+   "ladder": 2,
    "title": "Edit gungnir CS2",
    "width": 1920,
    "height": 1080,
+   "fps": 60,
    "bytes": 190147091,
    "levels": [
     {
@@ -173,7 +183,7 @@
      "size": 1080
     }
    ],
-   "generatedAt": "2026-11-11T13:36:04.713Z"
+   "generatedAt": "2026-11-11T13:53:56.373Z"
   }
  }
 }

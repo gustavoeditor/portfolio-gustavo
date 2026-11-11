@@ -12,7 +12,13 @@ const SVG = {
 };
 const icon=(name)=>'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+SVG[name]+'</svg>';
 const SAFE_URL=/^(?:\/videos(?:-\d{3,4})?\/[a-z0-9-]+\.mp4|https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\/\S+)$/i;
-const qualityName=(size)=>!size?'Original':size>=2160?'2160p 4K':size+'p';
+// YouTube-style names: "1080p60" only when that file really is high frame rate,
+// and only from 720p up; badge HD from 720p, 4K from 2160p.
+const qualityName=(level)=>{
+ if(!level||!level.size)return 'Original';
+ return level.size+'p'+(level.size>=720&&level.fps>40?Math.round(level.fps):'');
+};
+const qualityBadge=(level)=>!level||!level.size||level.size<720?'':level.size>=2160?'4K':'HD';
 const time=(seconds)=>{
  if(!Number.isFinite(seconds)||seconds<0)return '0:00';
  const s=Math.floor(seconds);return Math.floor(s/3600)>0
@@ -30,11 +36,11 @@ function mount(video,options={}){
    const width=Number(q.width)||0,height=Number(q.height)||0;
    const size=width&&height?Math.min(width,height):height;
    const same=size?levels.find(l=>l.size===size):levels.find(l=>l.url===q.url);
-   const level={url:q.url,width,height,size,kbps:Number(q.kbps)||0,broken:false};
+   const level={url:q.url,width,height,size,fps:Number(q.fps)||0,kbps:Number(q.kbps)||0,broken:false};
    if(!same)levels.push(level);
-   else if(level.kbps>same.kbps)Object.assign(same,level);
+   else if(level.fps>same.fps+1||(Math.abs(level.fps-same.fps)<=1&&level.kbps>same.kbps))Object.assign(same,level);
  }
- if(!levels.length&&primarySource)levels.push({url:primarySource,width:0,height:0,size:0,kbps:0,broken:false});
+ if(!levels.length&&primarySource)levels.push({url:primarySource,width:0,height:0,size:0,fps:0,kbps:0,broken:false});
  // Unknown size (an upload's original) is treated as the heaviest until metadata says otherwise.
  const order=()=>levels.sort((a,b)=>(a.size||Infinity)-(b.size||Infinity));
  order();
@@ -94,7 +100,10 @@ function mount(video,options={}){
  bottom.append(left,brand,qualityBox,loopButton,fullscreen);
  controls.append(timeline,bottom);
  const caption=document.createElement('span');caption.className='vip-player-caption';caption.textContent=title;
- root.append(video,caption,loopBadge,center,controls);
+ // Motion layer: play/pause flash, buffering ring.
+ const flash=document.createElement('span');flash.className='vip-flash';flash.setAttribute('aria-hidden','true');
+ const spinner=document.createElement('span');spinner.className='vip-spinner';spinner.setAttribute('aria-hidden','true');
+ root.append(video,caption,loopBadge,flash,spinner,center,controls);
  let disposed=false,dragging=false,frame=0,hideTimer=0,touchRevealOnly=false;
  const CONTROL_IDLE_MS=3200;
  // The player must not stay visible just because the mouse is motionless over it.
@@ -175,7 +184,7 @@ function mount(video,options={}){
  function renderQualityOptions(){
    const list=usable();
    const shown=current&&!current.broken?current:effectiveLevel();
-   const name=shown?qualityName(shown.size):'';
+   const name=shown?qualityName(shown):'';
    qualityMenu.replaceChildren();
    if(list.length<2){
      // One quality only: show what it is, nothing to choose.
@@ -185,10 +194,14 @@ function mount(video,options={}){
    }
    qualitySelect.disabled=false;qualityBox.hidden=false;
    qualitySelect.textContent=(qualityChoice==='auto'?'Auto · '+name:name)+' ▾';
-   const entries=[['auto','Auto']].concat(list.slice().reverse().map(l=>[levelId(l),qualityName(l.size)]));
-   for(const [value,label] of entries){
+   const entries=[['auto','Auto',null]].concat(list.slice().reverse().map(l=>[levelId(l),qualityName(l),l]));
+   entries.forEach(([value,label,level],index)=>{
      const option=document.createElement('button');option.type='button';option.className='vip-quality-option';
-     option.textContent=label;option.dataset.quality=value;
+     option.dataset.quality=value;option.style.setProperty('--i',String(index));
+     const text=document.createElement('span');text.className='vip-quality-name';text.textContent=label;
+     const badge=qualityBadge(level);
+     if(badge){const sup=document.createElement('sup');sup.className='vip-quality-badge';sup.textContent=badge;text.append(sup);}
+     option.append(text);
      const active=value==='auto'?qualityChoice==='auto':qualityChoice!=='auto'&&shown&&levelId(shown)===value;
      option.setAttribute('aria-pressed',String(Boolean(active)));
      if(value!=='auto'&&qualityChoice==='auto'&&shown&&levelId(shown)===value)option.dataset.auto='true';
@@ -200,7 +213,7 @@ function mount(video,options={}){
        qualitySelect.focus({preventScroll:true});
      });
      qualityMenu.append(option);
-   }
+   });
  }
  // Pick the starting quality before the first byte of playback.
  current=effectiveLevel();
@@ -213,7 +226,7 @@ function mount(video,options={}){
    const previousVolume=video.volume;
    const previousMute=video.muted;
    const oldSource=current?current.url:primarySource;
-   switching=true;
+   switching=true;root.dataset.switching='true';
    video.pause();
    let settled=false;
    let restore,failed;
@@ -223,17 +236,20 @@ function mount(video,options={}){
    };
    restore=()=>{
      if(settled||disposed)return;
-     settled=true;cleanup();switching=false;
+     settled=true;cleanup();switching=false;root.dataset.switching='false';
      try{video.currentTime=Math.min(previousTime,Number.isFinite(video.duration)&&video.duration>0?Math.max(0,video.duration-.05):previousTime);}catch(_){}
      video.volume=previousVolume;video.muted=previousMute;
      current=selected;stalls=[];
+     // Announce the new quality like a broadcast tag: "AUTO · 1080P60 HD".
+     const badge=qualityBadge(selected);
+     showBadge((qualityChoice==='auto'?'AUTO · ':'')+qualityName(selected).toUpperCase()+(badge?'  '+badge:''));
      if(shouldResume){const result=video.play();if(result?.catch)result.catch(()=>{});}
      draw();renderQualityOptions();
      if(effectiveLevel()!==current)applyQuality();
    };
    failed=()=>{
      if(settled||disposed)return;
-     settled=true;cleanup();switching=false;
+     settled=true;cleanup();switching=false;root.dataset.switching='false';
      selected.broken=true;
      renderQualityOptions();
      video.src=oldSource||primarySource;
@@ -349,11 +365,23 @@ function mount(video,options={}){
  }
  function toggle(event){
    if(event)event.stopPropagation();
-   if(video.paused||video.ended){
+   const willPlay=video.paused||video.ended;
+   if(willPlay){
      if(video.ended)video.currentTime=0;
      const started=video.play();if(started&&typeof started.catch==='function')started.catch(()=>{draw();});
    }else video.pause();
+   flashIcon(willPlay?'play':'pause');
  }
+ // YouTube-like feedback: the icon pops in the middle and fades out.
+ function flashIcon(name){
+   flash.innerHTML=icon(name);
+   flash.classList.remove('go');void flash.offsetWidth;flash.classList.add('go');
+ }
+ // Buffering ring: only while waiting for data (shown after a short delay in CSS).
+ const setBuffering=(active)=>{root.dataset.buffering=active?'true':'false';};
+ on(video,'waiting',()=>setBuffering(true));
+ on(video,'seeking',()=>setBuffering(true));
+ for(const e of ['playing','canplay','seeked','pause','ended','error'])on(video,e,()=>setBuffering(switching));
  // Mouse movement reveals the full controls; leaving the video hides them instantly.
  // Stationary hovering never prevents the idle timeout.
  on(root,'pointerenter',event=>{
@@ -442,13 +470,16 @@ function mount(video,options={}){
    root.dataset.loop=String(video.loop);
  }
  let badgeTimer=0;
+ function showBadge(text){
+   loopBadge.textContent=text;
+   loopBadge.classList.remove('show');void loopBadge.offsetWidth;loopBadge.classList.add('show');
+   clearTimeout(badgeTimer);badgeTimer=setTimeout(()=>loopBadge.classList.remove('show'),1400);
+ }
  function toggleLoop(){
    video.loop=!video.loop;
    try{localStorage.setItem(loopPreferenceKey,video.loop?'1':'0');}catch(_){}
    syncLoop();
-   loopBadge.textContent=video.loop?'↻  LOOP ATIVADO':'LOOP DESATIVADO';
-   loopBadge.classList.remove('show');void loopBadge.offsetWidth;loopBadge.classList.add('show');
-   clearTimeout(badgeTimer);badgeTimer=setTimeout(()=>loopBadge.classList.remove('show'),1400);
+   showBadge(video.loop?'↻  LOOP ATIVADO':'LOOP DESATIVADO');
    // Turning loop on after the end restarts the take right away.
    if(video.loop&&video.ended){video.currentTime=0;const p=video.play();if(p?.catch)p.catch(()=>{});}
  }

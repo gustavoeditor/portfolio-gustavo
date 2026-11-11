@@ -34,6 +34,8 @@ const LADDER = [
   { size: 1440, crf: 22, maxrate: '12000k', audio: '160k' },
   { size: 2160, crf: 21, maxrate: '24000k', audio: '160k' },
 ];
+// Bump when the ladder rules change so panel uploads are re-checked once.
+const LADDER_VERSION = 2;
 // A source a few pixels short of a rung (e.g. 1072p) still gets that rung.
 const fits = (rung, sourceSize) => rung.size <= sourceSize * 1.02;
 const LOCAL_FOLDERS = ['videos', 'videos-1080', 'videos-1440', 'videos-2160',
@@ -41,19 +43,28 @@ const LOCAL_FOLDERS = ['videos', 'videos-1080', 'videos-1440', 'videos-2160',
 
 function probe(file) {
   const out = execFileSync(FFPROBE, ['-v', 'error', '-show_entries',
-    'stream=codec_type,width,height:format=bit_rate', '-of', 'json', file], { encoding: 'utf8' });
+    'stream=codec_type,width,height,avg_frame_rate:format=bit_rate', '-of', 'json', file], { encoding: 'utf8' });
   const data = JSON.parse(out);
   const video = (data.streams || []).find(s => s.codec_type === 'video') || {};
   const width = Number(video.width), height = Number(video.height);
   if (!width || !height) throw new Error('Resolução ilegível: ' + file);
+  const [num, den] = String(video.avg_frame_rate || '0/1').split('/').map(Number);
+  const fps = den ? num / den : 0;
   return { width, height, size: Math.min(width, height), kbps: Math.round(Number(data.format?.bit_rate || 0) / 1000),
-    hasAudio: (data.streams || []).some(s => s.codec_type === 'audio') };
+    fps, fpsNum: num, fpsDen: den || 1, hasAudio: (data.streams || []).some(s => s.codec_type === 'audio') };
 }
+
+// Like YouTube: high frame rate (50/60 fps) only from 720p up; lower rungs at half the rate.
+const HFR = fps => fps > 40;
+const targetFps = (source, rung) => HFR(source.fps) && rung.size < 720 ? source.fps / 2 : source.fps;
+const sameFps = (a, b) => Math.abs(a - b) < 1;
 
 function encode(source, info, rung, dest) {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   const portrait = info.height > info.width;
-  const scale = portrait ? `scale=${rung.size}:-2` : `scale=-2:${rung.size}`;
+  const halve = HFR(info.fps) && rung.size < 720;
+  const scale = (halve ? `fps=${info.fpsNum}/${info.fpsDen * 2},` : '') +
+    (portrait ? `scale=${rung.size}:-2` : `scale=-2:${rung.size}`);
   const tmp = dest + '.part.mp4';
   const args = ['-hide_banner', '-loglevel', 'error', '-nostdin', '-y', '-i', source,
     '-map', '0:v:0', '-map', '0:a:0?', '-vf', scale + ':flags=lanczos', '-sn', '-dn',
@@ -64,8 +75,9 @@ function encode(source, info, rung, dest) {
   execFileSync(FFMPEG, args, { stdio: ['ignore', 'inherit', 'inherit'] });
   const out = probe(tmp);
   if (Math.abs(out.size - rung.size) > 2) throw new Error('Resolução errada em ' + dest);
+  if (!sameFps(out.fps, targetFps(info, rung))) throw new Error('Taxa de quadros errada em ' + dest);
   fs.renameSync(tmp, dest);
-  console.log('  ' + rung.size + 'p → ' + path.relative(root, dest).replace(/\\/g, '/') +
+  console.log('  ' + rung.size + 'p' + Math.round(out.fps) + ' → ' + path.relative(root, dest).replace(/\\/g, '/') +
     ' (' + (fs.statSync(dest).size / 1048576).toFixed(1) + ' MB)');
 }
 
@@ -75,11 +87,11 @@ function generateLocal() {
   for (const slug of slugs) {
     const files = LOCAL_FOLDERS.map(folder => path.join(root, folder, slug + '.mp4')).filter(f => fs.existsSync(f));
     const probed = files.map(file => ({ file, ...probe(file) }));
-    // Best source = biggest resolution, then highest bitrate.
-    const source = probed.sort((a, b) => b.size - a.size || b.kbps - a.kbps)[0];
-    const have = new Set(probed.map(p => p.size));
-    const missing = LADDER.filter(r => fits(r, source.size) && !have.has(r.size) &&
-      !(r.size === source.size));
+    // Best source = biggest resolution, then highest frame rate, then bitrate.
+    const source = probed.sort((a, b) => b.size - a.size || b.fps - a.fps || b.kbps - a.kbps)[0];
+    // A rung counts only if some file has that size AND the YouTube-style frame rate for it.
+    const missing = LADDER.filter(r => fits(r, source.size) &&
+      !probed.some(p => p.size === r.size && sameFps(p.fps, targetFps(source, r))));
     console.log(slug + ': fonte ' + source.size + 'p' + (missing.length ? '' : ' — completo'));
     for (const rung of missing) encode(source.file, source, rung, path.join(root, 'videos-' + rung.size, slug + '.mp4'));
   }
@@ -98,7 +110,7 @@ async function generateManaged() {
       if (!BLOB_VIDEO.test(src) || hidden.has(src)) continue;
       const id = 'up-' + crypto.createHash('sha256').update(src).digest('hex').slice(0, 12);
       const done = state.sources[src];
-      if (done && done.levels.every(l => fs.existsSync(path.join(root, l.url)))) continue;
+      if (done && done.ladder === LADDER_VERSION && done.levels.every(l => fs.existsSync(path.join(root, l.url)))) continue;
       console.log(String(project.title || id) + ': baixando original');
       const download = await fetch(src, { redirect: 'error' });
       if (!download.ok) { console.warn('  falhou HTTP ' + download.status + ', fica para a próxima'); continue; }
@@ -110,10 +122,11 @@ async function generateManaged() {
       for (const rung of LADDER.filter(r => fits(r, info.size))) {
         const rel = 'videos-' + rung.size + '/' + id + '.mp4';
         const dest = path.join(root, rel);
-        if (!fs.existsSync(dest)) encode(sourceFile, info, rung, dest);
+        if (!fs.existsSync(dest) || !sameFps(probe(dest).fps, targetFps(info, rung))) encode(sourceFile, info, rung, dest);
         levels.push({ url: '/' + rel, size: rung.size });
       }
-      state.sources[src] = { id, title: String(project.title || '').slice(0, 90), width: info.width, height: info.height,
+      state.sources[src] = { id, ladder: LADDER_VERSION, title: String(project.title || '').slice(0, 90),
+        width: info.width, height: info.height, fps: Math.round(info.fps * 100) / 100,
         bytes: fs.statSync(sourceFile).size, levels, generatedAt: new Date().toISOString() };
       fs.rmSync(sourceFile, { force: true });
       fs.mkdirSync(path.dirname(MANAGED_FILE), { recursive: true });
