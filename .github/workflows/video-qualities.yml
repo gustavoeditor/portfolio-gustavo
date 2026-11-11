@@ -55,7 +55,8 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- 'videos-*/' video-renditions/managed.json video-qualities.js
+          # Unquoted so bash expands it to the real videos-144/ … videos-2160/ folders.
+          git add -A -- videos-*/ video-renditions/managed.json video-qualities.js
           if git diff --cached --quiet; then
             echo "Nenhuma qualidade nova."
             exit 0
