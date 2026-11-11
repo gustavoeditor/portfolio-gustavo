@@ -1,6 +1,7 @@
 const {BlobPreconditionFailedError} = require('@vercel/blob');
 const { validMutation, privateHeaders, parseJsonBody } = require('../lib/admin-session');
 const { hasStore, readSnapshot, writeManaged, cleanProject, validUploadedUrl, validHiddenKey } = require('../lib/managed-projects');
+const { requestRenditions } = require('../lib/rendition-trigger');
 module.exports = async function handler(req, res) {
   privateHeaders(res);
   if (!['POST','DELETE','PATCH'].includes(req.method)) { res.setHeader('Allow','POST, DELETE, PATCH'); return res.status(405).end(); }
@@ -18,7 +19,9 @@ module.exports = async function handler(req, res) {
       const hidden = new Set(snapshot.hidden || []);
       if (body.hidden) hidden.add(key); else hidden.delete(key);
       await writeManaged(projects, snapshot, [...hidden]);
-      return res.status(200).json({ok:true,hidden:[...hidden]});
+      // A video put back on the site gets its qualities checked too.
+      const renditions = body.hidden ? undefined : await requestRenditions('unhide');
+      return res.status(200).json({ok:true,hidden:[...hidden],renditions});
     }
     if (req.method === 'DELETE') {
       const id = String(body.id || '');
@@ -42,7 +45,9 @@ module.exports = async function handler(req, res) {
     project.publishedAt = new Date().toISOString();
     const next = [...projects,project];
     await writeManaged(next,snapshot);
-    return res.status(201).json({ok:true,project,projects:next});
+    // 144p → 2160p versions are encoded by GitHub Actions; start it now instead of waiting.
+    const renditions = await requestRenditions('new-upload');
+    return res.status(201).json({ok:true,project,projects:next,renditions});
   } catch (error) {
     if (error instanceof BlobPreconditionFailedError || /already exists/i.test(error.message)) return res.status(409).json({error:'O catálogo foi atualizado em outra aba. Tente publicar novamente; os arquivos já enviados serão reaproveitados.'});
     console.error('admin publish error',error.message);
