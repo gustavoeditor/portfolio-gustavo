@@ -79,6 +79,11 @@
 .vip-quality-option[aria-pressed="true"]::after{content:"✓";color:#d8bbff}
 .vip-quality-option:hover,.vip-quality-option:focus-visible{background:#a080dc40;outline:none}
 @media(max-width:600px){.vip-quality-menu{right:-30px;bottom:calc(100% + 12px);width:120px}.vip-quality-option{min-height:42px;font-size:13px}}
+/* Each video lists its own resolutions; "Auto · 720p" shows what Auto picked. */
+.vip-quality{max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.vip-quality:disabled{cursor:default;padding-right:9px;opacity:.85}
+.vip-quality-option[data-auto="true"]::after{content:"auto";font-size:9px;letter-spacing:.06em;color:#bfa6e6}
+@media(max-width:600px){.vip-quality{max-width:100px}}
 
 /* G / PLAYER V4.3: responsive idle-aware controls.
    A hovering pointer alone must NOT reveal UI after 3.2 seconds of inactivity. */
