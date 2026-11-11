@@ -254,6 +254,11 @@ async function run(){
     await page.locator('.vip-quality-option[data-quality="'+quality+'"]').count(),1,
     'Missing player quality '+quality);
    assert.equal(await page.locator('.vip-quality-option[data-quality="2160"]').count(),0,'No fake 4K above a 1440p original');
+   // 60 fps original: "p60" + HD tag only from 720p up, like YouTube.
+   const label=q=>page.locator('.vip-quality-option[data-quality="'+q+'"] .vip-quality-name').evaluate(el=>el.firstChild.textContent+'|'+(el.querySelector('sup')?.textContent||''));
+   assert.equal(await label('1440'),'1440p60|HD');
+   assert.equal(await label('720'),'720p60|HD');
+   assert.equal(await label('480'),'480p|');
    // The 9-row menu must stay inside the short phone player and scroll.
    const fit=await page.evaluate(()=>{const m=document.querySelector('.vip-quality-menu').getBoundingClientRect(),p=document.querySelector('.vip-player').getBoundingClientRect();return m.top>=p.top-1&&m.bottom<=p.bottom+1;});
    assert.ok(fit,'Quality menu overflows the player');

@@ -123,3 +123,39 @@
 @keyframes vipLoopSpin{to{transform:rotate(360deg)}}
 @media(max-width:380px){.vip-loop{width:30px;height:30px;flex-basis:30px}}
 @media(prefers-reduced-motion:reduce){.vip-loop[aria-pressed="true"] svg,.vip-loop-badge.show{animation:none}.vip-loop-badge.show{opacity:1;transform:translate(-50%,0)}}
+
+/* G / PLAYER motion: menu, quality tags, play/pause flash, buffering.
+   Only opacity/transform (GPU-cheap, fine in lite mode); all off with reduced motion. */
+.vip-quality-badge{margin-left:3px;padding:1px 3px;border-radius:3px;background:#c9a8ff;color:#1b1029;font-size:7.5px;font-weight:900;letter-spacing:.04em;vertical-align:super;line-height:1}
+.vip-quality-option[aria-pressed="true"] .vip-quality-badge,.vip-quality-option:hover .vip-quality-badge{background:#efe3ff}
+.vip-quality-menu:not([hidden]){animation:vipMenuIn .24s cubic-bezier(.2,.9,.25,1.15) both;transform-origin:85% 100%}
+.vip-quality-menu:not([hidden]) .vip-quality-option{animation:vipOptionIn .28s cubic-bezier(.2,.84,.22,1) both;animation-delay:calc(var(--i,0) * 22ms)}
+.vip-quality-option{transition:background .16s,color .16s,transform .16s}
+.vip-quality-option:hover{transform:translateX(3px)}
+.vip-quality{transition:background .18s,border-color .18s,transform .18s}
+.vip-quality:not(:disabled):hover{border-color:#c9a8ff;background:#2d1f40}
+.vip-quality[aria-expanded="true"]{border-color:#d8bbff;background:#3a2656}
+.vip-control:active,.vip-quality:not(:disabled):active{transform:scale(.9)}
+.vip-center:active{transform:translate(-50%,-50%) scale(.93)}
+@keyframes vipMenuIn{from{opacity:0;transform:translateY(8px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes vipOptionIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* Seek bar grows on hover, like the big platforms. */
+.vip-timeline-wrap::before,.vip-buffer,.vip-progress{transition:height .18s ease}
+.vip-timeline-wrap:hover::before,.vip-timeline-wrap:hover .vip-buffer,.vip-timeline-wrap:hover .vip-progress{height:7px}
+/* Play/pause flash in the middle. */
+.vip-flash{position:absolute;z-index:5;left:50%;top:48%;display:grid;place-items:center;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:#140d1fb3;color:#fff;pointer-events:none;opacity:0}
+.vip-flash svg{width:26px;height:26px;fill:currentColor}
+.vip-flash.go{animation:vipFlash .55s cubic-bezier(.2,.8,.3,1) both}
+@keyframes vipFlash{0%{opacity:.95;transform:scale(.7)}100%{opacity:0;transform:scale(1.35)}}
+/* Paused but switching quality: keep the big play button out of the way. */
+.vip-player[data-switching="true"] .vip-center{opacity:0;pointer-events:none}
+/* Buffering ring, only after 280 ms so short waits never flicker. */
+.vip-spinner{position:absolute;z-index:5;left:50%;top:48%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:3px solid #ffffff26;border-top-color:#cdb5ff;pointer-events:none;opacity:0;transition:opacity .2s;animation:vipSpin .8s linear infinite;animation-play-state:paused}
+.vip-player[data-buffering="true"] .vip-spinner,.vip-player[data-switching="true"] .vip-spinner{opacity:1;transition-delay:.28s;animation-play-state:running}
+.vip-player[data-buffering="true"] .vip-center{opacity:0;pointer-events:none}
+@keyframes vipSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){
+ .vip-quality-menu:not([hidden]),.vip-quality-menu:not([hidden]) .vip-quality-option,.vip-flash.go{animation:none}
+ .vip-quality-option:hover{transform:none}
+ .vip-spinner{animation-duration:2.4s}
+}

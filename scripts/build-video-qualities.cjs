@@ -17,13 +17,15 @@ const MANAGED_FILE = path.join(root, 'video-renditions', 'managed.json');
 
 function probe(file) {
   const out = execFileSync(ffprobe, ['-v', 'error', '-select_streams', 'v:0',
-    '-show_entries', 'stream=width,height:format=bit_rate,duration', '-of', 'json', file], { encoding: 'utf8' });
+    '-show_entries', 'stream=width,height,avg_frame_rate:format=bit_rate,duration', '-of', 'json', file], { encoding: 'utf8' });
   const data = JSON.parse(out);
   const stream = (data.streams || [])[0] || {};
   const width = Number(stream.width), height = Number(stream.height);
   if (!width || !height) throw new Error('Resolução ilegível: ' + file);
   const kbps = Math.round(Number(data.format?.bit_rate || 0) / 1000);
-  return { width, height, kbps };
+  const [num, den] = String(stream.avg_frame_rate || '0/1').split('/').map(Number);
+  const fps = den ? Math.round(num / den * 100) / 100 : 0;
+  return { width, height, kbps, fps };
 }
 
 const slugs = fs.readdirSync(path.join(root, 'videos'))
@@ -40,9 +42,10 @@ for (const slug of slugs) {
     const info = probe(file);
     const size = Math.min(info.width, info.height);
     const level = { url: '/' + folder + '/' + slug + '.mp4', width: info.width, height: info.height,
-      bytes: fs.statSync(file).size, kbps: info.kbps };
+      fps: info.fps, bytes: fs.statSync(file).size, kbps: info.kbps };
     const previous = bySize.get(size);
-    if (!previous || level.kbps > previous.kbps) bySize.set(size, level);
+    // Same resolution twice: the 60 fps file wins, then the higher bitrate.
+    if (!previous || level.fps > previous.fps + 1 || (Math.abs(level.fps - previous.fps) <= 1 && level.kbps > previous.kbps)) bySize.set(size, level);
   }
   manifest[slug] = [...bySize.entries()].sort((a, b) => a[0] - b[0]).map(([, level]) => level);
 }
@@ -56,7 +59,7 @@ if (fs.existsSync(MANAGED_FILE)) {
       const file = path.join(root, level.url);
       if (!fs.existsSync(file)) continue;
       const info = probe(file);
-      levels.push({ url: level.url, width: info.width, height: info.height, bytes: fs.statSync(file).size, kbps: info.kbps });
+      levels.push({ url: level.url, width: info.width, height: info.height, fps: info.fps, bytes: fs.statSync(file).size, kbps: info.kbps });
     }
     if (levels.length) manifest[src] = levels.sort((a, b) => Math.min(a.width, a.height) - Math.min(b.width, b.height));
   }
@@ -66,5 +69,5 @@ const body = '// Gerado por scripts/build-video-qualities.cjs. Não edite à mã
   'window.GUSTAVO_VIDEO_QUALITIES=' + JSON.stringify(manifest) + ';\n';
 fs.writeFileSync(path.join(root, 'video-qualities.js'), body);
 for (const [slug, levels] of Object.entries(manifest)) {
-  console.log(slug.padEnd(34) + levels.map(l => Math.min(l.width, l.height) + 'p').join(' / '));
+  console.log(slug.slice(-40).padEnd(42) + levels.map(l => Math.min(l.width, l.height) + 'p' + Math.round(l.fps)).join(' / '));
 }

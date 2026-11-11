@@ -30,7 +30,7 @@ for(const h of [360,480]){
  assert.equal(createHash('sha256').update(buffer).digest('hex'),v.sha256,'Arquivo de vídeo não corresponde ao manifesto');
 }
 const playerCode=read('player.js');
-for(const token of ['options.qualities','function autoLevel()','function neededSize()','connection.saveData',"on(video,'waiting'",'qualityName(l.size)'])assert.ok(playerCode.includes(token),'Player sem qualidade adaptativa por vídeo: '+token);
+for(const token of ['options.qualities','function autoLevel()','function neededSize()','connection.saveData',"on(video,'waiting'",'qualityName(l)','qualityBadge(','function flashIcon(','vip-spinner'])assert.ok(playerCode.includes(token),'Player sem qualidade adaptativa por vídeo: '+token);
 // video-qualities.js must list the real files of every local video (rerun scripts/build-video-qualities.cjs).
 {
  const source=read('video-qualities.js');
@@ -38,6 +38,16 @@ for(const token of ['options.qualities','function autoLevel()','function neededS
  new Function('window',source)(sandbox.window);
  const catalog=sandbox.window.GUSTAVO_VIDEO_QUALITIES;
  assert.ok(catalog&&typeof catalog==='object','Manifesto de qualidades ausente');
+ // YouTube rule: 50/60 fps only from 720p up (all of them, when the video has it); below 720p at most 30.
+ const checkFrameRates=(name,levels)=>{
+  const hfr=Math.max(...levels.map(l=>Number(l.fps)||0));
+  for(const l of levels){
+   const size=Math.min(l.width,l.height);
+   assert.ok(Number(l.fps)>0,name+' sem fps no manifesto (rode scripts/build-video-qualities.cjs)');
+   if(size<720)assert.ok(l.fps<=31,name+' '+size+'p deveria ter até 30 fps');
+   else if(hfr>40)assert.ok(l.fps>40,name+' '+size+'p deveria manter 60 fps');
+  }
+ };
  const local=fs.readdirSync(path.join(root,'videos')).filter(n=>/^[a-z0-9-]+\.mp4$/i.test(n)).map(n=>n.slice(0,-4));
  for(const slug of local){
   const levels=catalog[slug];
@@ -51,6 +61,7 @@ for(const token of ['options.qualities','function autoLevel()','function neededS
   // Full ladder: every rung from 144p up to the video's own resolution.
   const top=Math.max(...sizes);
   for(const rung of [144,240,360,480,720,1080,1440,2160].filter(r=>r<=top))assert.ok(sizes.includes(rung),slug+' sem '+rung+'p (rode scripts/generate-video-ladder.cjs)');
+  checkFrameRates(slug,levels);
  }
  // Panel uploads: ladder keyed by the Blob original, files served from this repo.
  const managed=JSON.parse(read('video-renditions/managed.json'));
@@ -62,6 +73,7 @@ for(const token of ['options.qualities','function autoLevel()','function neededS
    assert.match(l.url,new RegExp('^/videos-\\d{3,4}/'+entry.id+'\\.mp4$'),'URL de qualidade de upload inválida: '+l.url);
    assert.equal(fs.statSync(path.join(root,l.url)).size,l.bytes,'Manifesto desatualizado para '+l.url);
   }
+  checkFrameRates(entry.title,levels);
   const short=Math.min(entry.width,entry.height);
   assert.equal(Math.max(...levels.map(l=>Math.min(l.width,l.height))),[144,240,360,480,720,1080,1440,2160].filter(r=>r<=short*1.02).pop(),'Escada incompleta: '+entry.title);
  }
@@ -73,7 +85,7 @@ const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(new Set(ids).size,ids.length,'IDs duplicados');
 for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(ids.includes(id),'Link interno quebrado: '+id);
 for(const name of ['inicio','trabalhos','portfolio-grid','galeria','especialidades','metodo','sobre','contato','brief-form','pack-button','video-modal'])assert.ok(ids.includes(name),'Seção da V4 ausente: '+name);
-for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/video-qualities.js?v=2','/player.js?v=8','/player.css?v=5','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
+for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/video-qualities.js?v=3','/player.js?v=9','/player.css?v=6','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
  assert.ok(html.includes(snippet),'Integração obrigatória ausente: '+snippet);
 }
 
@@ -144,7 +156,7 @@ assert.ok(read('ambience.css').includes('max-height:calc(100dvh - 95px)'),'Audio
 
 
 /* Playback controls must not remain visible just because the pointer is hovering. */
-assert.ok(html.includes('/player.css?v=5'),'Player auto-hide stylesheet reference missing');
+assert.ok(html.includes('/player.css?v=6'),'Player auto-hide stylesheet reference missing');
 const playerCSS=read('player.css');
 const playerJS=read('player.js');
 for(const token of ['CONTROL_IDLE_MS=3200',"on(root,'pointermove'", "on(root,'pointerleave'",'hideUI();',"on(root,'focusin'", "on(video,'play',onPlaybackState)",'touchRevealOnly','clearHideTimer();']){
