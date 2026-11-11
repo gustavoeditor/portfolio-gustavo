@@ -84,6 +84,10 @@
 .vip-quality:disabled{cursor:default;padding-right:9px;opacity:.85}
 .vip-quality-option[data-auto="true"]::after{content:"auto";font-size:9px;letter-spacing:.06em;color:#bfa6e6}
 @media(max-width:600px){.vip-quality{max-width:100px}}
+/* 144p → 2160p ladder: compact rows, scroll when the player is short. */
+.vip-quality-menu{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9679c2 transparent;width:140px}
+.vip-quality-option{min-height:32px;padding:6px 12px}
+@media(max-width:600px){.vip-quality-menu{width:128px}.vip-quality-option{min-height:34px}}
 
 /* G / PLAYER V4.3: responsive idle-aware controls.
    A hovering pointer alone must NOT reveal UI after 3.2 seconds of inactivity. */

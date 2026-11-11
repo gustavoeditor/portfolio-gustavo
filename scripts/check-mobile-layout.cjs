@@ -230,11 +230,14 @@ async function run(){
    await ctx.close();
    console.log('Launch homepage entry and #contato deep links OK at '+width+'px');
   }
-  // Real Chrome test: the uploaded Keydrop project starts at 360p on mobile,
-  // and the user can explicitly choose 480p or Original.
+  // Real Chrome test: the uploaded Keydrop project (1440p original) offers its whole
+  // 144p→1440p ladder, starts at 360p on a phone and switches when the user picks 480p.
   {
    const manifest=JSON.parse(fs.readFileSync(path.join(root,'video-renditions/abertura-keydrop-treino.json'),'utf8'));
-   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+   const ladder=JSON.parse(fs.readFileSync(path.join(root,'video-renditions/managed.json'),'utf8')).sources[manifest.source];
+   assert.ok(ladder,'Keydrop upload has no generated ladder');
+   const rung=size=>'/videos-'+size+'/'+ladder.id+'.mp4';
+   const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:3,isMobile:true,hasTouch:true});
    const page=await context.newPage();
    await page.route('**/api/managed-projects',route=>route.fulfill({status:200,contentType:'application/json',
     body:JSON.stringify({projects:[{title:'Abertura Keydrop Treino',src:manifest.source,
@@ -245,15 +248,19 @@ async function run(){
    await treinoCard.click();
    await page.locator('.vip-quality').waitFor({timeout:5000});
    const src=await page.locator('#modal-player').getAttribute('src');
-   assert.equal(src,'/videos-360/abertura-keydrop-treino.mp4','Mobile Auto should initially load 360p');
+   assert.equal(src,rung(360),'Mobile Auto should initially load 360p');
    await page.locator('.vip-quality').click();
-   for(const quality of ['auto','360','480','orig'])assert.equal(
+   for(const quality of ['auto','144','240','360','480','720','1080','1440'])assert.equal(
     await page.locator('.vip-quality-option[data-quality="'+quality+'"]').count(),1,
     'Missing player quality '+quality);
+   assert.equal(await page.locator('.vip-quality-option[data-quality="2160"]').count(),0,'No fake 4K above a 1440p original');
+   // The 9-row menu must stay inside the short phone player and scroll.
+   const fit=await page.evaluate(()=>{const m=document.querySelector('.vip-quality-menu').getBoundingClientRect(),p=document.querySelector('.vip-player').getBoundingClientRect();return m.top>=p.top-1&&m.bottom<=p.bottom+1;});
+   assert.ok(fit,'Quality menu overflows the player');
    await page.locator('.vip-quality-option[data-quality="480"]').click();
-   await page.waitForFunction(()=>document.getElementById('modal-player').getAttribute('src')==='/videos-480/abertura-keydrop-treino.mp4',null,{timeout:6000});
+   await page.waitForFunction(url=>document.getElementById('modal-player').getAttribute('src')===url,rung(480),{timeout:6000});
    await context.close();
-   console.log('Abertura Keydrop Treino: Auto 360p, 480p and Original available in mobile Chrome.');
+   console.log('Abertura Keydrop Treino: 144p→1440p ladder, Auto 360p and manual 480p in mobile Chrome.');
   }
 
   // Pack interest should navigate to a prefilled quote without sending data.

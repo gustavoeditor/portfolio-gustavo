@@ -130,6 +130,15 @@
       ]
     },
     {
+      "source": "/videos-(144|240|360|720|1440|2160)/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
       "source": "/videos-1080/(.*)",
       "headers": [
         {

@@ -1,13 +1,18 @@
 name: Gerar qualidades otimizadas dos vídeos
 
+# Gera a escada 144p → 2160p (até a resolução de cada vídeo) para:
+#  - os vídeos do repositório (videos/), quando entram ou mudam;
+#  - os vídeos enviados pelo painel (Vercel Blob), verificados a cada hora.
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/video-qualities.yml'
       - 'videos/**'
-      - 'videos-*/**'
+      - 'scripts/generate-video-ladder.cjs'
       - 'scripts/build-video-qualities.cjs'
+  schedule:
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -19,65 +24,42 @@ concurrency:
 
 jobs:
   encode:
-    name: Criar arquivos 480p
+    name: Gerar escada de qualidades
+    if: github.repository == 'gustavoeditor/portfolio-gustavo'
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: true
-      - name: Instalar FFmpeg (necessário para criar versões 480p)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Instalar FFmpeg
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
           ffmpeg -version | head -n 1
-          ffprobe -version | head -n 1
-      - name: Gerar versões leves 480p somente quando ausentes
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p videos-480
-          shopt -s nullglob
-          for src in videos/*.mp4; do
-            filename="${src##*/}"
-            dest="videos-480/$filename"
-            if [[ -s "$dest" ]]; then
-              echo "Já existe: $dest"
-              continue
-            fi
-            height="$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=nokey=1:noprint_wrappers=1 "$src" | head -n 1)"
-            if [[ ! "$height" =~ ^[0-9]+$ ]]; then
-              echo "::error::Não foi possível ler altura de $src"
-              exit 1
-            fi
-            if (( height <= 480 )); then
-              cp "$src" "$dest"
-              echo "Mantendo resolução original inferior ou igual a 480p: $filename"
-            else
-              ffmpeg -hide_banner -loglevel error -nostdin -i "$src" \
-                -vf "scale=-2:480" -sn -dn \
-                -c:v libx264 -preset veryfast -crf 29 -pix_fmt yuv420p \
-                -c:a aac -b:a 80k -ac 2 -movflags +faststart \
-                -max_muxing_queue_size 1024 -y "$dest"
-            fi
-            test -s "$dest"
-            ffprobe -v error "$dest" > /dev/null
-            echo "Gerado $dest"
-          done
+      - name: Gerar qualidades que faltam (repositório + uploads do painel)
+        run: node scripts/generate-video-ladder.cjs
       - name: Atualizar o manifesto de qualidades de cada vídeo
         run: node scripts/build-video-qualities.cjs
-      - name: Publicar versões reduzidas
+      - name: Conferir antes de publicar
+        run: node scripts/verify-portfolio.cjs
+      - name: Publicar
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- videos-480/ video-qualities.js
+          git add -- 'videos-*/' video-renditions/managed.json video-qualities.js
           if git diff --cached --quiet; then
-            echo "Nenhuma alteração."
+            echo "Nenhuma qualidade nova."
             exit 0
           fi
-          git commit -m "Generate optimized 480p variants for portfolio players"
+          git commit -m "Generate video quality ladder (144p-2160p)"
           git pull --rebase origin main
           git push origin HEAD:main
