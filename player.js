@@ -12,7 +12,7 @@ const SVG = {
 };
 const icon=(name)=>'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+SVG[name]+'</svg>';
 const SAFE_URL=/^(?:\/videos(?:-\d{3,4})?\/[a-z0-9-]+\.mp4|https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\/\S+)$/i;
-const qualityName=(size)=>!size?'Original':size>=2160?'4K':size+'p';
+const qualityName=(size)=>!size?'Original':size>=2160?'2160p 4K':size+'p';
 const time=(seconds)=>{
  if(!Number.isFinite(seconds)||seconds<0)return '0:00';
  const s=Math.floor(seconds);return Math.floor(s/3600)>0
@@ -293,7 +293,14 @@ function mount(video,options={}){
  on(qualitySelect,'click',(event)=>{
    showUI();
    event.stopPropagation();
-   if(qualityMenu.hidden){qualityMenu.hidden=false;qualitySelect.setAttribute('aria-expanded','true');}
+   if(qualityMenu.hidden){
+     // Up to 9 rows (Auto + 144p…2160p): fit inside the player, scroll the rest.
+     const room=qualityBox.getBoundingClientRect().top-root.getBoundingClientRect().top-22;
+     qualityMenu.style.maxHeight=Math.max(110,Math.floor(room))+'px';
+     qualityMenu.hidden=false;qualitySelect.setAttribute('aria-expanded','true');
+     const active=qualityMenu.querySelector('[data-auto="true"]')||qualityMenu.querySelector('[aria-pressed="true"]');
+     if(active)qualityMenu.scrollTop=Math.max(0,active.offsetTop-qualityMenu.clientHeight/2);
+   }
    else closeQualityMenu();
  });
  on(qualitySelect,'keydown',(event)=>{if(event.key==='ArrowDown'){event.preventDefault();if(qualityMenu.hidden)qualitySelect.click();qualityMenu.querySelector('button')?.focus();}});

@@ -48,6 +48,22 @@ for(const token of ['options.qualities','function autoLevel()','function neededS
    assert.match(l.url,new RegExp('^/videos(-\\d{3,4})?/'+slug+'\\.mp4$'),'URL de qualidade inválida: '+l.url);
    assert.equal(fs.statSync(path.join(root,l.url)).size,l.bytes,'Manifesto desatualizado para '+l.url+' (rode scripts/build-video-qualities.cjs)');
   }
+  // Full ladder: every rung from 144p up to the video's own resolution.
+  const top=Math.max(...sizes);
+  for(const rung of [144,240,360,480,720,1080,1440,2160].filter(r=>r<=top))assert.ok(sizes.includes(rung),slug+' sem '+rung+'p (rode scripts/generate-video-ladder.cjs)');
+ }
+ // Panel uploads: ladder keyed by the Blob original, files served from this repo.
+ const managed=JSON.parse(read('video-renditions/managed.json'));
+ for(const [src,entry] of Object.entries(managed.sources)){
+  assert.match(src,/^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/gustavo\/videos\//,'Upload de origem não autorizada');
+  const levels=catalog[src];
+  assert.ok(Array.isArray(levels)&&levels.length===entry.levels.length,'Upload sem qualidades no manifesto: '+entry.title);
+  for(const l of levels){
+   assert.match(l.url,new RegExp('^/videos-\\d{3,4}/'+entry.id+'\\.mp4$'),'URL de qualidade de upload inválida: '+l.url);
+   assert.equal(fs.statSync(path.join(root,l.url)).size,l.bytes,'Manifesto desatualizado para '+l.url);
+  }
+  const short=Math.min(entry.width,entry.height);
+  assert.equal(Math.max(...levels.map(l=>Math.min(l.width,l.height))),[144,240,360,480,720,1080,1440,2160].filter(r=>r<=short*1.02).pop(),'Escada incompleta: '+entry.title);
  }
 }
 
@@ -57,7 +73,7 @@ const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(new Set(ids).size,ids.length,'IDs duplicados');
 for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(ids.includes(id),'Link interno quebrado: '+id);
 for(const name of ['inicio','trabalhos','portfolio-grid','galeria','especialidades','metodo','sobre','contato','brief-form','pack-button','video-modal'])assert.ok(ids.includes(name),'Seção da V4 ausente: '+name);
-for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/video-qualities.js?v=1','/player.js?v=7','/player.css?v=4','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
+for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/video-qualities.js?v=2','/player.js?v=8','/player.css?v=5','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
  assert.ok(html.includes(snippet),'Integração obrigatória ausente: '+snippet);
 }
 
@@ -128,7 +144,7 @@ assert.ok(read('ambience.css').includes('max-height:calc(100dvh - 95px)'),'Audio
 
 
 /* Playback controls must not remain visible just because the pointer is hovering. */
-assert.ok(html.includes('/player.css?v=4'),'Player auto-hide stylesheet reference missing');
+assert.ok(html.includes('/player.css?v=5'),'Player auto-hide stylesheet reference missing');
 const playerCSS=read('player.css');
 const playerJS=read('player.js');
 for(const token of ['CONTROL_IDLE_MS=3200',"on(root,'pointermove'", "on(root,'pointerleave'",'hideUI();',"on(root,'focusin'", "on(video,'play',onPlaybackState)",'touchRevealOnly','clearHideTimer();']){

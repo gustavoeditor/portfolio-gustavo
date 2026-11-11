@@ -1,0 +1,179 @@
+{
+ "version": 1,
+ "sources": {
+  "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/abertura-keydrop-treino-mvb5csle-AZAxdGtZjIZReauGlG0qO5L0yXJuuD.mp4": {
+   "id": "up-afe5e3e241a9",
+   "title": "Abertura Keydrop Treino",
+   "width": 2560,
+   "height": 1440,
+   "bytes": 15093682,
+   "levels": [
+    {
+     "url": "/videos-144/up-afe5e3e241a9.mp4",
+     "size": 144
+    },
+    {
+     "url": "/videos-240/up-afe5e3e241a9.mp4",
+     "size": 240
+    },
+    {
+     "url": "/videos-360/up-afe5e3e241a9.mp4",
+     "size": 360
+    },
+    {
+     "url": "/videos-480/up-afe5e3e241a9.mp4",
+     "size": 480
+    },
+    {
+     "url": "/videos-720/up-afe5e3e241a9.mp4",
+     "size": 720
+    },
+    {
+     "url": "/videos-1080/up-afe5e3e241a9.mp4",
+     "size": 1080
+    },
+    {
+     "url": "/videos-1440/up-afe5e3e241a9.mp4",
+     "size": 1440
+    }
+   ],
+   "generatedAt": "2026-11-11T13:34:40.742Z"
+  },
+  "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/5y56-mvfq0qb3-guubpWQFtBCv84shHPqC05B9FgZbXl.mp4": {
+   "id": "up-cce7f7615660",
+   "title": "Take feito para tutorial e treino",
+   "width": 1920,
+   "height": 1080,
+   "bytes": 6616213,
+   "levels": [
+    {
+     "url": "/videos-144/up-cce7f7615660.mp4",
+     "size": 144
+    },
+    {
+     "url": "/videos-240/up-cce7f7615660.mp4",
+     "size": 240
+    },
+    {
+     "url": "/videos-360/up-cce7f7615660.mp4",
+     "size": 360
+    },
+    {
+     "url": "/videos-480/up-cce7f7615660.mp4",
+     "size": 480
+    },
+    {
+     "url": "/videos-720/up-cce7f7615660.mp4",
+     "size": 720
+    },
+    {
+     "url": "/videos-1080/up-cce7f7615660.mp4",
+     "size": 1080
+    }
+   ],
+   "generatedAt": "2026-11-11T13:34:44.393Z"
+  },
+  "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/121231232131-mvludqwh-wVYhR8yO2C6WAaUPwGxttE1fzd7mjs.mp4": {
+   "id": "up-9ee4d37de014",
+   "title": "Cenario dakr com pano sobe a AWP",
+   "width": 1920,
+   "height": 1080,
+   "bytes": 13609041,
+   "levels": [
+    {
+     "url": "/videos-144/up-9ee4d37de014.mp4",
+     "size": 144
+    },
+    {
+     "url": "/videos-240/up-9ee4d37de014.mp4",
+     "size": 240
+    },
+    {
+     "url": "/videos-360/up-9ee4d37de014.mp4",
+     "size": 360
+    },
+    {
+     "url": "/videos-480/up-9ee4d37de014.mp4",
+     "size": 480
+    },
+    {
+     "url": "/videos-720/up-9ee4d37de014.mp4",
+     "size": 720
+    },
+    {
+     "url": "/videos-1080/up-9ee4d37de014.mp4",
+     "size": 1080
+    }
+   ],
+   "generatedAt": "2026-11-11T13:34:50.270Z"
+  },
+  "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/adsasdadsa-mvrlhs9g-oN44gxztFOSHZqL26zKyQRFnlcyRCF.mp4": {
+   "id": "up-1f2157a7f1d9",
+   "title": "Cenario estilo canais de CS",
+   "width": 1920,
+   "height": 1080,
+   "bytes": 12541976,
+   "levels": [
+    {
+     "url": "/videos-144/up-1f2157a7f1d9.mp4",
+     "size": 144
+    },
+    {
+     "url": "/videos-240/up-1f2157a7f1d9.mp4",
+     "size": 240
+    },
+    {
+     "url": "/videos-360/up-1f2157a7f1d9.mp4",
+     "size": 360
+    },
+    {
+     "url": "/videos-480/up-1f2157a7f1d9.mp4",
+     "size": 480
+    },
+    {
+     "url": "/videos-720/up-1f2157a7f1d9.mp4",
+     "size": 720
+    },
+    {
+     "url": "/videos-1080/up-1f2157a7f1d9.mp4",
+     "size": 1080
+    }
+   ],
+   "generatedAt": "2026-11-11T13:34:56.203Z"
+  },
+  "https://fmctstqjja9h7bqg.public.blob.vercel-storage.com/gustavo/videos/edit-muito-foda-da-gugnir-mvtoy628-C1qvO8EIYpdmk9iiesQMs17FXovnrX.mp4": {
+   "id": "up-394b18037ece",
+   "title": "Edit gungnir CS2",
+   "width": 1920,
+   "height": 1080,
+   "bytes": 190147091,
+   "levels": [
+    {
+     "url": "/videos-144/up-394b18037ece.mp4",
+     "size": 144
+    },
+    {
+     "url": "/videos-240/up-394b18037ece.mp4",
+     "size": 240
+    },
+    {
+     "url": "/videos-360/up-394b18037ece.mp4",
+     "size": 360
+    },
+    {
+     "url": "/videos-480/up-394b18037ece.mp4",
+     "size": 480
+    },
+    {
+     "url": "/videos-720/up-394b18037ece.mp4",
+     "size": 720
+    },
+    {
+     "url": "/videos-1080/up-394b18037ece.mp4",
+     "size": 1080
+    }
+   ],
+   "generatedAt": "2026-11-11T13:36:04.713Z"
+  }
+ }
+}
