@@ -30,7 +30,26 @@ for(const h of [360,480]){
  assert.equal(createHash('sha256').update(buffer).digest('hex'),v.sha256,'Arquivo de vídeo não corresponde ao manifesto');
 }
 const playerCode=read('player.js');
-for(const token of ['mobileSource','verifiedExternalVariants',"mobile:'360p'",'matchMedia(\'(max-width:700px)\')'])assert.ok(playerCode.includes(token),'Player sem seleção móvel: '+token);
+for(const token of ['options.qualities','function autoLevel()','function neededSize()','connection.saveData',"on(video,'waiting'",'qualityName(l.size)'])assert.ok(playerCode.includes(token),'Player sem qualidade adaptativa por vídeo: '+token);
+// video-qualities.js must list the real files of every local video (rerun scripts/build-video-qualities.cjs).
+{
+ const source=read('video-qualities.js');
+ const sandbox={window:{}};
+ new Function('window',source)(sandbox.window);
+ const catalog=sandbox.window.GUSTAVO_VIDEO_QUALITIES;
+ assert.ok(catalog&&typeof catalog==='object','Manifesto de qualidades ausente');
+ const local=fs.readdirSync(path.join(root,'videos')).filter(n=>/^[a-z0-9-]+\.mp4$/i.test(n)).map(n=>n.slice(0,-4));
+ for(const slug of local){
+  const levels=catalog[slug];
+  assert.ok(Array.isArray(levels)&&levels.length>=1,'Vídeo sem qualidades no manifesto: '+slug+' (rode scripts/build-video-qualities.cjs)');
+  const sizes=levels.map(l=>Math.min(l.width,l.height));
+  assert.equal(new Set(sizes).size,sizes.length,'Qualidades repetidas em '+slug);
+  for(const l of levels){
+   assert.match(l.url,new RegExp('^/videos(-\\d{3,4})?/'+slug+'\\.mp4$'),'URL de qualidade inválida: '+l.url);
+   assert.equal(fs.statSync(path.join(root,l.url)).size,l.bytes,'Manifesto desatualizado para '+l.url+' (rode scripts/build-video-qualities.cjs)');
+  }
+ }
+}
 
 assert.ok(!projects.some(p=>p.title==='KeyDrop | AWP Product Cinematic'),'O vídeo substituído não deve continuar no catálogo');
 assert.ok(html.includes('function paintFeatured()')&&html.includes("normalizedTitle(p.title)==='abertura keydrop treino'"),'Destaques precisam vir do ranking de qualidade, incluindo vídeos enviados pelo painel');
@@ -38,7 +57,7 @@ const ids=[...html.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(new Set(ids).size,ids.length,'IDs duplicados');
 for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(ids.includes(id),'Link interno quebrado: '+id);
 for(const name of ['inicio','trabalhos','portfolio-grid','galeria','especialidades','metodo','sobre','contato','brief-form','pack-button','video-modal'])assert.ok(ids.includes(name),'Seção da V4 ausente: '+name);
-for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/player.js?v=6','/player.css?v=3','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
+for(const snippet of ['GUSTAVO | Editor de Vídeo','rel="canonical"','/api/social-image','property="og:image"','meta name="robots"','/_vercel/insights/script.js','/api/managed-projects','GustavoPlayer.mount','/video-qualities.js?v=1','/player.js?v=7','/player.css?v=4','data-filter="youtube"','coverArtwork(slug)','data-cover-id','id="pack-toast"','wa.me/5537988445372']){
  assert.ok(html.includes(snippet),'Integração obrigatória ausente: '+snippet);
 }
 
@@ -99,7 +118,7 @@ assert.ok(ambienceScript.includes("fxRange.addEventListener('input'")&&ambienceS
 assert.ok(ambienceScript.includes("localStorage.setItem(KEY, JSON.stringify(preferences))"),'Audio settings must survive a reload');
 assert.ok(ambienceScript.includes('window.addEventListener(\'storage\''),'Other tabs should reload changed preferences');
 const playerScript=read('player.js');
-assert.ok(playerScript.includes("gustavo-video-quality-v1"),'Video quality preference missing');
+assert.ok(playerScript.includes("gustavo-video-quality-v2"),'Video quality preference missing');
 assert.ok(playerScript.includes("gustavo-video-audio-v1")&&playerScript.includes("savePlaybackVolume();"),'Video audio volume and mute should persist');
 assert.ok(ambienceScript.includes("document.addEventListener('play',synchronize,true)"),'Pause/duck when video plays');
 assert.ok(ambienceScript.includes('document.hidden'),'Pause on background tabs');
@@ -109,7 +128,7 @@ assert.ok(read('ambience.css').includes('max-height:calc(100dvh - 95px)'),'Audio
 
 
 /* Playback controls must not remain visible just because the pointer is hovering. */
-assert.ok(html.includes('/player.css?v=3'),'Player auto-hide stylesheet reference missing');
+assert.ok(html.includes('/player.css?v=4'),'Player auto-hide stylesheet reference missing');
 const playerCSS=read('player.css');
 const playerJS=read('player.js');
 for(const token of ['CONTROL_IDLE_MS=3200',"on(root,'pointermove'", "on(root,'pointerleave'",'hideUI();',"on(root,'focusin'", "on(video,'play',onPlaybackState)",'touchRevealOnly','clearHideTimer();']){

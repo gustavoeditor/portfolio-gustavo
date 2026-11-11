@@ -247,10 +247,10 @@ async function run(){
    const src=await page.locator('#modal-player').getAttribute('src');
    assert.equal(src,'/videos-360/abertura-keydrop-treino.mp4','Mobile Auto should initially load 360p');
    await page.locator('.vip-quality').click();
-   for(const quality of ['mobile','low','high'])assert.equal(
+   for(const quality of ['auto','360','480','orig'])assert.equal(
     await page.locator('.vip-quality-option[data-quality="'+quality+'"]').count(),1,
     'Missing player quality '+quality);
-   await page.locator('.vip-quality-option[data-quality="low"]').click();
+   await page.locator('.vip-quality-option[data-quality="480"]').click();
    await page.waitForFunction(()=>document.getElementById('modal-player').getAttribute('src')==='/videos-480/abertura-keydrop-treino.mp4',null,{timeout:6000});
    await context.close();
    console.log('Abertura Keydrop Treino: Auto 360p, 480p and Original available in mobile Chrome.');

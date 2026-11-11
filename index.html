@@ -61,7 +61,7 @@
 <meta name="twitter:title" content="Gustavo | Editor de Vídeo para YouTube e Motion Design">
 <meta name="twitter:description" content="Editor de vídeo freelancer: YouTube, motion design, VFX e cinematics.">
 <meta name="twitter:image" content="https://portfolio-gustavo-chi.vercel.app/api/social-image">
-<link rel="stylesheet" href="/player.css?v=3">
+<link rel="stylesheet" href="/player.css?v=4">
 <link rel="stylesheet" href="/quote-modal.css?v=1">
 
 
@@ -819,7 +819,7 @@ html.lite .project-card.enter{animation:none}
 </dialog>
 
 <div class="pack-toast" id="pack-toast" role="status" aria-live="polite" hidden>Conheça o próximo lançamento na loja.</div>
-<script src="/player.js?v=6"></script>
+<script src="/video-qualities.js?v=1"></script><script src="/player.js?v=7"></script>
 <script src="/quality-control.js?v=1"></script>
 <script src="/portfolio-quality.js?v=1"></script>
 <script src="/portfolio-order.js?v=2"></script>
@@ -1002,10 +1002,10 @@ function paint(){stopPreview();const catalogTotal=document.getElementById('catal
    const response=await fetch('/video-renditions/abertura-keydrop-treino.json',{cache:'no-store'});
    if(response.ok){
     const rendition=await response.json();
-    if(rendition.source===treino[4] &&
-       rendition.variants?.['360']?.url==='/videos-360/abertura-keydrop-treino.mp4' &&
-       rendition.variants?.['480']?.url==='/videos-480/abertura-keydrop-treino.mp4'){
-      treino[6]={mobile:rendition.variants['360'].url,low:rendition.variants['480'].url};
+    if(rendition.source===treino[4] && rendition.variants && typeof rendition.variants==='object'){
+      treino[6]=Object.values(rendition.variants)
+        .filter(v=>v&&/^\/videos-\d{3,4}\/abertura-keydrop-treino\.mp4$/.test(v.url)&&Number(v.height)>0)
+        .map(v=>({url:v.url,width:Number(v.width)||0,height:Number(v.height)}));
     }
    }
   }catch(_){/* Keep original video when renditions are unavailable. */}
@@ -1190,8 +1190,10 @@ function openProject(index){const data=projects[index];if(!data)return;stopPrevi
  document.getElementById('modal-desc').textContent=data[3];document.getElementById('modal-source').href=videoSrc;
  player.poster=data[5]||artURI(data[2]);player.dataset.fallback='0';player.src=videoSrc;
  if(window.GustavoPlayer){try{
-  const variant=(!local&&data[6]&&typeof data[6].mobile==='string'&&typeof data[6].low==='string')?data[6]:null;
-  playerUI=GustavoPlayer.mount(player,{title:data[0],source:local?'/videos/'+file:videoSrc,mobileSource:variant?variant.mobile:'',lowSource:local?'/videos-480/'+file:variant?variant.low:'',fullSource:local?'/videos-1080/'+file:'',verifiedLocalVariants:local,verifiedExternalVariants:Boolean(variant),highLabel:local?'720p':'Original'});
+  // Each video lists only the resolutions it really has (video-qualities.js, or the upload's renditions).
+  const catalog=window.GUSTAVO_VIDEO_QUALITIES||{},slug=file.replace(/\.mp4$/i,'');
+  const qualities=local?(Array.isArray(catalog[slug])?catalog[slug]:[{url:'/videos/'+file}]):(Array.isArray(data[6])?data[6]:[]).concat([{url:videoSrc}]);
+  playerUI=GustavoPlayer.mount(player,{title:data[0],source:local?'/videos/'+file:videoSrc,qualities});
   document.querySelector('.modal-panel').insertBefore(playerUI.element,document.querySelector('.modal-foot'));
   player.controls=false;
  }catch(error){console.warn('Player visual indisponível, usando HTML5.',error);player.controls=true;}}

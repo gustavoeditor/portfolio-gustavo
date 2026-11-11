@@ -11,6 +11,8 @@ const SVG = {
  loop:'<path d="m17 2 3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="m7 22-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/>'
 };
 const icon=(name)=>'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+SVG[name]+'</svg>';
+const SAFE_URL=/^(?:\/videos(?:-\d{3,4})?\/[a-z0-9-]+\.mp4|https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\/\S+)$/i;
+const qualityName=(size)=>!size?'Original':size>=2160?'4K':size+'p';
 const time=(seconds)=>{
  if(!Number.isFinite(seconds)||seconds<0)return '0:00';
  const s=Math.floor(seconds);return Math.floor(s/3600)>0
@@ -20,31 +22,36 @@ const time=(seconds)=>{
 function mount(video,options={}){
  const title=String(options.title||'Vídeo');
  const primarySource=String(options.source||video.currentSrc||video.src||'');
- const mobileSource=typeof options.mobileSource==='string'&&options.mobileSource.startsWith('/videos-360/')?options.mobileSource:'';
- const lowSource=typeof options.lowSource==='string'&&options.lowSource.startsWith('/videos-480/')?options.lowSource:'';
- const fullSource=typeof options.fullSource==='string'&&options.fullSource.startsWith('/videos-1080/')?options.fullSource:'';
- // All original locally hosted projects have both encodes, verified in CI.
- // Avoid two HEAD requests and a second video download on each new player.
- const verifiedVariants=(options.verifiedLocalVariants===true && /^\/?videos\/[a-z0-9-]+\.mp4$/i.test(primarySource)) || (options.verifiedExternalVariants===true && /^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//i.test(primarySource));
- const highLabel=options.highLabel==='Original'?'Original':'720p';
- // Managed uploads use a separate preference, so a previous 720p/1080p choice
- // cannot force a heavy original on a phone when mobile encodes are available.
- const qualityPreferenceKey=options.verifiedExternalVariants===true?'gustavo-video-quality-managed-v1':'gustavo-video-quality-v1';
+ // Each video brings its own list of real resolutions (video-qualities.js or the
+ // upload's renditions). Only those are offered, named by their real size.
+ const levels=[];
+ for(const q of Array.isArray(options.qualities)?options.qualities:[]){
+   if(!q||!SAFE_URL.test(String(q.url||'')))continue;
+   const width=Number(q.width)||0,height=Number(q.height)||0;
+   const size=width&&height?Math.min(width,height):height;
+   const same=size?levels.find(l=>l.size===size):levels.find(l=>l.url===q.url);
+   const level={url:q.url,width,height,size,kbps:Number(q.kbps)||0,broken:false};
+   if(!same)levels.push(level);
+   else if(level.kbps>same.kbps)Object.assign(same,level);
+ }
+ if(!levels.length&&primarySource)levels.push({url:primarySource,width:0,height:0,size:0,kbps:0,broken:false});
+ // Unknown size (an upload's original) is treated as the heaviest until metadata says otherwise.
+ const order=()=>levels.sort((a,b)=>(a.size||Infinity)-(b.size||Infinity));
+ order();
+ const qualityPreferenceKey='gustavo-video-quality-v2';
  const audioPreferenceKey='gustavo-video-audio-v1';
  const loopPreferenceKey='gustavo-video-loop-v1';
- const validQualities=['auto','mobile','low','high','full'];
+ // Preference is a resolution ("720"), not a file: on a video without 720p the
+ // closest lower quality of that video is used instead.
  let qualityChoice='auto';
  try{
    const saved=localStorage.getItem(qualityPreferenceKey);
-   if(validQualities.includes(saved))qualityChoice=saved;
+   if(saved==='auto'||saved==='orig'||/^\d{3,4}$/.test(saved||''))qualityChoice=saved;
  }catch(_){}
- let mobileReady=verifiedVariants&&Boolean(mobileSource);
- let lowReady=verifiedVariants&&Boolean(lowSource);
- let fullReady=verifiedVariants&&Boolean(fullSource);
- let currentQuality='high';
+ let current=null;
  let switching=false;
+ let stallCap=Infinity,stalls=[],lastSeekAt=0;
  const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
- const slowNetwork=()=>Boolean(connection&&(connection.saveData||/^(slow-2g|2g|3g)$/.test(connection.effectiveType||'')));
  // Restore volume and mute from this browser without changing first-visit defaults.
  try {
    const stored=JSON.parse(localStorage.getItem(audioPreferenceKey)||'null');
@@ -118,58 +125,94 @@ function mount(video,options={}){
 
  const subscriptions=[];
  const on=(el,event,handler,opts)=>{el.addEventListener(event,handler,opts);subscriptions.push(()=>el.removeEventListener(event,handler,opts));};
- function effectiveQuality(){
-   if(qualityChoice==='auto'){
-     if(mobileReady && (slowNetwork() || matchMedia('(max-width:700px)').matches))return 'mobile';
-     if(lowReady && (slowNetwork() || (mobileSource&&matchMedia('(max-width:1024px)').matches)))return 'low';
-     return 'high';
+ const usable=()=>levels.filter(l=>!l.broken);
+ const levelId=(l)=>l.size?String(l.size):'orig';
+ // Pixels of video actually shown on screen (short side), times a capped pixel ratio.
+ function neededSize(){
+   const ref=levels.find(l=>l.width&&l.height);
+   const aspect=ref?ref.width/ref.height:16/9;
+   let w,h;
+   if(document.fullscreenElement===root){w=screen.width;h=screen.height;}
+   else{
+     const rect=root.isConnected?root.getBoundingClientRect():null;
+     w=rect&&rect.width>0?rect.width:Math.min(innerWidth*.92,1280);
+     h=rect&&rect.height>0?rect.height:innerHeight*.7;
    }
-   if(qualityChoice==='full')return fullReady?'full':'high';
-   if(qualityChoice==='mobile')return mobileReady?'mobile':lowReady?'low':'high';
-   if(qualityChoice==='low')return lowReady?'low':'high';
-   return 'high';
+   const shownW=Math.min(w,h*aspect),shownH=shownW/aspect;
+   const dpr=Math.min(window.devicePixelRatio||1,matchMedia('(pointer:coarse)').matches?1.5:2);
+   return Math.min(shownW,shownH)*dpr;
  }
+ // Auto: the smallest quality of THIS video that fills the player, limited by the
+ // connection (data saver, 2g/3g, measured downlink) and by recent buffering stalls.
+ function autoLevel(){
+   const list=usable();
+   if(list.length<2)return list[0]||null;
+   let cap=stallCap;
+   if(connection){
+     if(connection.saveData||/^(slow-2g|2g)$/.test(connection.effectiveType||''))cap=Math.min(cap,360);
+     else if(connection.effectiveType==='3g')cap=Math.min(cap,480);
+   }
+   const downlink=connection&&Number(connection.downlink)>0?connection.downlink*1000*.75:Infinity;
+   const need=neededSize()*.9;
+   let pick=list[0];
+   for(const l of list){
+     const size=l.size||Infinity;
+     if(l!==list[0]&&(size>cap||(l.kbps&&l.kbps>downlink)))break;
+     pick=l;
+     if(size>=need)break;
+   }
+   return pick;
+ }
+ function manualLevel(){
+   const list=usable();
+   if(qualityChoice==='orig')return list.find(l=>!l.size)||list[list.length-1]||null;
+   const wanted=Number(qualityChoice);
+   let pick=null;
+   for(const l of list)if(l.size&&l.size<=wanted)pick=l;
+   return pick||list[0]||null;
+ }
+ const effectiveLevel=()=>qualityChoice==='auto'?autoLevel():manualLevel();
  function renderQualityOptions(){
-   const shown=(qualityChoice==='full'&&!fullReady)||(qualityChoice==='low'&&!lowReady)||(qualityChoice==='mobile'&&!mobileReady)?'high':qualityChoice;
-   const names={auto:'Auto',full:'1080p',high:highLabel,low:'480p',mobile:'360p'};
-   qualitySelect.textContent=names[shown]+' ▾';
+   const list=usable();
+   const shown=current&&!current.broken?current:effectiveLevel();
+   const name=shown?qualityName(shown.size):'';
    qualityMenu.replaceChildren();
-   for(const [value,label] of [['auto','Auto'],['full','1080p'],['high',highLabel],['low','480p'],['mobile','360p']]){
-     if(value==='mobile'&&!mobileReady)continue;
-     if(value==='low'&&!lowReady)continue;
-     if(value==='full'&&!fullReady)continue;
+   if(list.length<2){
+     // One quality only: show what it is, nothing to choose.
+     qualitySelect.textContent=name;qualitySelect.disabled=true;
+     qualityBox.hidden=!shown||!shown.size;
+     return;
+   }
+   qualitySelect.disabled=false;qualityBox.hidden=false;
+   qualitySelect.textContent=(qualityChoice==='auto'?'Auto · '+name:name)+' ▾';
+   const entries=[['auto','Auto']].concat(list.slice().reverse().map(l=>[levelId(l),qualityName(l.size)]));
+   for(const [value,label] of entries){
      const option=document.createElement('button');option.type='button';option.className='vip-quality-option';
      option.textContent=label;option.dataset.quality=value;
-     option.setAttribute('aria-pressed',String(shown===value));
+     const active=value==='auto'?qualityChoice==='auto':qualityChoice!=='auto'&&shown&&levelId(shown)===value;
+     option.setAttribute('aria-pressed',String(Boolean(active)));
+     if(value!=='auto'&&qualityChoice==='auto'&&shown&&levelId(shown)===value)option.dataset.auto='true';
      option.addEventListener('click',(event)=>{
        event.stopPropagation();
-       qualityChoice=value;
+       qualityChoice=value;stallCap=Infinity;stalls=[];
        try{localStorage.setItem(qualityPreferenceKey,qualityChoice);}catch(_){}
-       closeQualityMenu();renderQualityOptions();applyQuality();
+       closeQualityMenu();applyQuality();renderQualityOptions();
        qualitySelect.focus({preventScroll:true});
      });
      qualityMenu.append(option);
    }
-   qualityBox.hidden=!mobileReady&&!lowReady&&!fullReady;
  }
- function selectedSource(key){
-   return key==='mobile'&&mobileReady?mobileSource:key==='low'&&lowReady?lowSource:key==='full'&&fullReady?fullSource:primarySource;
- }
- // Apply a validated saved or automatic quality before the first byte of playback.
- // The source switch doesn't need an asynchronous metadata probe for bundled files.
- if(verifiedVariants) {
-   currentQuality=effectiveQuality();
-   const initial=selectedSource(currentQuality);
-   if(initial && video.src!==new URL(initial,document.baseURI).href) video.src=initial;
- }
-  function changeSource(key){
-   const selected=key==='mobile'&&mobileReady?'mobile':key==='low'&&lowReady?'low':key==='full'&&fullReady?'full':'high';
-   if(selected===currentQuality||!primarySource||switching||disposed)return;
+ // Pick the starting quality before the first byte of playback.
+ current=effectiveLevel();
+ if(current&&video.src!==new URL(current.url,document.baseURI).href)video.src=current.url;
+ function changeSource(target){
+   const selected=target&&!target.broken?target:null;
+   if(!selected||selected===current||switching||disposed)return;
    const previousTime=Number.isFinite(video.currentTime)?video.currentTime:0;
    const shouldResume=!video.paused&&!video.ended;
    const previousVolume=video.volume;
    const previousMute=video.muted;
-   const oldSource=selectedSource(currentQuality);
+   const oldSource=current?current.url:primarySource;
    switching=true;
    video.pause();
    let settled=false;
@@ -183,17 +226,15 @@ function mount(video,options={}){
      settled=true;cleanup();switching=false;
      try{video.currentTime=Math.min(previousTime,Number.isFinite(video.duration)&&video.duration>0?Math.max(0,video.duration-.05):previousTime);}catch(_){}
      video.volume=previousVolume;video.muted=previousMute;
-     currentQuality=selected;
+     current=selected;stalls=[];
      if(shouldResume){const result=video.play();if(result?.catch)result.catch(()=>{});}
-     draw();
-     if(effectiveQuality()!==currentQuality)applyQuality();
+     draw();renderQualityOptions();
+     if(effectiveLevel()!==current)applyQuality();
    };
    failed=()=>{
      if(settled||disposed)return;
      settled=true;cleanup();switching=false;
-     if(selected==='mobile')mobileReady=false;
-     if(selected==='low')lowReady=false;
-     if(selected==='full')fullReady=false;
+     selected.broken=true;
      renderQualityOptions();
      video.src=oldSource||primarySource;
      video.load();
@@ -206,35 +247,45 @@ function mount(video,options={}){
    };
    video.addEventListener('loadedmetadata',restore);
    video.addEventListener('error',failed);
-   video.src=selectedSource(selected);
+   video.src=selected.url;
    video.load();
  }
- // Recover if an initially selected mobile file is temporarily missing on the CDN.
- // Never leave the customer with a broken player when the original still exists.
+ // Recover if the selected file is temporarily missing on the CDN.
+ // Never leave the customer with a broken player when another quality still exists.
  on(video,'error',()=>{
-   if(disposed||switching||currentQuality==='high')return;
-   if(currentQuality==='mobile')mobileReady=false;
-   else if(currentQuality==='low')lowReady=false;
-   else if(currentQuality==='full')fullReady=false;
-   currentQuality=lowReady?'low':'high';
-   const backup=selectedSource(currentQuality)||primarySource;
-   if(!backup||video.src===new URL(backup,document.baseURI).href)return;
-   video.src=backup;video.load();renderQualityOptions();
+   if(disposed||switching||!current)return;
+   current.broken=true;
+   const backup=effectiveLevel();
+   const url=backup?backup.url:primarySource;
+   current=backup;
+   if(!url||video.src===new URL(url,document.baseURI).href)return;
+   video.src=url;video.load();renderQualityOptions();
    const playback=video.play();if(playback?.catch)playback.catch(()=>{});
  });
- function applyQuality(){changeSource(effectiveQuality());}
- function probeVariant(src,key){
-   if(!src||typeof fetch!=='function')return;
-   // Metadata only; no additional media is downloaded until selected.
-   fetch(src,{method:'HEAD',cache:'force-cache'}).then(response=>{
-     if(disposed||!response.ok||!String(response.headers.get('content-type')||'').toLowerCase().includes('video/'))return;
-     if(key==='mobile')mobileReady=true;
-     if(key==='low')lowReady=true;
-     if(key==='full')fullReady=true;
-     renderQualityOptions();
-     applyQuality();
-   }).catch(()=>{});
- }
+ // An upload's original has no size in the manifest: name it once the browser knows.
+ on(video,'loadedmetadata',()=>{
+   if(!current||current.size||!video.videoWidth||!video.videoHeight)return;
+   current.width=video.videoWidth;current.height=video.videoHeight;
+   current.size=Math.min(video.videoWidth,video.videoHeight);
+   order();renderQualityOptions();
+ });
+ // Buffering twice in 15 s while Auto is on: step down one quality of this video.
+ on(video,'seeking',()=>{lastSeekAt=performance.now();});
+ on(video,'waiting',()=>{
+   if(disposed||switching||qualityChoice!=='auto'||!current||video.currentTime<.5)return;
+   const now=performance.now();
+   if(now-lastSeekAt<1500)return;
+   stalls=stalls.filter(t=>now-t<15000);stalls.push(now);
+   if(stalls.length<2)return;
+   const list=usable(),index=list.indexOf(current);
+   if(index<=0)return;
+   stallCap=list[index-1].size||Infinity;stalls=[];
+   applyQuality();
+ });
+ function applyQuality(){changeSource(effectiveLevel());}
+ // Bigger player (fullscreen, rotated phone, resized window) may need more pixels in Auto.
+ let resizeTimer=0;
+ const reconsider=()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(qualityChoice==='auto')applyQuality();},600);};
  function closeQualityMenu(){
    qualityMenu.hidden=true;qualitySelect.setAttribute('aria-expanded','false');
    scheduleHide();
@@ -251,15 +302,13 @@ function mount(video,options={}){
  renderQualityOptions();
  on(window,'storage',(event)=>{
    if(event.key!==qualityPreferenceKey)return;
-   if(!validQualities.includes(event.newValue))return;
-   qualityChoice=event.newValue;renderQualityOptions();applyQuality();
+   const value=String(event.newValue||'');
+   if(value!=='auto'&&value!=='orig'&&!/^\d{3,4}$/.test(value))return;
+   qualityChoice=value;applyQuality();renderQualityOptions();
  });
  if(connection&&typeof connection.addEventListener==='function')on(connection,'change',()=>{if(qualityChoice==='auto')applyQuality();});
- if(!verifiedVariants) {
-   probeVariant(mobileSource,'mobile');
-   probeVariant(lowSource,'low');
-   probeVariant(fullSource,'full');
- }
+ on(window,'resize',reconsider);
+ on(document,'fullscreenchange',reconsider);
  const raf=()=>{
    if(frame||disposed)return;
    frame=requestAnimationFrame(()=>{frame=0;draw();});
@@ -411,7 +460,7 @@ function mount(video,options={}){
  // Paused/ended controls remain visible. During playback the idle timer owns the UI.
  draw();onPlaybackState();
  return {element:root,destroy(){
-   disposed=true;clearHideTimer();clearTimeout(badgeTimer);
+   disposed=true;clearHideTimer();clearTimeout(badgeTimer);clearTimeout(resizeTimer);
    if(frame)cancelAnimationFrame(frame);
    for(const unsubscribe of subscriptions)unsubscribe();
    if(document.fullscreenElement===root&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
