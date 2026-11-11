@@ -97,20 +97,31 @@ function generateLocal() {
   }
 }
 
-async function generateManaged() {
+// Panel uploads on the live site that still need their ladder (no FFmpeg needed).
+async function managedWork() {
   const response = await fetch(SITE + '/api/managed-projects', { headers: { 'cache-control': 'no-cache' } });
   if (!response.ok) throw new Error('Catálogo indisponível: HTTP ' + response.status);
   const catalog = await response.json();
   const hidden = new Set(Array.isArray(catalog.hidden) ? catalog.hidden : []);
   const state = fs.existsSync(MANAGED_FILE) ? JSON.parse(fs.readFileSync(MANAGED_FILE, 'utf8')) : { version: 1, sources: {} };
+  const todo = [];
+  for (const project of Array.isArray(catalog.projects) ? catalog.projects : []) {
+    const src = String(project?.src || '');
+    if (!BLOB_VIDEO.test(src) || hidden.has(src)) continue;
+    const done = state.sources[src];
+    if (done && done.ladder === LADDER_VERSION && done.levels.every(l => fs.existsSync(path.join(root, l.url)))) continue;
+    todo.push(project);
+  }
+  return { todo, state };
+}
+
+async function generateManaged() {
+  const { todo, state } = await managedWork();
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ladder-'));
   try {
-    for (const project of Array.isArray(catalog.projects) ? catalog.projects : []) {
-      const src = String(project?.src || '');
-      if (!BLOB_VIDEO.test(src) || hidden.has(src)) continue;
+    for (const project of todo) {
+      const src = String(project.src);
       const id = 'up-' + crypto.createHash('sha256').update(src).digest('hex').slice(0, 12);
-      const done = state.sources[src];
-      if (done && done.ladder === LADDER_VERSION && done.levels.every(l => fs.existsSync(path.join(root, l.url)))) continue;
       console.log(String(project.title || id) + ': baixando original');
       const download = await fetch(src, { redirect: 'error' });
       if (!download.ok) { console.warn('  falhou HTTP ' + download.status + ', fica para a próxima'); continue; }
@@ -139,6 +150,13 @@ async function generateManaged() {
 
 (async () => {
   const only = process.argv[2];
+  if (only === '--pending') {
+    // For the workflow: "pending=N" in $GITHUB_OUTPUT so FFmpeg is only installed when needed.
+    const { todo } = await managedWork();
+    console.log(todo.length ? 'Uploads sem qualidades: ' + todo.map(p => p.title).join(', ') : 'Nenhum upload novo.');
+    if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'pending=' + todo.length + '\n');
+    return;
+  }
   if (only !== '--managed') generateLocal();
   if (only !== '--local') await generateManaged();
 })().catch(error => { console.error(error.stack || error); process.exitCode = 1; });

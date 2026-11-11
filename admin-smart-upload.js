@@ -510,19 +510,23 @@
       });
       pending.cover=uploadedCover;
       tell('Salvando o projeto na galeria...');
-      await safeJson(await fetch('/api/admin-publish',{
+      const published = await safeJson(await fetch('/api/admin-publish',{
         method:'POST',credentials:'same-origin',headers,
         body:JSON.stringify({
           uploadId:pending.id,title,category,position,qualityScore,quality:rankingMode==='auto'?quality:null,rankingMode,src:uploadedVideo.url,poster:uploadedCover.url,
           description:$('auto-description').value.trim()
         })
       }));
+      // The player gets 144p up to the video's own resolution (60 fps from 720p) once encoded.
+      const ladderNote = published && published.renditions==='started'
+        ? ' As qualidades 144p até a resolução do vídeo já estão sendo geradas e aparecem no site em uns 5 minutos.'
+        : ' As qualidades 144p até a resolução do vídeo são geradas automaticamente em até ~15 minutos; até lá toca o original.';
       progress.value = 100;
       totalProjects++;
       uploading = false;
       clearSelection();
       try {await reloadManaged();} catch (_) { /* Publication succeeded; list refresh can be retried independently. */ }
-      tell(rankingMode==='auto'?'Publicado! A galeria se reorganiza sozinha: o vídeo entra na posição da nota '+qualityScore+'/100.':'Publicado! A galeria respeitará a posição escolhida ou adicionará ao final.');
+      tell((rankingMode==='auto'?'Publicado! A galeria se reorganiza sozinha: o vídeo entra na posição da nota '+qualityScore+'/100.':'Publicado! A galeria respeitará a posição escolhida ou adicionará ao final.')+ladderNote);
     } catch(error) {
       tell(error.message || 'Não foi possível publicar. Confira sua sessão e tente novamente.',true);
     } finally {
