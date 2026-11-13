@@ -2,10 +2,60 @@
   "schemaVersion": 1,
   "product": "creative-tools",
   "channel": "beta",
-  "latest": "1.8.7",
+  "latest": "1.8.8",
   "message": "Beta gratuita: download direto pelo Creative Hub.",
   "updatedAt": "2026-11-12",
   "releases": [
+    {
+      "version": "1.8.8",
+      "date": "2026-11-12",
+      "status": "published",
+      "changes": [
+        "Atualização direto pelo Creative Hub: barra de progresso e \"Atualizado\", sem abrir a janela do instalador.",
+        "Nenhuma janela de console (CMD) e nenhuma caixa de aviso durante a instalação.",
+        "Menu Ctrl+B abre junto ao cursor do mouse.",
+        "Camadas criadas com as cores de etiqueta padrão do After Effects (ajuste, luz, câmera, shape...).",
+        "Âncora 9 pontos: os botões voltam a funcionar em camadas 3D (inclusive com pai, orientação e rotações X/Y/Z), sem mover a camada.",
+        "Ctrl+B: o atalho do menu volta a ser instalado no perfil padrão de atalhos do After Effects 2026 (antes ficava nas ferramentas nativas e o Hub mostrava \"Instalação parcial\").",
+        "Âncora 9 pontos: muda só o ponto de ancoragem; o elemento não sai mais do lugar (se o AE fosse mover a camada, nada é alterado).",
+        "Ctrl+B instalado em todas as versões do After Effects (inclusive o 2027).",
+        "Separar texto funciona em camadas 3D (Advanced 3D/extrusão), cada letra no lugar.",
+        "Shift volta a travar a curva, ENTRADA/SAÍDA e os controles do Bounce.",
+        "Atualização pelo Hub funciona com o Creative Cloud fechado: termina em segundos, com um único pedido de administrador (antes parava 4 minutos e falhava)."
+      ],
+      "downloadUrl": "/downloads/creative-tools/Creative_Tools_Setup_1.8.8.exe",
+      "sha256": "5e8bddc1e07131ef2e0a03074d300b1f0a4c579fde69949a07026e95c1521bfb",
+      "size": 3958674,
+      "rangeChunkSize": 3145728,
+      "fileName": "Creative_Tools_Setup_1.8.8.exe",
+      "requiresAdmin": true,
+      "minHubVersion": "0.1.3",
+      "detectVersion": "1.8.8",
+      "installer": {
+        "args": [],
+        "repairArgs": [
+          "--repair-menu"
+        ],
+        "uninstallArgs": [
+          "--uninstall-menu"
+        ],
+        "interactive": false,
+        "silentArgs": [
+          "--hub-silent",
+          "install"
+        ],
+        "silentUninstallArgs": [
+          "--hub-silent",
+          "uninstall"
+        ],
+        "statusArg": "--hub-status"
+      },
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      }
+    },
     {
       "version": "1.8.7",
       "date": "2026-11-12",
