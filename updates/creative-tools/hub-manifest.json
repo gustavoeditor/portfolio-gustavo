@@ -2,10 +2,53 @@
   "schemaVersion": 1,
   "product": "creative-tools",
   "channel": "beta",
-  "latest": "1.8.11",
+  "latest": "1.8.12",
   "message": "Beta gratuita: download direto pelo Creative Hub.",
   "updatedAt": "2026-11-18",
   "releases": [
+    {
+      "version": "1.8.12",
+      "date": "2026-11-18",
+      "status": "published",
+      "changes": [
+        "+ CRIAR com camada selecionada: a câmera enquadra a camada (preenche o quadro, mira o centro e gira junto).",
+        "A luz nasce no centro da camada selecionada, na mesma direção da luz padrão.",
+        "Objetos 3D (cubo, esfera, plano, toro, cone, cilindro) nascem do tamanho da seleção.",
+        "Painel cabe inteiro em qualquer tamanho: as abas e o + CRIAR encolhem por igual, sem barra de rolagem."
+      ],
+      "downloadUrl": "/downloads/creative-tools/Creative_Tools_Setup_1.8.12.exe",
+      "sha256": "8fbd40a647c30e26dd8e4218fa08aad36c81571ad5f9361cfdd8af40b70ba82a",
+      "size": 3975521,
+      "rangeChunkSize": 3145728,
+      "fileName": "Creative_Tools_Setup_1.8.12.exe",
+      "requiresAdmin": true,
+      "minHubVersion": "0.1.3",
+      "detectVersion": "1.8.12",
+      "installer": {
+        "args": [],
+        "repairArgs": [
+          "--repair-menu"
+        ],
+        "uninstallArgs": [
+          "--uninstall-menu"
+        ],
+        "interactive": false,
+        "silentArgs": [
+          "--hub-silent",
+          "install"
+        ],
+        "silentUninstallArgs": [
+          "--hub-silent",
+          "uninstall"
+        ],
+        "statusArg": "--hub-status"
+      },
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      }
+    },
     {
       "version": "1.8.11",
       "date": "2026-11-18",
