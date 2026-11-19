@@ -2,10 +2,52 @@
   "schemaVersion": 1,
   "product": "creative-tools",
   "channel": "beta",
-  "latest": "1.8.12",
+  "latest": "1.8.13",
   "message": "Beta gratuita: download direto pelo Creative Hub.",
   "updatedAt": "2026-11-18",
   "releases": [
+    {
+      "version": "1.8.13",
+      "date": "2026-11-18",
+      "status": "published",
+      "changes": [
+        "Painel cabe 100% em qualquer tamanho: cabeçalho, abas, conteúdo, rodapé e + CRIAR encolhem juntos, sem cortar nada e sem barra de rolagem.",
+        "O painel se reajusta na hora ao redimensionar dentro do After Effects (antes podia ficar preso no tamanho antigo e cortar à direita).",
+        "Mensagem de status quebra linha em vez de ser cortada com reticências."
+      ],
+      "downloadUrl": "/downloads/creative-tools/Creative_Tools_Setup_1.8.13.exe",
+      "sha256": "223746de95b2f92440efbd8a962590cffc99b542f9dcb7537df8b097787b80af",
+      "size": 3976300,
+      "rangeChunkSize": 3145728,
+      "fileName": "Creative_Tools_Setup_1.8.13.exe",
+      "requiresAdmin": true,
+      "minHubVersion": "0.1.3",
+      "detectVersion": "1.8.13",
+      "installer": {
+        "args": [],
+        "repairArgs": [
+          "--repair-menu"
+        ],
+        "uninstallArgs": [
+          "--uninstall-menu"
+        ],
+        "interactive": false,
+        "silentArgs": [
+          "--hub-silent",
+          "install"
+        ],
+        "silentUninstallArgs": [
+          "--hub-silent",
+          "uninstall"
+        ],
+        "statusArg": "--hub-status"
+      },
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      }
+    },
     {
       "version": "1.8.12",
       "date": "2026-11-18",
