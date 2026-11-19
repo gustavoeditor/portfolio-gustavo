@@ -2,10 +2,53 @@
   "schemaVersion": 1,
   "product": "creative-tools",
   "channel": "beta",
-  "latest": "1.8.13",
+  "latest": "1.8.14",
   "message": "Beta gratuita: download direto pelo Creative Hub.",
-  "updatedAt": "2026-11-18",
+  "updatedAt": "2026-11-19",
   "releases": [
+    {
+      "version": "1.8.14",
+      "date": "2026-11-19",
+      "status": "published",
+      "changes": [
+        "O painel se reajusta na hora ao redimensionar dentro do After Effects (antes podia ficar preso no tamanho antigo e cortar à direita).",
+        "Mensagem de status quebra linha em vez de ser cortada com reticências.",
+        "Nulo: com câmera ou luz selecionada, o nulo nasce no centro dela (não mais no centro da tela); sem nada selecionado, no centro da composição.",
+        "Painel comprimido nítido e legível: nada de texto embaçado nem letras minúsculas. Se não couber, só o conteúdo rola, sem cortar nada dos lados."
+      ],
+      "downloadUrl": "/downloads/creative-tools/Creative_Tools_Setup_1.8.14.exe",
+      "sha256": "12817cf2a69f0ff7e780a544dd06f353ac98b06c10db60de78489360676662f9",
+      "size": 3979573,
+      "rangeChunkSize": 3145728,
+      "fileName": "Creative_Tools_Setup_1.8.14.exe",
+      "requiresAdmin": true,
+      "minHubVersion": "0.1.3",
+      "detectVersion": "1.8.14",
+      "installer": {
+        "args": [],
+        "repairArgs": [
+          "--repair-menu"
+        ],
+        "uninstallArgs": [
+          "--uninstall-menu"
+        ],
+        "interactive": false,
+        "silentArgs": [
+          "--hub-silent",
+          "install"
+        ],
+        "silentUninstallArgs": [
+          "--hub-silent",
+          "uninstall"
+        ],
+        "statusArg": "--hub-status"
+      },
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      }
+    },
     {
       "version": "1.8.13",
       "date": "2026-11-18",
