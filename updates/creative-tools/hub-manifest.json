@@ -2,10 +2,54 @@
   "schemaVersion": 1,
   "product": "creative-tools",
   "channel": "beta",
-  "latest": "1.8.14",
+  "latest": "1.8.15",
   "message": "Beta gratuita: download direto pelo Creative Hub.",
-  "updatedAt": "2026-11-19",
+  "updatedAt": "2026-11-20",
   "releases": [
+    {
+      "version": "1.8.15",
+      "date": "2026-11-20",
+      "status": "published",
+      "changes": [
+        "Gráfico de velocidade sem travar: arrastar a curva ficou cerca de 6x mais leve.",
+        "Âncora 9 pontos instantânea em camadas 2D, sem piscar a timeline.",
+        "PURGE: clique limpa a RAM (rápido, mantém o Desfazer); Shift+clique limpa RAM e disco.",
+        "Bounce mais natural: continua de um keyframe para o outro sem corte, sem tranco na chegada e com mais força em degraus rápidos (escadinhas).",
+        "O painel abre com a curva reta (linear, 0/0)."
+      ],
+      "downloadUrl": "/downloads/creative-tools/Creative_Tools_Setup_1.8.15.exe",
+      "sha256": "f078a3a650c551783ae1928c0560d77eb1ef7a88421e278fc80e3e0974ee6383",
+      "size": 3984636,
+      "rangeChunkSize": 3145728,
+      "fileName": "Creative_Tools_Setup_1.8.15.exe",
+      "requiresAdmin": true,
+      "minHubVersion": "0.1.3",
+      "detectVersion": "1.8.15",
+      "installer": {
+        "args": [],
+        "repairArgs": [
+          "--repair-menu"
+        ],
+        "uninstallArgs": [
+          "--uninstall-menu"
+        ],
+        "interactive": false,
+        "silentArgs": [
+          "--hub-silent",
+          "install"
+        ],
+        "silentUninstallArgs": [
+          "--hub-silent",
+          "uninstall"
+        ],
+        "statusArg": "--hub-status"
+      },
+      "compatibility": {
+        "windows": "10",
+        "host": "AEFT",
+        "hostMin": "16.0"
+      }
+    },
     {
       "version": "1.8.14",
       "date": "2026-11-19",
